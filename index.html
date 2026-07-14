@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Network Design Central</title>
+<!-- Favicon set — the SVG alone wasn't enough: Safari (desktop and iOS) doesn't render
+     SVG favicons in the tab at all, and browsers request /favicon.ico directly regardless
+     of these <link> tags on the very first hit. So: .ico first (universal, incl. Safari),
+     the .svg as a crisp progressive upgrade for browsers that do support it, explicit PNG
+     sizes as a middle fallback, apple-touch-icon for Safari bookmarks/iOS/macOS "Add to
+     Dock", and a webmanifest so Android/Chrome home-screen icons resolve too.
+     ?v=2 cache-busts this rollout — browsers cache favicons very aggressively per-origin,
+     so a same-URL swap can silently keep showing the old (missing) icon until this changes. -->
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png?v=2">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=2">
+<link rel="manifest" href="site.webmanifest?v=2">
+
+<!-- React, ReactDOM, and the Babel compiler, loaded from a public CDN so
+     there's nothing to install and nothing else to upload. If you're ever
+     behind a corporate network that blocks or breaks CDN scripts, see
+     context.md -> "If the CDN is blocked". -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+  /* Brand font (Mier B02) isn't hosted anywhere yet -- falls back to system
+     fonts until you add real font files. See context.md -> "Fonts". */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F4F5F8; color: #14171F; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  #root { height: 100%; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #C3C9D4; border-radius: 8px; border: 2px solid #F4F5F8; }
+  ::-webkit-scrollbar-thumb:hover { background: #5A5E66; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  @keyframes ndcspin { to { transform: rotate(360deg); } }
+  @keyframes ndcindet { 0% { left: -40%; } 100% { left: 100%; } }
+  @keyframes ndcpulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+  @keyframes ndcfade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @keyframes ndctoast { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; } }
+  :focus-visible { outline: 2px solid #003F98; outline-offset: 2px; }
+  aside :focus-visible { outline: 2px solid #9AB4FF; outline-offset: 2px; }
+  input:focus { box-shadow: 0 0 0 3px rgba(0,63,152,0.25); }
+  button:focus-visible, [onclick]:focus-visible { border-radius: 8px; }
+  .ndc-tip { position: relative; }
+  .ndc-tip .ndc-tip-pop { position: absolute; top: calc(100% + 9px); left: 50%; transform: translateX(-50%) translateY(-3px); min-width: 170px; max-width: 264px; background: #14171F; color: #fff; font-size: 11.5px; line-height: 1.45; font-weight: 500; letter-spacing: 0; text-align: left; text-transform: none; padding: 8px 11px; border-radius: 8px; box-shadow: 0 8px 24px rgba(11,20,48,0.28); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 130ms ease, transform 130ms ease; z-index: 500; white-space: normal; }
+  .ndc-tip .ndc-tip-pop::before { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-bottom-color: #14171F; }
+  .ndc-tip:hover .ndc-tip-pop { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="root">
+  <div style="padding:40px;font-family:-apple-system,sans-serif;color:#5A5E66;">Loading…</div>
+</div>
+
+<script>
+/* Loads test-rlh-design-central-base.jsx as plain text, compiles it in the browser
+   with Babel, and runs it. This needs the page to be served over http/https
+   (GitHub Pages, or any local server) -- browsers block this kind of file
+   loading when you just double-click index.html. See context.md -> "Viewing
+   this locally" if you want to preview before pushing to GitHub. */
+(function () {
+  var FILE = 'test-rlh-design-central-base.jsx';
+
+  function showError(err) {
+    console.error('Failed to load ' + FILE, err);
+    document.getElementById('root').innerHTML =
+      '<pre style="padding:24px;color:#D14B4B;white-space:pre-wrap;font-family:monospace;">' +
+      'Could not load ' + FILE + ':\n' + (err && (err.stack || err.message) || err) +
+      '\n\nIf you just double-clicked this file, that\'s why -- see context.md, ' +
+      '"Viewing this locally".</pre>';
+  }
+
+  if (location.protocol === 'file:') {
+    showError('Opened directly from disk (file://) — this needs to be served over http/https.');
+    return;
+  }
+
+  fetch(FILE)
+    .then(function (r) {
+      if (!r.ok) throw new Error(FILE + ' — HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function (code) {
+      var compiled = Babel.transform(code, {
+        presets: [['react', { runtime: 'classic' }]],
+        sourceType: 'script',
+        filename: FILE,
+      }).code;
+      (0, eval)(compiled); // runs in global scope on purpose
+    })
+    .catch(showError);
+})();
+</script>
+</body>
+</html>
