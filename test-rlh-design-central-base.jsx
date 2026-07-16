@@ -165,6 +165,7 @@ function View(B, self) {
 <div style={css(`font-size:12.5px; font-weight:600; color:#14171F; white-space:nowrap;`)}>{personaName}</div>
 <div style={css(`font-size:11px; color:#5A5E66; white-space:nowrap;`)}>{personaRole}</div>
 </div>
+<button onClick={onSignOut} title={"Sign out"} aria-label={"Sign out"} style={css(`border:none; background:transparent; cursor:pointer; padding:5px; color:#8E96A3; display:flex; flex-shrink:0;`)} onMouseEnter={(e) => hoverOn(e, `color:#D14B4B;`)} onMouseLeave={(e) => hoverOff(e, `border:none; background:transparent; cursor:pointer; padding:5px; color:#8E96A3; display:flex; flex-shrink:0;`, `color:#D14B4B;`)}><svg width={"15"} height={"15"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.9"}><path d={"M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button>
 </div>
 </header>
 {/* IN-MODULE SUB-TABS (Tier-2 only): filters / inner views for the active module.
@@ -2129,11 +2130,42 @@ function View(B, self) {
 <div style={css(`display:flex; align-items:center; gap:20px; border-bottom:1px solid #E6EBF2; margin-bottom:16px;`)}>
 {(aSel.sections || []).map((t, __i73c) => (<React.Fragment key={__i73c}><button onClick={t.onClick} style={css(`position:relative; padding:0 0 12px; border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:13px; font-weight:${t.weight}; color:${t.color};`)}>{t.label}{(t.active) ? (<><span style={css(`position:absolute; left:0; right:0; bottom:0; height:3px; background:#003F98; border-radius:3px 3px 0 0;`)} /></>) : null}</button></React.Fragment>))}
 </div>
-{/* metrics summary — always visible above the tabs, not tab-gated (2026-07-10, mirrors Ops Lead) */}
+{/* Plan Inputs — SC details + vehicles used (2026-07-16, unifies with Design Review's layout) */}
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; gap:9px;`)}><div style={css(`width:4px; height:18px; background:#003F98; border-radius:2px;`)} /><span style={css(`font-size:15px; font-weight:700; color:#14171F;`)}>Plan Inputs</span></div>
+<div style={css(`display:flex; flex-wrap:wrap; gap:20px 36px; padding:15px 18px; background:#fff; border:1px solid #E6EBF2; border-radius:8px; margin-bottom:12px;`)}>
+<div><div style={css(`font-size:10.5px; color:#5A5E66;`)}>Nodes</div><div style={css(`font-size:15px; font-weight:600; color:#14171F; font-variant-numeric:tabular-nums;`)}>{aSel.inputNodes}</div></div>
+<div><div style={css(`font-size:10.5px; color:#5A5E66;`)}>Volume</div><div style={css(`font-size:15px; font-weight:600; color:#14171F; font-variant-numeric:tabular-nums;`)}>{aSel.inputVolume}</div></div>
+<div><div style={css(`font-size:10.5px; color:#5A5E66;`)}>Historical weight</div><div style={css(`font-size:15px; font-weight:600; color:#14171F;`)}>{aSel.hwLabel} · {aSel.hwTag}</div></div>
+<div><div style={css(`font-size:10.5px; color:#5A5E66;`)}>SC coordinates</div><div style={css(`font-size:13.5px; font-weight:600; color:#14171F; font-variant-numeric:tabular-nums;`)}>{aSel.inputScCoords}</div></div>
+</div>
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:18px 20px; margin-bottom:18px;`)}>
+<div style={css(`display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:13px;`)}><div style={css(`font-size:13px; font-weight:700; color:#14171F;`)}>Vehicles used</div><div style={css(`font-size:11.5px; color:#5A5E66;`)}>{aSel.inputVehTotal} total</div></div>
+<div style={css(`display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;`)}>
+{(aSel.inputVehArr || []).map((v, __iIVA) => (<React.Fragment key={__iIVA}>
+<div style={css(`display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 13px; background:#F7F8FB; border:1px solid #EEF1F6; border-radius:8px;`)}>
+<span style={css(`font-size:12.5px; color:#14171F; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{v.veh}</span>
+<span style={css(`font-size:13px; font-weight:700; color:#003F98; flex-shrink:0;`)}>×{v.n}</span>
+</div>
+</React.Fragment>))}
+</div>
+</div>
+{/* Plan Outputs */}
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; gap:9px;`)}><div style={css(`width:4px; height:18px; background:#003F98; border-radius:2px;`)} /><span style={css(`font-size:15px; font-weight:700; color:#14171F;`)}>Plan Outputs</span></div>
 <div style={css(`display:grid; grid-template-columns:repeat(auto-fit,minmax(108px,1fr)); gap:1px; background:#EEF1F6; border:1px solid #EEF1F6; border-radius:8px; overflow:hidden; margin-bottom:16px;`)}>
 {(aSel.metrics || []).map((m, __i73) => (<React.Fragment key={__i73}><div style={css(`background:#fff; padding:13px 14px;`)}><div style={css(`font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:500; color:#14171F; line-height:1;`)}>{m.value}</div><div style={css(`font-size:11px; color:#5A5E66; margin-top:5px;`)}>{m.label}</div></div></React.Fragment>))}
 </div>
+{/* Validation Flags */}
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; gap:9px;`)}><div style={css(`width:4px; height:18px; background:#003F98; border-radius:2px;`)} /><span style={css(`font-size:15px; font-weight:700; color:#14171F;`)}>Validation Flags</span></div>
+{(aSel.hasPlanFlags) ? (<>
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:16px 18px; margin-bottom:16px;`)}>
+<div style={css(`display:flex; flex-direction:column; gap:7px;`)}>
+{(aSel.planFlags || []).map((fl, __iPFa) => (<React.Fragment key={__iPFa}><div style={css(`display:flex; align-items:center; gap:9px; padding:10px 14px; background:#F7F8FB; border:1px solid #EEF1F6; border-radius:8px;`)}><span style={css(`display:inline-flex; align-items:center; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:700; background:${fl.sevBg}; color:${fl.sevFg}; flex-shrink:0;`)}>{fl.sevLabel}</span><span style={css(`font-size:12.5px; color:#5A5E66;`)}>{fl.t}</span></div></React.Fragment>))}
+</div>
+</div>
+</>) : null}
+{(aSel.noPlanFlags) ? (<><div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:12.5px; color:#128A3E;`)}><svg width={"15"} height={"15"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M20 6L9 17l-5-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>No validation flags on this plan.</div></>) : null}
 {/* status banners — vary by state, sit above the tabs so they're visible regardless of which tab is open */}
+
 {(aSel.isPushed) ? (<>
 <div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:13px; overflow:hidden; margin-bottom:16px;`)}>
 <div style={css(`display:flex; align-items:center; gap:12px; padding:16px 20px;`)}>
@@ -2237,7 +2269,7 @@ function View(B, self) {
 <div style={css(`padding:11px 12px; font-size:12px; text-align:right; font-variant-numeric:tabular-nums; color:${dv.hasLatLngChange ? '#9A5E00' : '#14171F'};`)}>{dv.lat}</div>
 <div style={css(`padding:11px 12px; font-size:12px; text-align:right; font-variant-numeric:tabular-nums; color:${dv.hasLatLngChange ? '#9A5E00' : '#14171F'};`)}>{dv.lng}</div>
 <div style={css(`padding:11px 12px; font-size:12px; color:${dv.hasRouteCodeChange ? '#9A5E00' : '#14171F'};`)}>{dv.routeCode}</div>
-<div style={css(`padding:11px 12px; font-size:12px; text-align:center; font-variant-numeric:tabular-nums; color:${dv.hasTpChange ? '#9A5E00' : '#14171F'};`)}>{dv.tp}</div>
+<div style={css(`padding:11px 12px; font-size:12px; text-align:center; font-variant-numeric:tabular-nums;`)}>{(dv.hasTpChange) ? (<><span style={css(`color:#9A5E00;`)}>{dv.tp}</span></>) : (dv.hasTpRipple) ? (<><span style={css(`display:inline-flex; align-items:center; gap:4px; justify-content:center;`)} title={"Renumbered automatically because another DC left or joined this route \u2014 not an edit of its own"}><span style={css(`text-decoration:line-through; color:#8E96A3; font-size:11px;`)}>{dv.tp}</span><span style={css(`color:#1E6FB8; font-weight:700;`)}>{dv.rippleTp}</span></span></>) : (<><span style={css(`color:#14171F;`)}>{dv.tp}</span></>)}</div>
 <div style={css(`padding:11px 12px; font-size:12px; color:#5A5E66;`)}>{dv.zone}</div>
 <div style={css(`padding:11px 12px; font-size:12px; color:${dv.hasVehChange ? '#9A5E00' : '#14171F'};`)}>{dv.hasVehChange ? dv.vehTypeProposed : dv.vehType}</div>
 <div style={css(`padding:11px 12px; font-size:12px; text-align:right; font-variant-numeric:tabular-nums; color:${dv.hasDistChange ? '#9A5E00' : '#14171F'};`)}>{dv.hasDistChange ? dv.rtDistProposed : dv.rtDist}</div>
@@ -2344,6 +2376,27 @@ function View(B, self) {
 <div style={css(`flex:1;`)}>
 <div style={css(`font-size:9.5px; color:${sc.suggestedLabelFg}; font-weight:700; margin-bottom:2px; text-transform:uppercase; letter-spacing:0.04em;`)}>{sc.suggestedLabel}</div>
 <div style={css(`font-size:18px; font-weight:700; color:${sc.propFg}; font-variant-numeric:tabular-nums; line-height:1.1;`)}>{sc.propVal}</div>
+</div>
+</div>
+</div>
+</React.Fragment>))}
+</div>
+</div>
+{/* SECTION 1B: VEHICLE MIX — original plan vehicles vs suggested vehicles */}
+<div>
+<div style={css(`font-size:10px; font-weight:700; color:#7A8094; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;`)}>Vehicle mix — original vs. suggested</div>
+<div style={css(`display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;`)}>
+{(aSel.planSimVehCards || []).map((vc, __iPSVA) => (<React.Fragment key={__iPSVA}>
+<div style={css(`background:#fff; border:${vc.cardBd}; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:4px;`)}>
+<div style={css(`font-size:10.5px; font-weight:600; color:#7A8094; letter-spacing:0.04em; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{vc.veh}</div>
+<div style={css(`display:flex; align-items:baseline; gap:10px; margin-top:4px;`)}>
+<div style={css(`flex:1;`)}>
+<div style={css(`font-size:9.5px; color:#8E96A3; font-weight:500; margin-bottom:2px;`)}>Original</div>
+<div style={css(`font-size:18px; font-weight:700; color:#5A5E66; font-variant-numeric:tabular-nums; line-height:1.1;`)}>×{vc.orig}</div>
+</div>
+<div style={css(`flex:1;`)}>
+<div style={css(`font-size:9.5px; color:${vc.changed ? '#C77B00' : '#8E96A3'}; font-weight:700; margin-bottom:2px; text-transform:uppercase; letter-spacing:0.04em;`)}>{vc.changed ? 'Suggested change' : 'Suggested'}</div>
+<div style={css(`font-size:18px; font-weight:700; color:${vc.suggFg}; font-variant-numeric:tabular-nums; line-height:1.1;`)}>×{vc.sugg}</div>
 </div>
 </div>
 </div>
@@ -2743,10 +2796,40 @@ function View(B, self) {
 {(oSel.submitted) ? (<><div style={css(`display:flex; align-items:center; gap:9px; padding:10px 14px; margin-bottom:14px; background:#E7F4EC; border:1px solid #B6E0C6; border-radius:8px;`)}><svg width={"16"} height={"16"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#128A3E"} strokeWidth={"2.2"}><path d={"M20 6L9 17l-5-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg><span style={css(`font-size:12px; color:#14171F;`)}><strong style={css(`font-weight:700;`)}>{oSel.submittedRecord}</strong> — the planner can now review your row decisions.</span></div></>) : null}
 {/* §10 O2 — plan-level co-reviewer awareness: surface "someone has proposed a change" up front (the same way the planner sees feedback received), not only row-by-row. */}
 {(oSel.hasProp) ? (<><div style={css(`display:flex; align-items:center; gap:9px; padding:11px 14px; margin-bottom:14px; background:#EAF3FB; border:1px solid #C4DDF2; border-radius:8px; flex-wrap:wrap;`)}><svg aria-hidden={"true"} width={"16"} height={"16"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#1E6FB8"} strokeWidth={"2"} style={css(`flex-shrink:0;`)}><path d={"M5 21V4M5 4h11l-2 4 2 4H5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg><span style={css(`font-size:12px; font-weight:700; color:#14171F;`)}>{oSel.propSummary}</span><span style={css(`font-size:12px; color:#5A5E66;`)}>Review the flagged rows before you submit your feedback.</span></div></>) : null}
-{/* metrics summary — always visible above the tabs, not tab-gated */}
+{/* Plan Inputs — SC details + vehicles used (2026-07-16, unifies with Design Review's layout) */}
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; gap:9px;`)}><div style={css(`width:4px; height:18px; background:#003F98; border-radius:2px;`)} /><span style={css(`font-size:15px; font-weight:700; color:#14171F;`)}>Plan Inputs</span></div>
+<div style={css(`display:flex; flex-wrap:wrap; gap:20px 36px; padding:15px 18px; background:#fff; border:1px solid #E6EBF2; border-radius:8px; margin-bottom:12px;`)}>
+<div><div style={css(`font-size:10.5px; color:#5A5E66;`)}>Nodes</div><div style={css(`font-size:15px; font-weight:600; color:#14171F; font-variant-numeric:tabular-nums;`)}>{oSel.inputNodes}</div></div>
+<div><div style={css(`font-size:10.5px; color:#5A5E66;`)}>Volume</div><div style={css(`font-size:15px; font-weight:600; color:#14171F; font-variant-numeric:tabular-nums;`)}>{oSel.inputVolume}</div></div>
+<div><div style={css(`font-size:10.5px; color:#5A5E66;`)}>Historical weight</div><div style={css(`font-size:15px; font-weight:600; color:#14171F;`)}>{oSel.hwLabel} · {oSel.hwTag}</div></div>
+<div><div style={css(`font-size:10.5px; color:#5A5E66;`)}>SC coordinates</div><div style={css(`font-size:13.5px; font-weight:600; color:#14171F; font-variant-numeric:tabular-nums;`)}>{oSel.inputScCoords}</div></div>
+</div>
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:18px 20px; margin-bottom:18px;`)}>
+<div style={css(`display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:13px;`)}><div style={css(`font-size:13px; font-weight:700; color:#14171F;`)}>Vehicles used</div><div style={css(`font-size:11.5px; color:#5A5E66;`)}>{oSel.inputVehTotal} total</div></div>
+<div style={css(`display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;`)}>
+{(oSel.inputVehArr || []).map((v, __iIVO) => (<React.Fragment key={__iIVO}>
+<div style={css(`display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 13px; background:#F7F8FB; border:1px solid #EEF1F6; border-radius:8px;`)}>
+<span style={css(`font-size:12.5px; color:#14171F; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{v.veh}</span>
+<span style={css(`font-size:13px; font-weight:700; color:#003F98; flex-shrink:0;`)}>×{v.n}</span>
+</div>
+</React.Fragment>))}
+</div>
+</div>
+{/* Plan Outputs */}
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; gap:9px;`)}><div style={css(`width:4px; height:18px; background:#003F98; border-radius:2px;`)} /><span style={css(`font-size:15px; font-weight:700; color:#14171F;`)}>Plan Outputs</span></div>
 <div style={css(`display:grid; grid-template-columns:repeat(auto-fit,minmax(108px,1fr)); gap:1px; background:#EEF1F6; border:1px solid #EEF1F6; border-radius:8px; overflow:hidden; margin-bottom:16px;`)}>
 {(oSel.metrics || []).map((m, __i93) => (<React.Fragment key={__i93}><div style={css(`background:#fff; padding:13px 14px;`)}><div style={css(`font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:500; color:#14171F; line-height:1;`)}>{m.value}</div><div style={css(`font-size:11px; color:#5A5E66; margin-top:5px;`)}>{m.label}</div></div></React.Fragment>))}
 </div>
+{/* Validation Flags */}
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:12px 16px; margin-bottom:12px; display:flex; align-items:center; gap:9px;`)}><div style={css(`width:4px; height:18px; background:#003F98; border-radius:2px;`)} /><span style={css(`font-size:15px; font-weight:700; color:#14171F;`)}>Validation Flags</span></div>
+{(oSel.hasPlanFlags) ? (<>
+<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:16px 18px; margin-bottom:16px;`)}>
+<div style={css(`display:flex; flex-direction:column; gap:7px;`)}>
+{(oSel.planFlags || []).map((fl, __iPFo) => (<React.Fragment key={__iPFo}><div style={css(`display:flex; align-items:center; gap:9px; padding:10px 14px; background:#F7F8FB; border:1px solid #EEF1F6; border-radius:8px;`)}><span style={css(`display:inline-flex; align-items:center; padding:2px 8px; border-radius:6px; font-size:10px; font-weight:700; background:${fl.sevBg}; color:${fl.sevFg}; flex-shrink:0;`)}>{fl.sevLabel}</span><span style={css(`font-size:12.5px; color:#5A5E66;`)}>{fl.t}</span></div></React.Fragment>))}
+</div>
+</div>
+</>) : null}
+{(oSel.noPlanFlags) ? (<><div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:12px 16px; display:flex; align-items:center; gap:8px; margin-bottom:16px; font-size:12.5px; color:#128A3E;`)}><svg width={"15"} height={"15"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M20 6L9 17l-5-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>No validation flags on this plan.</div></>) : null}
 {/* section tabs */}
 <div style={css(`display:flex; gap:22px; border-bottom:1px solid #E6EBF2; margin-bottom:16px;`)}>
 {(oSel.sections || []).map((t, __i92) => (<React.Fragment key={__i92}><button onClick={t.onClick} style={css(`position:relative; padding:0 0 12px; border:none; background:transparent; cursor:pointer; font-family:inherit; font-size:13px; font-weight:${t.weight}; color:${t.color};`)}>{t.label}{(t.active) ? (<><span style={css(`position:absolute; left:0; right:0; bottom:0; height:3px; background:#003F98; border-radius:3px 3px 0 0;`)} /></>) : null}</button></React.Fragment>))}
@@ -2794,7 +2877,7 @@ function View(B, self) {
 <div style={css(`padding:11px 12px; font-size:11.5px; text-align:right; font-variant-numeric:tabular-nums;`)}>{(dv.hasLatLngChange) ? (<><span style={css(`display:inline-flex; align-items:center; gap:4px;`)}><span style={css(`text-decoration:line-through; color:#8E96A3; font-size:10.5px;`)}>{dv.lat}</span><span style={css(`color:#C77B00; font-weight:600;`)}>{dv.latProposed}</span>{(dv.editable) ? (<><button onClick={() => dv.onRevertField('latLng')} aria-label={"Revert position"} title={"Revert"} style={css(`border:none; background:transparent; cursor:pointer; padding:1px; color:#8E96A3; display:flex;`)}><svg width={"11"} height={"11"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></>) : null}</span></>) : (<><span style={css(`color:#14171F;`)}>{dv.lat}</span></>)}</div>
 <div style={css(`padding:11px 12px; font-size:11.5px; text-align:right; font-variant-numeric:tabular-nums;`)}>{(dv.hasLatLngChange) ? (<><span style={css(`display:inline-flex; align-items:center; gap:4px;`)}><span style={css(`text-decoration:line-through; color:#8E96A3; font-size:10.5px;`)}>{dv.lng}</span><span style={css(`color:#C77B00; font-weight:600;`)}>{dv.lngProposed}</span>{(dv.editable) ? (<><button onClick={() => dv.onRevertField('latLng')} aria-label={"Revert position"} title={"Revert"} style={css(`border:none; background:transparent; cursor:pointer; padding:1px; color:#8E96A3; display:flex;`)}><svg width={"11"} height={"11"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></>) : null}</span></>) : (<><span style={css(`color:#14171F;`)}>{dv.lng}</span></>)}</div>
 <div style={css(`padding:11px 12px; font-size:12px;`)}>{(dv.hasRouteCodeChange) ? (<><span style={css(`display:inline-flex; align-items:center; gap:4px;`)}><span style={css(`text-decoration:line-through; color:#8E96A3; font-size:11px;`)}>{dv.routeCode}</span><span style={css(`color:#C77B00; font-weight:600;`)}>→{dv.routeCodeProposed}</span>{(dv.editable) ? (<><button onClick={() => dv.onRevertField('routeCode')} aria-label={"Revert route code"} title={"Revert"} style={css(`border:none; background:transparent; cursor:pointer; padding:1px; color:#8E96A3; display:flex;`)}><svg width={"11"} height={"11"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></>) : null}</span></>) : (<><span style={css(`color:#14171F;`)}>{dv.routeCode}</span></>)}</div>
-<div style={css(`padding:11px 12px; font-size:12px; text-align:center; font-variant-numeric:tabular-nums;`)}>{(dv.hasTpChange) ? (<><span style={css(`display:inline-flex; align-items:center; gap:4px;`)}><span style={css(`text-decoration:line-through; color:#8E96A3; font-size:11px;`)}>{dv.tp}</span><span style={css(`color:#C77B00; font-weight:700;`)}>{dv.tpProposed}</span>{(dv.editable) ? (<><button onClick={() => dv.onRevertField('tp')} aria-label={"Revert touch point"} title={"Revert"} style={css(`border:none; background:transparent; cursor:pointer; padding:1px; color:#8E96A3; display:flex;`)}><svg width={"11"} height={"11"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></>) : null}</span></>) : (<><span style={css(`color:#14171F;`)}>{dv.tp}</span></>)}</div>
+<div style={css(`padding:11px 12px; font-size:12px; text-align:center; font-variant-numeric:tabular-nums;`)}>{(dv.hasTpChange) ? (<><span style={css(`display:inline-flex; align-items:center; gap:4px;`)}><span style={css(`text-decoration:line-through; color:#8E96A3; font-size:11px;`)}>{dv.tp}</span><span style={css(`color:#C77B00; font-weight:700;`)}>{dv.tpProposed}</span>{(dv.editable) ? (<><button onClick={() => dv.onRevertField('tp')} aria-label={"Revert touch point"} title={"Revert"} style={css(`border:none; background:transparent; cursor:pointer; padding:1px; color:#8E96A3; display:flex;`)}><svg width={"11"} height={"11"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></>) : null}</span></>) : (dv.hasTpRipple) ? (<><span style={css(`display:inline-flex; align-items:center; gap:4px; justify-content:center;`)} title={"Renumbered automatically because another DC left or joined this route \u2014 not an edit of its own"}><span style={css(`text-decoration:line-through; color:#8E96A3; font-size:11px;`)}>{dv.tp}</span><span style={css(`color:#1E6FB8; font-weight:700;`)}>{dv.rippleTp}</span></span></>) : (<><span style={css(`color:#14171F;`)}>{dv.tp}</span></>)}</div>
 <div style={css(`padding:11px 12px; font-size:12px; color:#5A5E66;`)}>{dv.zone}</div>
 <div style={css(`padding:11px 12px; font-size:12px;`)}>{(dv.hasVehChange) ? (<><span style={css(`color:#C77B00; font-weight:600;`)}>{dv.vehTypeProposed}</span></>) : (<><span style={css(`color:#14171F;`)}>{dv.vehType}</span></>)}</div>
 <div style={css(`padding:11px 12px; font-size:12px; text-align:right;`)}>{(dv.hasDistChange) ? (<><span style={css(`display:inline-flex; align-items:center; gap:4px; justify-content:flex-end;`)}><span style={css(`text-decoration:line-through; color:#8E96A3; font-size:11px;`)}>{dv.rtDist}</span><span style={css(`color:#C77B00; font-weight:600;`)}>{dv.rtDistProposed}</span>{(dv.editable) ? (<><button onClick={() => dv.onRevertField('distance')} aria-label={"Revert distance"} title={"Revert"} style={css(`border:none; background:transparent; cursor:pointer; padding:1px; color:#8E96A3; display:flex;`)}><svg width={"11"} height={"11"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></>) : null}</span></>) : (<><span style={css(`color:#14171F;`)}>{dv.rtDist}</span></>)}</div>
@@ -2921,6 +3004,27 @@ function View(B, self) {
 <div style={css(`flex:1;`)}>
 <div style={css(`font-size:9.5px; color:${sc.suggestedLabelFg}; font-weight:700; margin-bottom:2px; text-transform:uppercase; letter-spacing:0.04em;`)}>{sc.suggestedLabel}</div>
 <div style={css(`font-size:18px; font-weight:700; color:${sc.propFg}; font-variant-numeric:tabular-nums; line-height:1.1;`)}>{sc.propVal}</div>
+</div>
+</div>
+</div>
+</React.Fragment>))}
+</div>
+</div>
+{/* SECTION 1B: VEHICLE MIX — original plan vehicles vs suggested vehicles */}
+<div>
+<div style={css(`font-size:10px; font-weight:700; color:#7A8094; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:10px;`)}>Vehicle mix — original vs. suggested</div>
+<div style={css(`display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px;`)}>
+{(oSel.opsSimVehCards || []).map((vc, __iOSVA) => (<React.Fragment key={__iOSVA}>
+<div style={css(`background:#fff; border:${vc.cardBd}; border-radius:10px; padding:14px 16px; display:flex; flex-direction:column; gap:4px;`)}>
+<div style={css(`font-size:10.5px; font-weight:600; color:#7A8094; letter-spacing:0.04em; text-transform:uppercase; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{vc.veh}</div>
+<div style={css(`display:flex; align-items:baseline; gap:10px; margin-top:4px;`)}>
+<div style={css(`flex:1;`)}>
+<div style={css(`font-size:9.5px; color:#8E96A3; font-weight:500; margin-bottom:2px;`)}>Original</div>
+<div style={css(`font-size:18px; font-weight:700; color:#5A5E66; font-variant-numeric:tabular-nums; line-height:1.1;`)}>×{vc.orig}</div>
+</div>
+<div style={css(`flex:1;`)}>
+<div style={css(`font-size:9.5px; color:${vc.changed ? '#C77B00' : '#8E96A3'}; font-weight:700; margin-bottom:2px; text-transform:uppercase; letter-spacing:0.04em;`)}>{vc.changed ? 'Suggested change' : 'Suggested'}</div>
+<div style={css(`font-size:18px; font-weight:700; color:${vc.suggFg}; font-variant-numeric:tabular-nums; line-height:1.1;`)}>×{vc.sugg}</div>
 </div>
 </div>
 </div>
@@ -3598,6 +3702,16 @@ function View(B, self) {
 // Solver concurrency — In-Progress slots run at once, the rest wait as Planned. Single source of
 // truth shared by triggerRuns (slot assignment) and the Step-4 ETA math so they can never disagree.
 const NDC_CONCURRENCY = 6;
+
+// Supabase client — auth (magic-link) + Ops Alignment persistence (plans / plan_reviewers /
+// plan_row_feedback / plan_reviewer_status tables). Anon key is safe client-side; the RLS policies
+// set up alongside this repo are what actually gate access, not this key.
+const NDC_SUPABASE_URL = 'https://txpdodgovdfmcuvsaoqf.supabase.co';
+const NDC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4cGRvZGdvdmRmbWN1dnNhb3FmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQxMTU2NDgsImV4cCI6MjA5OTY5MTY0OH0.0xxU2uR3nY7PMkzgE7XmiPdrtDV67cG8FghUP_aHs5k';
+const supabase = (window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(NDC_SUPABASE_URL, NDC_SUPABASE_ANON_KEY)
+  : null; // null only if the CDN script failed to load — auth screen shows a clear error in that case
+
 const NDC_RUN_MINUTES = 30; // ~30 min per solve (used for the batch ETA estimate)
 // NDC_COST_PER_KM — hardcoded RLH vehicle running cost, Rs/km (2026-07-09, provided by product).
 // Only ACE / Bolero / 407 were given explicit rates. Any other RLH-feasible vehicle type (e.g. the
@@ -3649,10 +3763,18 @@ class NDCApp extends React.Component {
     this.standaloneMapSc = _qp.get('standaloneMap');
     this.standaloneMapMode = _qp.get('mapMode') || '';
     this.state = {
+      // Real auth (2026-07-16) — replaces the "Acting as"/View-as toggles. authChecked flips true
+      // once the initial supabase.auth.getSession() resolves; authUser/authProfile are null until
+      // a real magic-link session exists. See componentDidMount for the auth listener.
+      authChecked: false, authUser: null, authProfile: null,
+      authEmail: '', authSending: false, authSent: false, authError: '',
       persona: 'planner',
       // 2026-07-14 — lets the Ops Lead view be "acted" as any of a plan's assigned reviewers instead
       // of always being hardcoded to Rahul Sharma, so more-than-one-reviewer scenarios can actually be
       // simulated (submit as A, switch to B, submit differently, see the co-reviewer overlay update).
+      // 2026-07-16 — retired now that logins are real: a logged-in Ops Lead reviews as themselves,
+      // not a switchable persona. Left wired (harmless) in case it's needed for QA later; the
+      // switcher UI itself is hidden (showOpsActingSwitcher forced false in renderVals).
       opsActingPersona: null,
       view: 'inputs', // Command Center hidden for now -- see nav comment near plannerNav
       showCoach: props.showFtux !== false,
@@ -3969,7 +4091,93 @@ class NDCApp extends React.Component {
   // the latest file fully replaces all prior node-change data. Stamps the "last uploaded by" indicator.
   uploadNodeChanges() { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.csv'; inp.onchange = () => { const f = inp.files && inp.files[0]; if (!f) { this.showToast('Upload cancelled', '#5A5E66'); return; } const now = new Date(); const date = String(now.getDate()).padStart(2, '0') + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()] + ' · ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'); this.setState({ nodeChangeBy: 'You (Planner)', nodeChangeDate: date }); this.showToast('6 nodes rejected as they are already part of AutoDML', '#C77B00'); }; inp.click(); }
 
-  componentWillUnmount() { clearInterval(this._q); clearTimeout(this._t); }
+  componentDidMount() {
+    if (!supabase) {
+      // CDN script failed to load or was blocked — surface this clearly instead of hanging on a
+      // blank "Loading…" auth screen forever.
+      this.setState({ authChecked: true, authError: 'Could not reach the Supabase client library (CDN blocked?). Refresh, or check your network settings.' });
+      return;
+    }
+    supabase.auth.getSession().then(({ data }) => {
+      const session = data && data.session;
+      this.setState({ authChecked: true, authUser: session ? session.user : null });
+      if (session) this.loadAuthProfile(session.user.id);
+    });
+    this._authSub = supabase.auth.onAuthStateChange((_event, session) => {
+      this.setState({ authUser: session ? session.user : null, authProfile: session ? this.state.authProfile : null });
+      if (session) this.loadAuthProfile(session.user.id);
+    });
+  }
+
+  loadAuthProfile(userId) {
+    if (!supabase) return;
+    supabase.from('profiles').select('role, display_name, email').eq('id', userId).single()
+      .then(({ data, error }) => {
+        if (error) { console.error('Failed to load profile', error); return; }
+        this.setState({
+          authProfile: data,
+          // Map the DB role onto this app's existing persona values ('planner' | 'ops') — no
+          // manual toggle anymore, this is fixed by whoever set the role in Table Editor.
+          persona: data && data.role === 'ops_lead' ? 'ops' : 'planner',
+          view: data && data.role === 'ops_lead' ? 'align' : 'inputs',
+        });
+      });
+  }
+
+  sendMagicLink() {
+    if (!supabase) return;
+    const email = (this.state.authEmail || '').trim();
+    if (!email) { this.setState({ authError: 'Enter your email address.' }); return; }
+    this.setState({ authSending: true, authError: '' });
+    supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } }).then(({ error }) => {
+      if (error) { this.setState({ authSending: false, authError: error.message || 'Could not send the link — is this email on the invited list?' }); return; }
+      this.setState({ authSending: false, authSent: true });
+    });
+  }
+
+  signOut() {
+    if (!supabase) return;
+    supabase.auth.signOut().then(() => this.setState({ authUser: null, authProfile: null, authEmail: '', authSent: false }));
+  }
+
+  renderLogin() {
+    const e = React.createElement;
+    const st = this.state;
+    if (!st.authChecked) {
+      return e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: "'Inter', sans-serif", color: '#5A5E66' } }, 'Loading…');
+    }
+    return e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#F4F5F8', fontFamily: "'Inter', sans-serif" } },
+      e('div', { style: { width: '360px', maxWidth: '92vw', background: '#fff', border: '1px solid #E6EBF2', borderRadius: '14px', padding: '28px 26px', boxShadow: '0 12px 34px rgba(11,20,48,0.10)' } },
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '18px' } },
+          e('div', { style: { width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg,#003F98,#2F4FC6)' } }),
+          e('div', { style: { fontSize: '14px', fontWeight: 700, color: '#14171F' } }, 'Network Design Central')
+        ),
+        st.authSent
+          ? e('div', null,
+              e('div', { style: { fontSize: '13.5px', fontWeight: 600, color: '#14171F', marginBottom: '6px' } }, 'Check your email'),
+              e('div', { style: { fontSize: '12.5px', color: '#5A5E66', lineHeight: 1.5 } }, "We've sent a sign-in link to " + st.authEmail + '. Click it to continue — you can close this tab.'),
+              e('button', { onClick: () => this.setState({ authSent: false }), style: { marginTop: '14px', height: '34px', padding: '0 12px', border: '1px solid #E6EBF2', background: '#fff', color: '#5A5E66', fontFamily: 'inherit', fontSize: '12.5px', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' } }, 'Use a different email')
+            )
+          : e('div', null,
+              e('div', { style: { fontSize: '13.5px', fontWeight: 600, color: '#14171F', marginBottom: '4px' } }, 'Sign in'),
+              e('div', { style: { fontSize: '12px', color: '#8E96A3', marginBottom: '14px' } }, "Enter your work email — we'll send a one-time sign-in link. Only invited addresses will receive one."),
+              e('input', {
+                type: 'email', value: st.authEmail, placeholder: 'name@valmo.com',
+                onChange: (ev) => this.setState({ authEmail: ev.target.value, authError: '' }),
+                onKeyDown: (ev) => { if (ev.key === 'Enter') this.sendMagicLink(); },
+                style: { width: '100%', height: '38px', padding: '0 12px', border: '1px solid #C3C9D4', borderRadius: '8px', fontFamily: 'inherit', fontSize: '13px', color: '#14171F', outline: 'none', boxSizing: 'border-box', marginBottom: '10px' },
+              }),
+              st.authError ? e('div', { style: { fontSize: '11.5px', color: '#D14B4B', marginBottom: '10px', lineHeight: 1.4 } }, st.authError) : null,
+              e('button', {
+                onClick: () => this.sendMagicLink(), disabled: st.authSending,
+                style: { width: '100%', height: '38px', border: 'none', background: st.authSending ? '#8FA9D8' : '#003F98', color: '#fff', fontFamily: 'inherit', fontSize: '13px', fontWeight: 600, borderRadius: '8px', cursor: st.authSending ? 'default' : 'pointer' },
+              }, st.authSending ? 'Sending…' : 'Send sign-in link')
+            )
+      )
+    );
+  }
+
+  componentWillUnmount() { clearInterval(this._q); clearTimeout(this._t); if (this._authSub && this._authSub.data && this._authSub.data.subscription) this._authSub.data.subscription.unsubscribe(); }
 
   // A1/A3 — single source of truth for the July 2026 cycle dates. Freeze (Acknowledge) = Jul 12.
   // "now" is pinned to the seed cycle (24 Jun 2026) so the demo is deterministic, not a frozen literal.
@@ -5653,6 +5861,25 @@ class NDCApp extends React.Component {
       const submittedFbByIdx = {};
       plan.rows.forEach((rr3, i3) => { if (ps !== 'Pushed' && rr3.fb) submittedFbByIdx[i3] = rr3.fb; });
       const flagsHyp = this.computeHypotheticalPlan(plan, submittedFbByIdx);
+      // Plan Inputs (2026-07-16) — SC details + vehicles used. Vehicle mix is tallied straight off
+      // plan.rows (never merged with in-progress/proposed feedback) so it shows the ORIGINAL plan pre-
+      // Finalise and automatically becomes the FINAL aligned mix post-Finalise, since plan.rows only
+      // changes at the moment confirmFin() commits — no separate "which state to show" logic needed.
+      const inputNodes = plan.rows.reduce((a, r) => a + (r.dcs ? r.dcs.length : 0), 0);
+      const inputVolume = plan.rows.reduce((a, r) => a + (r.volume || 0), 0);
+      const inputScCoords = plan.rows[0] ? (Number(plan.rows[0].oLat).toFixed(4) + ', ' + Number(plan.rows[0].oLng).toFixed(4)) : '—';
+      const inputVehMix = {}; plan.rows.forEach(r => { inputVehMix[r.veh] = (inputVehMix[r.veh] || 0) + 1; });
+      const inputVehArr = Object.keys(inputVehMix).map(k => ({ veh: k, n: inputVehMix[k] }));
+      // Validation Flags (2026-07-16) — structural errors/warnings for the always-visible section.
+      // Distance-variance warnings (tagged with dcCode) are excluded here since they already have
+      // their own dedicated banner (aSel.hasDistanceVariance) with route-scoped decision context.
+      const planFlags = []
+        .concat(flagsHyp.errors.map(e => ({ sevLabel: 'Error', sevBg: '#D14B4B', sevFg: '#fff', t: e.t })))
+        .concat(flagsHyp.warnings.filter(w => !w.dcCode).map(w => ({ sevLabel: 'Warning', sevBg: '#FBF1DF', sevFg: '#C77B00', t: w.t })));
+      // 2026-07-15 — same ripple-display lookup as the Ops Lead side: shows auto-renumbered TPs on DCs
+      // that didn't move themselves (display-only, doesn't reorder rows or touch distances early).
+      const hypTpByRoute = {};
+      (flagsHyp.routes || []).forEach(rt => { const m = {}; rt.dcCodes.forEach((code, i) => { m[code] = rt.tpOrder[i]; }); hypTpByRoute[rt.routeCode] = m; });
       const rows = plan.rows.map((r, idx) => {
         // 2026-07-10 — a plan still Pushed (pending feedback) must never show a flagged change to the
         // Planner, even if a row carries co-reviewer-visibility demo data (r.ops/r.fb seeded for the
@@ -5711,9 +5938,14 @@ class NDCApp extends React.Component {
           });
           const fRouteCode = mkField('routeCode', routeChg), fTp = mkField('tp', tpChg), fLatLng = mkField('latLng', latLngChg), fDistance = mkField('distance', distChg);
           const allFields = [fRouteCode, fTp, fLatLng, fDistance].filter(f => f.has);
+          // ripple only applies to a DC that's staying put (no explicit route/tp override of its own) —
+          // an explicit hasTpChange/hasRouteCodeChange already shows its own diff, no need to double up.
+          const rippleTp = (!tpChg && !routeChg) ? (hypTpByRoute[r.routeCode] || {})[dc.code] : null;
+          const hasTpRipple = rippleTp != null && rippleTp !== dc.tpOrder;
           return Object.assign({}, dc, {
             hasChange: !!chg, noChange: !chg,
             hasChgTp: tpChg, noChgTp: !tpChg, chgTp: tpChg ? String(chg.tp) : '',
+            hasTpRipple, rippleTp,
             hasLatLngChange: latLngChg, noLatLngChange: !latLngChg, proposedLatLng: pLat + ', ' + pLng, proposedLat: pLat, proposedLng: pLng,
             hasRouteCodeChange: routeChg, proposedRouteCode: routeChg ? chg.routeCode : '', isSplitProposal: routeChg && !!chg.splitVehicle,
             hasDistChange: distChg, proposedDist: distChg ? (chg.distance + ' km') : '',
@@ -5912,7 +6144,7 @@ class NDCApp extends React.Component {
             lmdc: dc.code, designVol: fmtInt(dc.vol),
             lat: dc.lat, lng: dc.lng, latProposed: dc.hasLatLngChange ? dc.proposedLat : '', lngProposed: dc.hasLatLngChange ? dc.proposedLng : '', hasLatLngChange: dc.hasLatLngChange, fLatLng: dc.fLatLng,
             routeCode: rr.routeCode, routeCodeProposed: dc.hasRouteCodeChange ? dc.proposedRouteCode : '', hasRouteCodeChange: dc.hasRouteCodeChange, fRouteCode: dc.fRouteCode,
-            tp: dc.tpOrder, tpProposed: dc.hasChgTp ? dc.chgTp : '', hasTpChange: dc.hasChgTp, fTp: dc.fTp,
+            tp: dc.tpOrder, tpProposed: dc.hasChgTp ? dc.chgTp : '', hasTpChange: dc.hasChgTp, fTp: dc.fTp, hasTpRipple: dc.hasTpRipple, rippleTp: dc.rippleTp,
             zone: plan.zone, outCutoff: plan.rows[ri].outCutoff, tat: rr.tat, inCutoff: addHoursA(plan.rows[ri].outCutoff, plan.rows[ri].breakdownTat),
             vehType: rr.veh, vehTypeProposed: (routeChange && routeChange.changeVal) ? routeChange.changeVal.split(' → ')[1] : '', hasVehChange: !!routeChange,
             rtDist: dc.dist, rtDistProposed: dc.hasDistChange ? dc.proposedDist : '', hasDistChange: dc.hasDistChange, fDistance: dc.fDistance,
@@ -5974,6 +6206,8 @@ class NDCApp extends React.Component {
         scCoords: plan.rows[0] ? (Number(plan.rows[0].oLat).toFixed(4) + ', ' + Number(plan.rows[0].oLng).toFixed(4)) : '—',
         statusLabel: STPILL[ps].l, statusBg: STPILL[ps].bg, statusFg: STPILL[ps].fg,
         hasDistanceVariance: distanceVarianceEntries.length > 0, distanceVarianceCount: distanceVariancePendingCount, distanceVarianceEntries,
+        inputNodes: fmtInt(inputNodes), inputVolume: fmtInt(inputVolume), inputScCoords, inputVehArr, inputVehTotal: plan.rows.length,
+        planFlags, hasPlanFlags: planFlags.length > 0, noPlanFlags: planFlags.length === 0,
         finalWarnings: finalWarningsMsgs, finalWarningsCount: finalWarningsMsgs.length,
         hasSubmissionGap, submissionGapMsg,
         sentDate: plan.sentDate, reviewers: plan.reviewerNames.join(', '), opsLeads,
@@ -6110,6 +6344,16 @@ class NDCApp extends React.Component {
               mkCard('SC CPS (₹)', +planCpsOriginal.toFixed(2), +pC.toFixed(2), v => '₹' + v.toFixed(2)),
             ];
           })();
+          // Vehicle mix comparison (2026-07-16, per product decision on Plan Inputs) — original tally
+          // from plan.rows as committed vs. suggested tally from the same hypothetical planSimCards
+          // above already reads, so Simulate shows the vehicle-mix consequence alongside the metrics.
+          const planSimVehOrigMix = {}; plan.rows.forEach(rr4 => { planSimVehOrigMix[rr4.veh] = (planSimVehOrigMix[rr4.veh] || 0) + 1; });
+          const planSimVehSuggMix = {}; (planHyp.routes || []).forEach(rt => { planSimVehSuggMix[rt.vehName] = (planSimVehSuggMix[rt.vehName] || 0) + 1; });
+          const planSimVehAllTypes = Array.from(new Set([...Object.keys(planSimVehOrigMix), ...Object.keys(planSimVehSuggMix)]));
+          const planSimVehCards = planSimVehAllTypes.map(veh => {
+            const orig = planSimVehOrigMix[veh] || 0, sugg = planSimVehSuggMix[veh] || 0, changed = orig !== sugg;
+            return { veh, orig, sugg, changed, suggFg: changed ? '#C77B00' : '#5A5E66', cardBd: changed ? '2px solid #C77B00' : '1px solid #E6EBF2' };
+          });
           // Section 2: route-level reference — kept as the ORIGINAL structure with a "touched" flag;
           // see the identical note on the Ops Lead side for why a per-route proposed CPS isn't shown.
           const planSimRouteRows = plan.rows.map((r, ri) => {
@@ -6170,7 +6414,7 @@ class NDCApp extends React.Component {
             closePlanSim: () => this.setState({ planSimOpen: false, planSimMapOpen: false, planSmOrigSearch: '', planSmPropSearch: '', planSmOrigRoute: 'All', planSmPropRoute: 'All', planSmOrigLegendOpen: false, planSmPropLegendOpen: false }),
             planSimPlanName: plan.scCode + ' · ' + plan.scName,
             planSimOpen: !!st.planSimOpen, planSimRows,
-            planSimCards,
+            planSimCards, planSimVehCards,
             planSimRouteRows,
             planSimCpsHeadwind, planSimHeadwindPositive, planSimHeadwindLabel, planSimHeadwindColor, planSimHeadwindBg, planSimHeadwindBd,
             planSimSubtitle: nFlagged + ' Needs Change row' + (nFlagged === 1 ? '' : 's') + ' · indicative, not a re-solve',
@@ -6525,6 +6769,27 @@ class NDCApp extends React.Component {
       const opsMergedFbTop = this.effectiveFbFor(plan);
       const opsHypTop = this.computeHypotheticalPlan(plan, opsMergedFbTop);
       const opsNcRowsTop = plan.rows.filter((r, i) => dec[i] === 'Needs Change' || r.ops === 'Needs Change');
+      // Plan Inputs (2026-07-16) — same basis as the Planner side: vehicle mix is tallied off
+      // plan.rows directly, never merged with in-progress feedback, so it's the original plan
+      // pre-Finalise and the final aligned mix post-Finalise automatically.
+      const inputNodesO = plan.rows.reduce((a, r2) => a + (r2.dcs ? r2.dcs.length : 0), 0);
+      const inputVolumeO = plan.rows.reduce((a, r2) => a + (r2.volume || 0), 0);
+      const inputScCoordsO = plan.rows[0] ? (Number(plan.rows[0].oLat).toFixed(4) + ', ' + Number(plan.rows[0].oLng).toFixed(4)) : '—';
+      const inputVehMixO = {}; plan.rows.forEach(r2 => { inputVehMixO[r2.veh] = (inputVehMixO[r2.veh] || 0) + 1; });
+      const inputVehArrO = Object.keys(inputVehMixO).map(k => ({ veh: k, n: inputVehMixO[k] }));
+      // Validation Flags (2026-07-16) — structural errors/warnings off the same opsHypTop everything
+      // else in this view already reads (submitted + in-progress feedback).
+      const opsPlanFlags = []
+        .concat(opsHypTop.errors.map(e => ({ sevLabel: 'Error', sevBg: '#D14B4B', sevFg: '#fff', t: e.t })))
+        .concat(opsHypTop.warnings.map(w => ({ sevLabel: 'Warning', sevBg: '#FBF1DF', sevFg: '#C77B00', t: w.t })));
+      // 2026-07-15 — scoped exception to "no live reordering during review": when a DC leaves/joins a
+      // route, the OTHER DCs left behind get silently renumbered by the recompute engine, but that
+      // ripple was never shown until Finalise. This builds a routeCode -> {dcCode: newTp} lookup from
+      // the same opsHypTop the rest of this view already reads, purely to DISPLAY the ripple inline
+      // (strikethrough old TP -> new TP) — it does not reorder rows or touch distances early; Finalise
+      // is still the only place the reorder actually commits.
+      const hypTpByRoute = {};
+      (opsHypTop.routes || []).forEach(rt => { const m = {}; rt.dcCodes.forEach((code, i) => { m[code] = rt.tpOrder[i]; }); hypTpByRoute[rt.routeCode] = m; });
       const rows = plan.rows.map((r, idx) => { const dv = dec[idx] || 'Pending'; const op = OP[dv];
         // §10 O2 — show a co-reviewer's already-proposed change to THIS (second) reviewer, so opening
         // the plan never shows a blank slate. Prefer live submitted feedback, else the seeded row.
@@ -6580,7 +6845,12 @@ class NDCApp extends React.Component {
           const editable = !planLocked;
           const hasRouteCodeChange = !!ov.routeCode, hasTpChange = ov.tp != null && ov.tp !== '', hasDistChange = ov.distance != null && ov.distance !== '';
           const hasLatLngChange = (ov.lat != null && ov.lat !== '') || (ov.lng != null && ov.lng !== '');
+          // ripple only applies to a DC that's staying put (no explicit route/tp override of its own) —
+          // an explicit hasTpChange/hasRouteCodeChange already shows its own diff, no need to double up.
+          const rippleTp = (!hasTpChange && !hasRouteCodeChange) ? (hypTpByRoute[r.routeCode] || {})[dc.code] : null;
+          const hasTpRipple = rippleTp != null && rippleTp !== dc.tpOrder;
           oDcViewRows.push({
+            hasTpRipple, rippleTp,
             lmdc: dc.code, designVol: fmtInt(dc.vol),
             lat: dc.lat, lng: dc.lng, latProposed: hasLatLngChange && ov.lat != null && ov.lat !== '' ? ov.lat : '', lngProposed: hasLatLngChange && ov.lng != null && ov.lng !== '' ? ov.lng : '', hasLatLngChange,
             routeCode: r.routeCode, routeCodeProposed: hasRouteCodeChange ? ov.routeCode : '', hasRouteCodeChange,
@@ -6629,6 +6899,8 @@ class NDCApp extends React.Component {
         planLocked, opsAck: planStatus === 'Acknowledged', opsFinal: planStatus === 'Finalised',
         hasSubmissionGap: (planStatus === 'Acknowledged' || planStatus === 'Finalised') && (plan.submittedReviewers || []).length < (plan.reviewerNames || []).length,
         submissionGapMsg: 'Frozen with ' + ((plan.reviewerNames || []).length - (plan.submittedReviewers || []).length) + ' of ' + (plan.reviewerNames || []).length + ' reviewers not having submitted feedback.',
+        inputNodes: fmtInt(inputNodesO), inputVolume: fmtInt(inputVolumeO), inputScCoords: inputScCoordsO, inputVehArr: inputVehArrO, inputVehTotal: plan.rows.length,
+        planFlags: opsPlanFlags, hasPlanFlags: opsPlanFlags.length > 0, noPlanFlags: opsPlanFlags.length === 0,
         detailOpen: !!st.opsDetailOpen, showCard: !st.opsDetailOpen,
         openDetail: () => this.setState({ opsDetailOpen: true }), backToCards: () => this.setState({ opsDetailOpen: false }),
         onDownloadCsv: () => { const head = 'Route,Vehicle,Touch Points,Round-Trip Dist (km),Breakdown TAT (h),Out Cutoff,Volume,Utilisation,CPS\n'; const body = plan.rows.map(r => [r.routeCode, r.veh, r.tp, r.rtDist, r.breakdownTat, r.outCutoff, r.volume, Math.round(r.util * 100) + '%', r.cps.toFixed(2)].join(',')).join('\n'); this.downloadText(plan.scCode + '-plan.csv', head + body); this.showToast('CSV downloaded \u00b7 ' + plan.rows.length + ' routes', '#128A3E'); },
@@ -6868,7 +7140,18 @@ class NDCApp extends React.Component {
           mkCard('SC CPS (₹)', +opsHyp.originalScCPS.toFixed(2), +opsHyp.scCPS.toFixed(2), v => '₹' + v.toFixed(2)),
         ];
       })();
-      // Section 2: per-route reference — kept as the ORIGINAL structure with a status indicator only.
+      // Vehicle mix comparison (2026-07-16) — mirrors the Planner side: original tally from
+      // opsPlan.rows as committed vs. suggested tally from the same opsHyp used just above.
+      const opsSimVehCards = (() => {
+        if (!canOpsSim || !opsPlan) return [];
+        const origMix = {}; opsPlan.rows.forEach(rr5 => { origMix[rr5.veh] = (origMix[rr5.veh] || 0) + 1; });
+        const suggMix = {}; (opsHyp.routes || []).forEach(rt => { suggMix[rt.vehName] = (suggMix[rt.vehName] || 0) + 1; });
+        const allTypes = Array.from(new Set([...Object.keys(origMix), ...Object.keys(suggMix)]));
+        return allTypes.map(veh => {
+          const orig = origMix[veh] || 0, sugg = suggMix[veh] || 0, changed = orig !== sugg;
+          return { veh, orig, sugg, changed, suggFg: changed ? '#C77B00' : '#5A5E66', cardBd: changed ? '2px solid #C77B00' : '1px solid #E6EBF2' };
+        });
+      })();
       // A true per-route proposed-CPS column isn't shown here because routes can split/merge under
       // feedback, so "this original route's new CPS" isn't always a well-defined 1:1 mapping — the
       // SC-level card above is the real number; this table is just "what's touched, and why".
@@ -6913,7 +7196,7 @@ class NDCApp extends React.Component {
       opsSimPlanName: opsPlan ? (opsPlan.scCode + ' · ' + opsPlan.scName) : '',
       opsSimOpen: st.opsSimOpen,
       opsSimRows,
-      opsSimCards,
+      opsSimCards, opsSimVehCards,
       opsSimRouteRows,
       opsSimCpsHeadwind, opsSimHeadwindPositive, opsSimHeadwindLabel, opsSimHeadwindColor, opsSimHeadwindBg, opsSimHeadwindBd,
       opsSimSubtitle: opsNcRows.length + ' Needs Change row' + (opsNcRows.length === 1 ? '' : 's') + ' · indicative, not a re-solve',
@@ -7871,12 +8154,20 @@ class NDCApp extends React.Component {
     if (opsActingPool.indexOf(this.opsPersonaName()) < 0) opsActingPool.unshift(this.opsPersonaName());
     const opsActingCurrent = this.opsPersonaName();
 
+    // 2026-07-16 — real identity, from the logged-in Supabase user + profile, replacing the
+    // hardcoded "Pranita Sapkal"/opsPersonaName() stand-ins. Falls back to the email if the
+    // profile hasn't loaded yet (brief flash on first render right after sign-in).
+    const authProfile = st.authProfile;
+    const realDisplayName = (authProfile && authProfile.display_name) || (st.authUser && st.authUser.email) || '—';
+    const realRoleLabel = planner ? 'Planner' : 'Ops Lead';
+    const realInitials = realDisplayName.split(/[\s@.]+/).filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '—';
     return {
       contentPad: '28px 34px',
       isPlanner: planner, isOps: !planner,
-      personaName: planner ? 'Pranita Sapkal' : this.opsPersonaName(),
-      personaRole: planner ? 'Central Network Planner' : 'Ops Lead · South',
-      personaInitials: planner ? 'PS' : this.opsPersonaName().split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase(),
+      personaName: realDisplayName,
+      personaRole: realRoleLabel,
+      personaInitials: realInitials,
+      onSignOut: () => this.signOut(),
       view: st.view, isCommand: st.view === 'command', isInputs: st.view === 'inputs', isStub: !(st.view === 'command' || st.view === 'inputs' || st.view === 'creation' || st.view === 'review' || st.view === 'align' || st.view === 'map' || st.view === 'finalise' || st.view === 'cyclesummary'),
       ...this.creationVals(),
       ...this.reviewVals(),
@@ -7906,8 +8197,8 @@ class NDCApp extends React.Component {
       freezeMiniText: daysToFreeze + 'd to freeze · ' + health.label, freezeMiniBg: health.miniBg, freezeMiniFg: health.miniFg,
       plannerSegBg: planner ? '#fff' : 'transparent', plannerSegFg: planner ? '#003F98' : '#5A5E66',
       opsSegBg: !planner ? '#fff' : 'transparent', opsSegFg: !planner ? '#003F98' : '#5A5E66',
-      showPersonaToggle: st.view === 'align',
-      showOpsActingSwitcher: !planner && st.view === 'align',
+      showPersonaToggle: false, // 2026-07-16 — retired: identity now comes from the real login, not a toggle
+      showOpsActingSwitcher: false, // 2026-07-16 — retired: a logged-in Ops Lead reviews as themselves
       opsActingCurrent, opsActingOptions: opsActingPool,
       onOpsActingChange: (e) => this.switchOpsPersona(e.target.value, st.opsPlanId),
       setPlanner: () => this.setPersona('planner'), setOps: () => this.setPersona('ops'),
@@ -7944,6 +8235,7 @@ class NDCApp extends React.Component {
 
   render() {
     if (this.standaloneMapSc) return this.renderStandaloneMap();
+    if (!this.state.authUser) return this.renderLogin();
     return View(this.renderVals(), this);
   }
 
