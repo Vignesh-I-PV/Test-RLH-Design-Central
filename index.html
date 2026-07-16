@@ -26,6 +26,10 @@
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<!-- Supabase JS client — auth (magic-link) + the plans/plan_reviewers/plan_row_feedback/
+     plan_reviewer_status tables. Anon key below is safe to expose client-side; RLS policies
+     (see supabase_*.sql in this repo's history) are what actually enforce access, not this key. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
