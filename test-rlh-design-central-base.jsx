@@ -971,6 +971,13 @@ function View(B, self) {
 </div>
 </React.Fragment>))}
 </div>
+<div style={css(`margin-top:20px;`)}>
+<div style={css(`font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:8px;`)}>Default Reviewers <span style={css(`font-weight:400; color:#8E96A3; letter-spacing:0; text-transform:none;`)}>— real Ops Leads pre-selected when a plan for this SC is pushed</span></div>
+<div style={css(`display:flex; flex-wrap:wrap; gap:7px;`)}>
+{(addScReviewerChips || []).map((r, __i169) => (<React.Fragment key={__i169}><button onClick={r.onToggle} style={css(`display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid ${r.bd}; background:${r.bg}; color:${r.fg}; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:999px; cursor:pointer;`)}>{r.name}</button></React.Fragment>))}
+{(!addScHasReviewerOptions) ? (<><span style={css(`font-size:12px; color:#8E96A3;`)}>No Ops Leads registered yet — invite them in Supabase, then they'll show up here.</span></>) : null}
+</div>
+</div>
 </div>
 <div style={css(`display:flex; align-items:center; justify-content:flex-end; gap:12px; padding:16px 24px; border-top:1px solid #E6EBF2; background:#FAFBFD; position:sticky; bottom:0;`)}>
 <button onClick={closeAddSc} style={css(`height:38px; padding:0 18px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)}>Cancel</button>
@@ -1809,15 +1816,11 @@ function View(B, self) {
 <button onClick={closePush} aria-label={"Close dialog"} style={css(`border:none; background:transparent; cursor:pointer; padding:6px; color:#5A5E66; display:flex;`)}><svg aria-hidden={"true"} width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M6 6l12 12M18 6L6 18"} strokeLinecap={"round"} /></svg></button>
 </div>
 <div style={css(`padding:20px 22px;`)}>
-<div style={css(`font-size:12px; font-weight:700; color:#14171F; margin-bottom:9px;`)}>SC POCs <span style={css(`font-weight:500; color:#5A5E66;`)}>— from SC Master</span></div>
-<div style={css(`display:flex; flex-wrap:wrap; gap:7px; margin-bottom:20px;`)}>
-{(pocChips || []).map((p, __i62) => (<React.Fragment key={__i62}><button onClick={p.onToggle} style={css(`display:inline-flex; align-items:center; gap:6px; padding:7px 13px; border:1px solid ${p.bd}; background:${p.bg}; color:${p.fg}; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:999px; cursor:pointer;`)}>{p.name}</button></React.Fragment>))}
-</div>
-<div style={css(`font-size:12px; font-weight:700; color:#14171F; margin-bottom:9px;`)}>Add a reviewer manually</div>
+<div style={css(`font-size:12px; font-weight:700; color:#14171F; margin-bottom:9px;`)}>Add a POC</div>
 <div style={css(`display:flex; gap:8px; margin-bottom:20px;`)}>
-<input value={pushName} onInput={onPushName} placeholder={"Name"} style={css(`flex:1; height:38px; padding:0 12px; border:1px solid #E6EBF2; border-radius:8px; font-family:inherit; font-size:12.5px; color:#14171F; outline:none;`)} />
-<input value={pushEmail} onInput={onPushEmail} placeholder={"email@valmo.com"} style={css(`flex:1.2; height:38px; padding:0 12px; border:1px solid #E6EBF2; border-radius:8px; font-family:inherit; font-size:12.5px; color:#14171F; outline:none;`)} />
-<button onClick={addManualReviewer} style={css(`height:38px; padding:0 15px; border:1px solid #003F98; background:#fff; color:#003F98; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer; flex-shrink:0;`)} onMouseEnter={(e) => hoverOn(e, `background:#EAEEFB;`)} onMouseLeave={(e) => hoverOff(e, `height:38px; padding:0 15px; border:1px solid #003F98; background:#fff; color:#003F98; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer; flex-shrink:0;`, `background:#EAEEFB;`)}>Add</button>
+<select value={pushAddSelect} onChange={onPushAddSelect} style={css(`flex:1; height:38px; padding:0 10px; border:1px solid #E6EBF2; border-radius:8px; font-family:inherit; font-size:12.5px; color:#14171F; background:#fff; outline:none; cursor:pointer;`)}>
+{(pushAddOptions || []).map((o, __i162) => (<React.Fragment key={__i162}><option value={o.value}>{o.label}</option></React.Fragment>))}
+</select>
 </div>
 <div style={css(`font-size:12px; font-weight:700; color:#14171F; margin-bottom:9px;`)}>Reviewers <span style={css(`color:#003F98;`)}>({pushCount})</span></div>
 <div style={css(`display:flex; flex-direction:column; gap:7px;`)}>
@@ -1825,10 +1828,10 @@ function View(B, self) {
 <div style={css(`display:flex; align-items:center; gap:11px; padding:9px 13px; background:#FAFBFD; border:1px solid #EEF1F6; border-radius:8px;`)}>
 <div style={css(`width:30px; height:30px; border-radius:50%; background:#EAEEFB; color:#003F98; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; overflow:hidden;`)}>{r.initials}</div>
 <div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:12.5px; font-weight:600; color:#14171F;`)}>{r.name}</div><div style={css(`font-size:11px; color:#5A5E66;`)}>{r.email}</div></div>
-{(r.isPoc) ? (<><span style={css(`padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; background:#EAEEFB; color:#2F4FC6;`)}>SC POC</span></>) : null}
 <button onClick={r.onRemove} aria-label={"Remove reviewer"} style={css(`border:none; background:transparent; cursor:pointer; padding:4px; color:#5A5E66; display:flex;`)}><svg aria-hidden={"true"} width={"15"} height={"15"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M6 6l12 12M18 6L6 18"} strokeLinecap={"round"} /></svg></button>
 </div>
 </React.Fragment>))}
+{(reviewersList || []).length === 0 ? (<><div style={css(`padding:14px; text-align:center; font-size:12px; color:#8E96A3; border:1px dashed #E6EBF2; border-radius:8px;`)}>No reviewers yet — this SC has no default reviewers on file. Add one above.</div></>) : null}
 </div>
 </div>
 <div style={css(`display:flex; align-items:center; gap:12px; padding:16px 22px; border-top:1px solid #E6EBF2; background:#FAFBFD;`)}>
@@ -2081,7 +2084,7 @@ function View(B, self) {
 <div style={css(`display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-top:12px;`)}>
 {(aSel.canPlanSim) ? (<><button onClick={aSel.onPlanSim} style={css(`display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 13px; border:1px solid #2F4FC6; background:${aSel.planSimBtnBg}; color:${aSel.planSimBtnFg}; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer;`)}><svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M13 2L3 14h9l-1 8 10-12h-9l1-8z"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>{aSel.planSimBtnLabel}</button></>) : null}
 {(aSel.canAck) ? (<><button onClick={aSel.onAck} style={css(`display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 13px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `background:#003F98;`, `background:#00337D;`)}><svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.9"}><path d={"M7 11V8a5 5 0 0110 0v3M5.5 11h13v9.5h-13z"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Acknowledge & freeze</button></>) : null}
-{(aSel.isAck) ? (<><button onClick={aSel.onFin} title={aSel.finBlocked ? 'Decide all flagged rows first' : 'Finalise this plan'} style={css(`display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 13px; border:none; background:${aSel.finBtnBg}; color:${aSel.finBtnFg}; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:${aSel.finCursor};`)}><svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.9"}><path d={"M5 21V4M5 4h11l-2 4 2 4H5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Finalise plan</button></>) : null}
+{(aSel.isAck) ? (<><button onClick={aSel.onFin} title={aSel.finBlocked ? 'Decide all flagged rows first' : 'Finalise this plan'} style={css(`display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 13px; border:none; background:${aSel.finBtnBg}; color:${aSel.finBtnFg}; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:${aSel.finCursor};`)}><svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.9"}><path d={"M5 21V4M5 4h11l-2 4 2 4H5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Finalise plan</button><button onClick={aSel.onUnfreeze} title={"Reopen this plan for Ops Lead editing"} style={css(`display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border:1px solid #D8DEE8; background:#fff; color:#5A5E66; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer;`)}><svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.9"}><path d={"M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Unfreeze</button></>) : null}
 </div>
 </>) : null}
 </div>
@@ -2330,6 +2333,7 @@ function View(B, self) {
 {/* Finalise plan */}
 {(aSel.isAck) ? (<>
 <button onClick={aSel.onFin} title={aSel.finBlocked ? 'Decide all flagged rows first' : 'Finalise this plan'} style={css(`display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 18px; border:none; background:${aSel.finBtnBg}; color:${aSel.finBtnFg}; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:${aSel.finCursor};`)}><svg width={"15"} height={"15"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.9"}><path d={"M5 21V4M5 4h11l-2 4 2 4H5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Finalise plan</button>
+<button onClick={aSel.onUnfreeze} title={"Reopen this plan for Ops Lead editing"} style={css(`display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 16px; border:1px solid #D8DEE8; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#C77B00; color:#C77B00;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:8px; height:38px; padding:0 16px; border:1px solid #D8DEE8; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`, `border-color:#C77B00; color:#C77B00;`)}><svg width={"15"} height={"15"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.9"}><path d={"M3 12a9 9 0 0115-6.7L21 8M21 3v5h-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Unfreeze</button>
 </>) : null}
 </div>
 </>) : null}
@@ -2570,6 +2574,21 @@ function View(B, self) {
 <div style={css(`display:flex; gap:10px; justify-content:flex-end; padding:22px 24px;`)}>
 <button onClick={closeAck} style={css(`height:38px; padding:0 16px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)}>Cancel</button>
 <button onClick={confirmAck} style={css(`height:38px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `height:38px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#00337D;`)}>Acknowledge & freeze</button>
+</div>
+</div>
+</div>
+</>) : null}
+{/* UNFREEZE MODAL — reopens Ops Lead editing on an Acknowledged plan; resets the Planner's own Accept/Reject decisions. */}
+{(unfreezeOpen) ? (<>
+<div style={css(`position:fixed; inset:0; z-index:95; background:rgba(11,20,48,0.45); display:flex; align-items:center; justify-content:center; padding:24px;`)}>
+<div style={css(`width:480px; max-width:100%; background:#fff; border-radius:15px; box-shadow:0 24px 60px rgba(0,0,0,0.3); overflow:hidden;`)}>
+<div style={css(`padding:24px 24px 0; display:flex; gap:14px;`)}>
+<div style={css(`width:44px; height:44px; border-radius:8px; background:#FBF1DF; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width={"22"} height={"22"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#C77B00"} strokeWidth={"1.8"}><path d={"M12 8v5m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"} strokeLinecap={"round"} /></svg></div>
+<div><div style={css(`font-size:16px; font-weight:700; color:#14171F;`)}>Unfreeze {unfreezePlanName}?</div><div style={css(`font-size:13px; color:#5A5E66; margin-top:8px; line-height:1.55;`)}>This reopens the plan for <strong>{unfreezeReviewers}</strong> to edit their feedback again. <strong style={css(`color:#C77B00;`)}>Any changes you've already accepted or rejected on this plan will be reset</strong> — you'll need to decide them again once feedback settles. Submitted feedback itself is not lost.</div></div>
+</div>
+<div style={css(`display:flex; gap:10px; justify-content:flex-end; padding:22px 24px;`)}>
+<button onClick={closeUnfreeze} style={css(`height:38px; padding:0 16px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)}>Cancel</button>
+<button onClick={confirmUnfreeze} style={css(`height:38px; padding:0 18px; border:none; background:#C77B00; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#A66300;`)} onMouseLeave={(e) => hoverOff(e, `height:38px; padding:0 18px; border:none; background:#C77B00; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#A66300;`)}>Unfreeze plan</button>
 </div>
 </div>
 </div>
@@ -3830,6 +3849,7 @@ class NDCApp extends React.Component {
       alignStatus: {}, remindedPlans: {},
       simRow: null, simMapRow: null,
       ackOpen: false, ackPlanId: null,
+      unfreezeOpen: false, unfreezePlanId: null,
       finOpen: false, finPlanId: null, finDirectOpen: false, finDirectSCcode: null,
       opsPlanId: null, opsPage: 0, opsSection: 'summary', opsRowDec: {}, opsRowFb: {}, opsTpOrder: {}, ncOpen: false, ncDecision: 'Needs Change', ncRow: null, ncCells: {}, ncFlags: {}, ncDcCells: {}, ncRemark: '', opsSubmitted: {},
       alignExpandedRow: {}, opsExpandedRow: {},
@@ -3890,7 +3910,10 @@ class NDCApp extends React.Component {
   setPersona(p) { this.setState({ persona: p, view: p === 'ops' ? 'align' : 'inputs' }); }
   // Current "acting" Ops Lead identity — defaults to Rahul Sharma (the original single hardcoded
   // persona) so nothing changes until the person deliberately switches who they're simulating.
-  opsPersonaName() { return this.state.opsActingPersona || 'Rahul Sharma'; }
+  // 2026-07-16 — real identity: returns the logged-in person's display name (falls back to their
+  // email if the profile row hasn't loaded yet). Replaces the old switchable/hardcoded persona.
+  opsPersonaName() { const p = this.state.authProfile; return (p && p.display_name) || (this.state.authUser && this.state.authUser.email) || 'Unknown reviewer'; }
+  plannerPersonaName() { const p = this.state.authProfile; return (p && p.display_name) || (this.state.authUser && this.state.authUser.email) || 'Unknown planner'; }
   switchOpsPersona(name, planId) {
     // Clear any not-yet-submitted draft on the currently open plan when switching identity, so an
     // in-progress edit made "as" one reviewer doesn't silently get submitted under a different name.
@@ -3964,7 +3987,14 @@ class NDCApp extends React.Component {
     const contacts = [['opsZh', 'SC Ops ZH'], ['lhOpsZh', 'SC-LH Ops ZH'], ['opsCh', 'SC Ops CH'], ['lhOpsCh', 'SC-LH Ops CH'], ['opsAm1', 'SC Ops AM-1'], ['lhOpsAm1', 'SC-LH Ops AM-1'], ['opsAm2', 'SC Ops AM-2'], ['lhOpsAm2', 'SC-LH Ops AM-2']];
     const addScContacts = contacts.map(c => ({ key: c[0], label: c[1], value: f[c[0]] || '', ph: 'name@meesho.com', onInput: set(c[0]) }));
     const editing = !!st.addScEditCode;
-    return { addScOpen: !!st.addScOpen, addScMain: addScMain, addScContacts: addScContacts, addScTitle: editing ? ('Edit Sort Centre · ' + st.addScEditCode) : 'Add Sort Centre', addScSubmitLabel: editing ? 'Save changes' : 'Add SC', closeAddSc: () => this.setState({ addScOpen: false, addScEditCode: null }), submitAddSc: () => this.submitAddSc() };
+    const directory = st.opsLeadDirectory || [];
+    const selectedIds = st.addScReviewerIds || [];
+    const addScReviewerChips = directory.map(p => {
+      const on = selectedIds.indexOf(p.id) >= 0;
+      const name = p.display_name || p.email;
+      return { id: p.id, name, on, bg: on ? '#003F98' : '#fff', fg: on ? '#fff' : '#5A5E66', bd: on ? '#003F98' : '#C3C9D4', onToggle: () => this.toggleAddScReviewer(p.id) };
+    });
+    return { addScOpen: !!st.addScOpen, addScMain: addScMain, addScContacts: addScContacts, addScReviewerChips, addScHasReviewerOptions: directory.length > 0, addScTitle: editing ? ('Edit Sort Centre · ' + st.addScEditCode) : 'Add Sort Centre', addScSubmitLabel: editing ? 'Save changes' : 'Add SC', closeAddSc: () => this.setState({ addScOpen: false, addScEditCode: null }), submitAddSc: () => this.submitAddSc() };
   }
   // C10 — open the SC editor pre-filled from an existing SC (real inline-equivalent edit, not a dead control).
   openScEdit(code) {
@@ -3972,7 +4002,9 @@ class NDCApp extends React.Component {
     if (!sc) { this.comingSoon('Edit SC'); return; }
     const pl = sc.pocs || [];
     const form = { code: sc.code, name: sc.name, city: (sc.name || '') + (sc.zone ? ', ' + sc.zone : ''), type: 'LMSC', zone: sc.zone || 'South', volCap: String(sc.volCap || ''), sortCap: String(sc.sortCap || ''), nlhDocks: String(sc.docks || ''), rlhDocks: '0', localTp: '5', nonLocalTp: '3', open: '06:00', close: '22:00', opsZh: pl[0] || '', opsCh: pl[1] || '', opsAm1: pl[2] || '', opsAm2: pl[3] || '' };
-    this.setState({ addScOpen: true, addScEditCode: code, addScForm: form, pocOpenRow: null });
+    this.setState({ addScOpen: true, addScEditCode: code, addScForm: form, pocOpenRow: null, addScReviewerIds: [] });
+    // Real default reviewers (sc_reviewers), separate from the decorative contact-role fields above.
+    this.loadScReviewers(code).then(reviewers => { if (this.state.addScEditCode === code) this.setState({ addScReviewerIds: reviewers.map(r => r.id) }); });
   }
   // C12 — functional INLINE edit for SC Vehicle Availability: per-field overlay stored as
   // { cnt, tp, zf } objects keyed by "scCode|vehType". setAvailField is the generic writer;
@@ -3994,6 +4026,7 @@ class NDCApp extends React.Component {
     if (!code) { this.showToast('SC Code is required', '#C77B00'); return; }
     const num = (x) => { const n = parseInt(String(x == null ? '' : x).replace(/[^0-9]/g, ''), 10); return isNaN(n) ? 0 : n; };
     const pocs = ['opsZh', 'opsCh', 'opsAm1', 'opsAm2'].map(k => (f[k] || '').trim()).filter(Boolean);
+    const reviewerIds = st.addScReviewerIds || [];
     if (st.addScEditCode) {
       // Edit mode — apply changes to a session-edited overlay so the existing SC row reflects them.
       const edits = Object.assign({}, st.scEdits || {});
@@ -4001,13 +4034,16 @@ class NDCApp extends React.Component {
       // also patch any session-added SC in place
       const addedScs = (st.addedScs || []).map(s => s.code === st.addScEditCode ? Object.assign({}, s, edits[st.addScEditCode]) : s);
       this.setState({ scEdits: edits, addedScs: addedScs, addScOpen: false, addScEditCode: null, addScForm: {} });
+      this.saveScReviewers(st.addScEditCode, reviewerIds);
       this.showToast('Sort Centre ' + st.addScEditCode + ' updated', '#128A3E');
       return;
     }
     const sc = { code: code, name: (f.name || '').trim() || code, cityCode: code.replace(/[^A-Z]/g, '').slice(0, 3) || code, zone: f.zone || 'South', dcCount: 0, volume: num(f.volCap), sortCap: num(f.sortCap), volCap: num(f.volCap), docks: num(f.nlhDocks) + num(f.rlhDocks), lat: 0, lng: 0, hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0, pocs: pocs.length ? pocs : ['—'] };
     this.setState({ addedScs: [sc].concat(st.addedScs || []), addScOpen: false, addScForm: {}, inputsZone: 'All', inputsSearch: '' });
+    this.saveScReviewers(code, reviewerIds);
     this.showToast('Sort Centre ' + code + ' added to the master', '#128A3E');
   }
+  toggleAddScReviewer(id) { const cur = (this.state.addScReviewerIds || []).slice(); const i = cur.indexOf(id); i >= 0 ? cur.splice(i, 1) : cur.push(id); this.setState({ addScReviewerIds: cur }); }
   submitAddVeh() {
     const st = this.state; const f = st.addVehForm || {};
     const name = (f.vtype || '').trim();
@@ -4121,8 +4157,188 @@ class NDCApp extends React.Component {
           persona: data && data.role === 'ops_lead' ? 'ops' : 'planner',
           view: data && data.role === 'ops_lead' ? 'align' : 'inputs',
         });
+        this.loadOpsLeadDirectory();
+        this.loadPlansFromSupabase();
       });
   }
+
+  // ===== Supabase data layer for Ops Alignment (2026-07-16) =====================================
+  // Everything below reads/writes the real tables (plans / plan_reviewers / plan_row_feedback /
+  // plan_reviewer_status / sc_reviewers) set up alongside this repo. Local plan.rows/.metrics stay
+  // exactly the shape they always were — only the OUTER wrapper (status, who's tagged, the latest
+  // per-row feedback overlay, who's submitted) is now Supabase-backed instead of buildSeed() demo data.
+
+  // Every real Ops Lead in the system — powers both the Push modal's "add a reviewer" picker and
+  // SC Master's default-reviewer picker. Loaded once after login; small enough not to need paging.
+  loadOpsLeadDirectory() {
+    if (!supabase) return;
+    supabase.from('profiles').select('id, display_name, email').eq('role', 'ops_lead').order('display_name')
+      .then(({ data, error }) => {
+        if (error) { console.error('Failed to load Ops Lead directory', error); return; }
+        this.setState({ opsLeadDirectory: data || [] });
+      });
+  }
+
+  // Returns a Promise of this SC's default reviewers, as [{id, display_name, email}] — used to
+  // pre-populate the Push modal's chips.
+  loadScReviewers(scCode) {
+    if (!supabase) return Promise.resolve([]);
+    return supabase.from('sc_reviewers').select('reviewer_id, profiles(id, display_name, email)').eq('sc_code', scCode)
+      .then(({ data, error }) => { if (error) { console.error('Failed to load SC reviewers', error); return []; } return (data || []).map(r => r.profiles).filter(Boolean); });
+  }
+
+  // Diffs the given reviewer id list against what's currently stored for this SC and applies just
+  // the additions/removals — called from SC Master's "Default Reviewers" picker, not from the Push
+  // modal (per decision: adding someone in the Push modal tags that one plan only, doesn't change
+  // the SC's standing default list).
+  saveScReviewers(scCode, reviewerIds) {
+    if (!supabase) return Promise.resolve();
+    return supabase.from('sc_reviewers').select('reviewer_id').eq('sc_code', scCode).then(({ data }) => {
+      const current = new Set((data || []).map(r => r.reviewer_id));
+      const next = new Set(reviewerIds);
+      const toAdd = reviewerIds.filter(id => !current.has(id));
+      const toRemove = [...current].filter(id => !next.has(id));
+      const ops = [];
+      if (toAdd.length) ops.push(supabase.from('sc_reviewers').insert(toAdd.map(id => ({ sc_code: scCode, reviewer_id: id }))));
+      toRemove.forEach(id => ops.push(supabase.from('sc_reviewers').delete().eq('sc_code', scCode).eq('reviewer_id', id)));
+      return Promise.all(ops);
+    });
+  }
+
+  // Full plan list for the logged-in user, reconstructed into the exact shape the rest of the app
+  // already expects (rows/metrics untouched; reviewerNames/submittedReviewers/status/row-feedback
+  // now come from the real tables instead of buildSeed()). RLS already scopes this correctly:
+  // a planner's query returns every plan, an Ops Lead's returns only plans they're tagged on.
+  loadPlansFromSupabase() {
+    if (!supabase || !this.state.authUser) return;
+    Promise.all([
+      supabase.from('plans').select('*'),
+      supabase.from('plan_reviewers').select('plan_id, reviewer_id, profiles(id, display_name, email)'),
+      supabase.from('plan_row_feedback').select('*'),
+      supabase.from('plan_reviewer_status').select('*'),
+    ]).then(([plansRes, reviewersRes, feedbackRes, statusRes]) => {
+      if (plansRes.error) { console.error('Failed to load plans', plansRes.error); return; }
+      const reviewersByPlan = {}, feedbackByPlan = {}, statusByPlan = {};
+      (reviewersRes.data || []).forEach(r => { (reviewersByPlan[r.plan_id] = reviewersByPlan[r.plan_id] || []).push(r); });
+      (feedbackRes.data || []).forEach(f => { (feedbackByPlan[f.plan_id] = feedbackByPlan[f.plan_id] || []).push(f); });
+      (statusRes.data || []).forEach(s => { (statusByPlan[s.plan_id] = statusByPlan[s.plan_id] || []).push(s); });
+      const STATUS_MAP = { ingested: 'Pushed', pending: 'Pushed', acknowledged: 'Acknowledged', finalized: 'Finalised' };
+      const plans = (plansRes.data || []).map(row => {
+        const planObj = Object.assign({}, row.data, { id: row.id, remote: true });
+        const revRows = reviewersByPlan[row.id] || [];
+        const fbRows = feedbackByPlan[row.id] || [];
+        const statusRows = statusByPlan[row.id] || [];
+        planObj.reviewerNames = revRows.map(r => r.profiles && (r.profiles.display_name || r.profiles.email)).filter(Boolean);
+        planObj.reviewerIds = revRows.map(r => r.reviewer_id);
+        planObj.submittedReviewers = statusRows.filter(s => s.submitted).map(s => {
+          const match = revRows.find(r => r.reviewer_id === s.reviewer_id);
+          return (match && match.profiles && (match.profiles.display_name || match.profiles.email)) || s.reviewer_id;
+        });
+        // overlay each row's LATEST feedback (row_id = routeCode, latest-write-wins already enforced
+        // by plan_row_feedback being a single row per (plan_id, row_id)) onto the planner-owned base rows.
+        const fbByRoute = {}; fbRows.forEach(f => { fbByRoute[f.row_id] = f; });
+        planObj.rows = (planObj.rows || []).map(r => {
+          const fb = fbByRoute[r.routeCode];
+          if (!fb) return r;
+          return Object.assign({}, r, { ops: 'Needs Change', fb: fb.feedback });
+        });
+        planObj.status = (row.status === 'pending' && (planObj.submittedReviewers || []).length > 0) ? 'In Alignment' : (STATUS_MAP[row.status] || 'Pushed');
+        return planObj;
+      });
+      this.setState(s => ({ data: Object.assign({}, s.data, { plans }) }));
+    });
+  }
+
+  // Pushes a brand-new plan: inserts the planner-owned base structure (rows/metrics/hw/zone/etc,
+  // everything reviewer- and status-related stripped out since those live in their own tables) plus
+  // one plan_reviewers row per tagged Ops Lead. Scoped to first-push only — re-pushing an
+  // already-pushed plan to reset it back to 'pending' isn't wired yet (status can only change via
+  // the acknowledge/finalise/unfreeze functions), flagged as a follow-up if that's ever needed.
+  pushPlanToSupabase(plan, reviewerIds) {
+    if (!supabase || !this.state.authUser) return;
+    const uid = this.state.authUser.id;
+    const dataBlob = Object.assign({}, plan);
+    delete dataBlob.id; delete dataBlob.status; delete dataBlob.remote;
+    delete dataBlob.reviewerNames; delete dataBlob.reviewerIds; delete dataBlob.submittedReviewers;
+    supabase.from('plans').insert({ id: plan.id, created_by: uid, status: 'pending', data: dataBlob }).then(({ error }) => {
+      if (error) { this.showToast('Could not push to Supabase — ' + error.message, '#D14B4B'); return; }
+      const rows = (reviewerIds || []).map(rid => ({ plan_id: plan.id, reviewer_id: rid }));
+      const done = () => this.loadPlansFromSupabase();
+      if (!rows.length) { done(); return; }
+      supabase.from('plan_reviewers').insert(rows).then(({ error: e2 }) => {
+        if (e2) this.showToast('Plan pushed, but could not tag all reviewers — ' + e2.message, '#C77B00');
+        done();
+      });
+    });
+  }
+
+  // Writes this reviewer's latest per-row feedback + flips their submission status. feedbackByRoute
+  // is { [routeCode]: fbObject }, the SAME shape already used locally as row.fb.
+  submitFeedbackToSupabase(plan, feedbackByRoute) {
+    if (!supabase || !this.state.authUser) return;
+    const uid = this.state.authUser.id;
+    const rows = Object.keys(feedbackByRoute || {}).map(routeCode => ({ plan_id: plan.id, row_id: routeCode, feedback: feedbackByRoute[routeCode], updated_by: uid, updated_at: new Date().toISOString() }));
+    const writeFeedback = rows.length ? supabase.from('plan_row_feedback').upsert(rows) : Promise.resolve({ error: null });
+    writeFeedback.then(({ error }) => {
+      if (error) { this.showToast('Could not save feedback — ' + error.message, '#D14B4B'); return; }
+      supabase.from('plan_reviewer_status').upsert({ plan_id: plan.id, reviewer_id: uid, submitted: true, submitted_at: new Date().toISOString() }).then(({ error: e2 }) => {
+        if (e2) { this.showToast('Could not record submission — ' + e2.message, '#D14B4B'); return; }
+        this.loadPlansFromSupabase();
+      });
+    });
+  }
+
+  acknowledgePlanRemote(planId) {
+    if (!supabase) return;
+    supabase.rpc('acknowledge_plan', { p_plan_id: planId }).then(({ error }) => {
+      if (error) { this.showToast('Could not acknowledge — ' + error.message, '#D14B4B'); return; }
+      this.loadPlansFromSupabase();
+    });
+  }
+  finalisePlanRemote(planId) {
+    if (!supabase) return;
+    supabase.rpc('finalise_plan', { p_plan_id: planId }).then(({ error }) => {
+      if (error) { this.showToast('Could not finalise — ' + error.message, '#D14B4B'); return; }
+      this.loadPlansFromSupabase();
+    });
+  }
+  unfreezePlanRemote(planId) {
+    if (!supabase) return;
+    supabase.rpc('unfreeze_plan', { p_plan_id: planId }).then(({ error }) => {
+      if (error) { this.showToast('Could not unfreeze — ' + error.message, '#D14B4B'); return; }
+      this.loadPlansFromSupabase();
+    });
+  }
+
+  // ===== Plan file-naming / snapshot versioning (2026-07-16) ============================
+  // Stores exactly 3 named "files" per plan, per the agreed convention:
+  //   1. {name}            — ingested / pushed to alignment (same file, no new snapshot at push)
+  //   2. {name}_FEEDBACK   — Ops feedback submitted (re-submission overwrites this same file;
+  //                          Acknowledge does NOT create a new one, it just freezes this one)
+  //   3. {name}_FINALISED  — finalised by the planner
+  // Finalise Directly skips stage 2 — only {name} and {name}_FINALISED exist.
+  //
+  // Real ingestion isn't built yet, so {name} is generated here in the same shape a real ingested
+  // file would have (SCCODE_YYYYMMDD_HHMMSS, e.g. VWS_20260716_142026) at first-push time, and
+  // carried on the plan itself from then on — swap this for the real ingested filename once
+  // Design Ingestion is built; nothing else about this naming/versioning logic needs to change.
+  generateIngestFileName(scCode) {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return scCode + '_' + d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+  }
+
+  // Upserts one named snapshot — "unique (plan_id, file_name)" in the schema is what keeps this
+  // at exactly one row per stage (a resubmission overwrites the _FEEDBACK file, it doesn't add one).
+  saveSnapshot(planId, stage, fileName, planSnapshotData) {
+    if (!supabase || !this.state.authUser) return;
+    const uid = this.state.authUser.id;
+    supabase.from('plan_snapshots').upsert({ plan_id: planId, file_name: fileName, stage, data: planSnapshotData, created_by: uid }, { onConflict: 'plan_id,file_name' })
+      .then(({ error }) => { if (error) console.error('Failed to save snapshot ' + fileName, error); });
+  }
+  // ===== end plan file-naming / snapshot versioning =====
+
+  // ===== end Supabase data layer =====
 
   sendMagicLink() {
     if (!supabase) return;
@@ -5354,17 +5570,27 @@ class NDCApp extends React.Component {
     };
   }
 
-  openPush(code, runId) { const sc = this.state.data.scs.find(s => s.code === code); this.setState({ pushOpen: true, pushSCcode: code, pushRunId: runId || null, pushReviewers: [...new Set(sc.pocs)].slice(0, 2), pushName: '', pushEmail: '' }); }
+  openPush(code, runId) {
+    this.setState({ pushOpen: true, pushSCcode: code, pushRunId: runId || null, pushReviewers: [], pushAddSelect: '' });
+    // Pre-select this SC's default reviewers (sc_reviewers) — real people, not local demo POCs.
+    this.loadScReviewers(code).then(reviewers => {
+      if (this.state.pushSCcode === code) this.setState({ pushReviewers: reviewers.map(r => r.id) });
+    });
+  }
   closePush() { this.setState({ pushOpen: false }); }
-  togglePushReviewer(n) { const cur = this.state.pushReviewers.slice(); const i = cur.indexOf(n); i >= 0 ? cur.splice(i, 1) : cur.push(n); this.setState({ pushReviewers: cur }); }
-  addManualReviewer() { const n = (this.state.pushName || '').trim(); if (!n) return; const cur = this.state.pushReviewers.slice(); if (cur.indexOf(n) < 0) cur.push(n); this.setState({ pushReviewers: cur, pushName: '', pushEmail: '' }); }
-  removeReviewer(n) { this.setState({ pushReviewers: this.state.pushReviewers.filter(x => x !== n) }); }
+  togglePushReviewer(id) { const cur = this.state.pushReviewers.slice(); const i = cur.indexOf(id); i >= 0 ? cur.splice(i, 1) : cur.push(id); this.setState({ pushReviewers: cur }); }
+  // Adds one more reviewer picked from the full Ops Lead directory (not this SC's defaults) — tags
+  // this plan only, per decision: doesn't change the SC's standing default list.
+  addPushReviewerById(id) { if (!id) return; const cur = this.state.pushReviewers.slice(); if (cur.indexOf(id) < 0) cur.push(id); this.setState({ pushReviewers: cur, pushAddSelect: '' }); }
+  removeReviewer(id) { this.setState({ pushReviewers: this.state.pushReviewers.filter(x => x !== id) }); }
   openFinDirect(code, runId) { this.setState({ finDirectOpen: true, finDirectSCcode: code, pushSCcode: code, pushRunId: runId || null, pushReviewers: [] }); }
   doPush(finaliseDirect) {
     const st = this.state, d = st.data, code = st.pushSCcode;
     const targetStatus = finaliseDirect ? 'Finalised' : 'Pushed';
     const sc = d.scs.find(s => s.code === code);
-    const reviewers = (st.pushReviewers || []).slice();
+    const reviewerIds = (st.pushReviewers || []).slice();
+    const directory = st.opsLeadDirectory || [];
+    const reviewers = reviewerIds.map(id => { const p = directory.find(x => x.id === id); return (p && (p.display_name || p.email)) || id; });
     // Resolve the chosen run EXPLICITLY: the run the planner picked on the card, else the
     // balanced HW-0.5 run, else any run for this SC. The chosen run's HW + metrics flow into the plan.
     const run = (st.pushRunId && d.runs.find(r => r.id === st.pushRunId)) || d.runs.find(r => r.scCode === code && r.hw === 0.5) || d.runs.find(r => r.scCode === code);
@@ -5374,8 +5600,9 @@ class NDCApp extends React.Component {
     const alignStatus = Object.assign({}, st.alignStatus);
     const idx = plans.findIndex(p => p.scCode === code);
     let plan = idx >= 0 ? plans[idx] : null;
+    const wasNewPlan = idx < 0;
     if (plan && run && sc) {
-      // existing plan for this SC \u2014 re-push it for fresh Ops review against the CHOSEN run:
+      // existing plan for this SC — re-push it for fresh Ops review against the CHOSEN run:
       // rebuild rows + metrics + HW from that run so the pushed plan reflects the picked run, not the seed.
       const VEHN = ['TATA ACE / 7ft', 'Bolero / 8ft', 'TATA 407 / 10ft', '14ft Trailer'];
       const rowCount = Math.min(Math.max(run.routes, 6), 13);
@@ -5387,7 +5614,7 @@ class NDCApp extends React.Component {
         rows.push({ routeCode: sc.cityCode + '-R' + String(j + 1).padStart(2, '0'), veh, vehTp: 7, tp, dcs, rtDist: 80 + j * 18, breakdownTat: 1.2, outCutoff: '23:00', oLat: sc.lat, oLng: sc.lng, volume: Math.round(run.volume / rowCount), util: run.util, cps: run.cps, ops: 'Pending', planner: null, fb: null });
       }
       const reviewerNamesNext = reviewers.length ? reviewers : plan.reviewerNames;
-      plan = Object.assign({}, plan, { hw: runHw, rows, pushedBy: 'Pranita Sapkal', reviewerNames: reviewerNamesNext,
+      plan = Object.assign({}, plan, { hw: runHw, rows, pushedBy: this.plannerPersonaName(), reviewerNames: reviewerNamesNext,
         // A re-push restarts the alignment cycle — old submissions no longer apply. Finalise Directly
         // deliberately bypasses the alignment loop by product decision, so it's not a "gap", not a
         // missed submission — treat every assigned reviewer as covered rather than flagging it.
@@ -5395,6 +5622,9 @@ class NDCApp extends React.Component {
         metrics: { routes: run.routes, vehicles: run.vehicles, distance: run.distance, cps: run.cps, coverage: run.coverage, util: run.util, avgTat: run.avgTat, cost: run.cost } });
       plans[idx] = plan;
       alignStatus[plan.id] = targetStatus;
+      // Re-pushing an already-Supabase-backed plan isn't wired to persist remotely yet (status can
+      // only change via acknowledge/finalise/unfreeze) — flag it plainly instead of silently no-op'ing.
+      if (plan.remote) this.showToast('Re-pushed locally \u2014 re-push isn\u2019t yet persisted to Supabase for an already-pushed plan', '#C77B00');
     } else if (run && sc) {
       // synthesize a real plan so it surfaces for the Ops Lead and in the planner pipeline
       const VEHN = ['TATA ACE / 7ft', 'Bolero / 8ft', 'TATA 407 / 10ft', '14ft Trailer'];
@@ -5406,14 +5636,23 @@ class NDCApp extends React.Component {
         const dcs = []; for (let k = 0; k < tp; k++) dcs.push(sc.cityCode + (101 + j * 7 + k));
         rows.push({ routeCode: sc.cityCode + '-R' + String(j + 1).padStart(2, '0'), veh, vehTp: 7, tp, dcs, rtDist: 80 + j * 18, breakdownTat: 1.2, outCutoff: '23:00', oLat: sc.lat, oLng: sc.lng, volume: Math.round(run.volume / rowCount), util: run.util, cps: run.cps, ops: 'Pending', planner: null, fb: null });
       }
-      const newPlanReviewers = reviewers.length ? reviewers : [...new Set(sc.pocs)].slice(0, 2);
-      plan = { id: 'PL-' + code, name: code + ' \u00b7 ' + sc.name + ' RLH', scCode: code, scName: sc.name, zone: sc.zone, hw: runHw, status: targetStatus, rows, pushedBy: 'Pranita Sapkal', sentDate: 'Today', sendBack: 0, feedbackReceived: false, allDecided: finaliseDirect ? true : false, reviewerNames: newPlanReviewers, submittedReviewers: finaliseDirect ? newPlanReviewers.slice() : [], metrics: { routes: run.routes, vehicles: run.vehicles, distance: run.distance, cps: run.cps, coverage: run.coverage, util: run.util, avgTat: run.avgTat, cost: run.cost } };
+      const newPlanReviewers = reviewers.length ? reviewers : [];
+      const fileBaseName = this.generateIngestFileName(code);
+      plan = { id: 'PL-' + code, name: code + ' \u00b7 ' + sc.name + ' RLH', scCode: code, scName: sc.name, zone: sc.zone, hw: runHw, status: targetStatus, rows, pushedBy: this.plannerPersonaName(), sentDate: 'Today', sendBack: 0, feedbackReceived: false, allDecided: finaliseDirect ? true : false, reviewerNames: newPlanReviewers, submittedReviewers: finaliseDirect ? newPlanReviewers.slice() : [], fileBaseName, metrics: { routes: run.routes, vehicles: run.vehicles, distance: run.distance, cps: run.cps, coverage: run.coverage, util: run.util, avgTat: run.avgTat, cost: run.cost } };
       plans.push(plan);
     }
     const pushed = Object.assign({}, st.pushedSCs); pushed[code] = true;
     // Land on the alignment LIST (L1), not the freshly-pushed plan's blank "waiting for feedback" detail.
     // Reset the filter to All so the just-pushed/finalised plan is guaranteed visible in the list.
     this.setState({ data: Object.assign({}, d, { plans }), alignStatus, pushedSCs: pushed, pushOpen: false, finDirectOpen: false, pushRunId: null, view: 'align', opsPlanId: plan ? plan.id : st.opsPlanId, alignPlanId: null, alignFilter: 'Pending Feedback', alignPage: 0 });
+    // Persist a genuinely new (not-yet-remote), normal (non-Finalise-Direct) push to Supabase.
+    if (plan && wasNewPlan && !finaliseDirect) this.pushPlanToSupabase(plan, reviewerIds);
+    // File-naming convention: stage-1 snapshot ({name}) on every new push. Finalise Directly skips
+    // straight to stage-3 ({name}_FINALISED) since there's no Ops feedback stage to pass through.
+    if (plan && wasNewPlan && plan.fileBaseName) {
+      this.saveSnapshot(plan.id, 'ingested', plan.fileBaseName, plan);
+      if (finaliseDirect) this.saveSnapshot(plan.id, 'finalised', plan.fileBaseName + '_FINALISED', plan);
+    }
     const runTxt = run ? (run.runId || run.id) : code;
     if (finaliseDirect) this.showToast('Finalised ' + runTxt + ' directly \u2014 skipped Ops alignment, ready for RFQ handoff', '#128A3E');
     else this.showToast('Pushed ' + runTxt + ' (' + hwTxt + ') to alignment \u00b7 ' + reviewers.length + ' reviewer' + (reviewers.length === 1 ? '' : 's'), '#128A3E');
@@ -5480,7 +5719,26 @@ class NDCApp extends React.Component {
   setAlignRemark(planId, idx, val) { const a = Object.assign({}, this.state.alignRemarks); a[planId] = Object.assign({}, a[planId]); a[planId][idx] = val; this.setState({ alignRemarks: a }); }
   // Master–detail: which flagged route is open in the detail pane (per plan).
   setAlignRoute(planId, idx) { const a = Object.assign({}, this.state.alignRouteSel || {}); a[planId] = idx; this.setState({ alignRouteSel: a }); }
-  confirmAck() { const id = this.state.ackPlanId; const s = Object.assign({}, this.state.alignStatus); s[id] = 'Acknowledged'; this.setState({ alignStatus: s, ackOpen: false }); this.showToast(id + ' acknowledged \u2014 plan frozen & reviewers locked', '#1E6FB8'); }
+  confirmAck() { const id = this.state.ackPlanId; const s = Object.assign({}, this.state.alignStatus); s[id] = 'Acknowledged'; this.setState({ alignStatus: s, ackOpen: false }); const plan = (this.state.data.plans || []).find(p => p.id === id); if (plan && plan.remote) this.acknowledgePlanRemote(id); this.showToast(id + ' acknowledged \u2014 plan frozen & reviewers locked', '#1E6FB8'); }
+  // confirmUnfreeze() — the inverse of confirmAck(). Reverts status to 'In Alignment' (NOT 'Pushed' —
+  // submitted feedback stays fully visible/intact, this just reopens Ops Lead editing and clears the
+  // Planner's own Accept/Reject calls, which were made against a feedback set that may now change).
+  // plan.rows[i].fb and plan.submittedReviewers are untouched — nothing about what Ops already
+  // submitted is lost, only the Planner's decisions on top of it.
+  confirmUnfreeze() {
+    const id = this.state.unfreezePlanId;
+    const s = Object.assign({}, this.state.alignStatus); s[id] = 'In Alignment';
+    const alignDecisions = Object.assign({}, this.state.alignDecisions); delete alignDecisions[id];
+    const alignDcDecisions = Object.assign({}, this.state.alignDcDecisions); delete alignDcDecisions[id];
+    const alignFieldDec = Object.assign({}, this.state.alignFieldDec);
+    Object.keys(alignFieldDec).forEach(k => { if (k.indexOf(id + ':') === 0) delete alignFieldDec[k]; });
+    this.setState({ alignStatus: s, alignDecisions, alignDcDecisions, alignFieldDec, unfreezeOpen: false, unfreezePlanId: null });
+    // unfreeze_plan (the RPC) also resets every tagged reviewer's submitted flag server-side, and is
+    // only callable from 'acknowledged' — matching this local reset exactly for a real plan.
+    const plan = (this.state.data.plans || []).find(p => p.id === id);
+    if (plan && plan.remote) this.unfreezePlanRemote(id);
+    this.showToast(id + ' unfrozen \u2014 reopened for Ops Lead editing, decisions reset', '#C77B00');
+  }
   confirmFin() {
     const id = this.state.finPlanId;
     const d = this.state.data;
@@ -5520,7 +5778,10 @@ class NDCApp extends React.Component {
       const clr = (obj) => { const c = Object.assign({}, obj); delete c[id]; return c; };
       this.setState({ opsRowFb: clr(this.state.opsRowFb), opsRowDec: clr(this.state.opsRowDec), alignDecisions: clr(this.state.alignDecisions), alignDcDecisions: clr(this.state.alignDcDecisions) });
     }
-    const s = Object.assign({}, this.state.alignStatus); s[id] = 'Finalised'; const fb = Object.assign({}, this.state.alignFinalisedBy); fb[id] = 'Pranita Sapkal'; this.setState({ alignStatus: s, alignFinalisedBy: fb, finOpen: false }); this.showToast(id + ' finalised — reordered per accepted feedback, ready for RFQ handoff', '#128A3E');
+    const s = Object.assign({}, this.state.alignStatus); s[id] = 'Finalised'; const fb = Object.assign({}, this.state.alignFinalisedBy); fb[id] = this.plannerPersonaName(); this.setState({ alignStatus: s, alignFinalisedBy: fb, finOpen: false });
+    if (plan && plan.remote) this.finalisePlanRemote(id);
+    if (plan && plan.fileBaseName) this.saveSnapshot(id, 'finalised', plan.fileBaseName + '_FINALISED', plan);
+    this.showToast(id + ' finalised — reordered per accepted feedback, ready for RFQ handoff', '#128A3E');
   }
 
   // LMDC cluster view — generate deterministic DC breakdown rows for a route.
@@ -6264,7 +6525,9 @@ class NDCApp extends React.Component {
         undecidedFlaggedCount: flaggedRows.filter(r => !r.decision).length,
         canAck: ps === 'In Alignment' && (!!st.opsSubmitted[plan.id] || !!plan.feedbackReceived), canFinalise: ps === 'Acknowledged' && allDecided && validatedClean, finBlocked: ps === 'Acknowledged' && !(allDecided && validatedClean),
         finBtnBg: (ps === 'Acknowledged' && allDecided && validatedClean) ? '#128A3E' : '#E6EBF2', finBtnFg: (ps === 'Acknowledged' && allDecided && validatedClean) ? '#fff' : '#5A5E66', finCursor: (ps === 'Acknowledged' && allDecided && validatedClean) ? 'pointer' : 'not-allowed',
-        onAck: () => { if (!st.opsSubmitted[plan.id] && !plan.feedbackReceived) { this.showToast('At least one reviewer must submit feedback before you can acknowledge', '#C77B00'); return; } this.setState({ ackOpen: true, ackPlanId: plan.id }); }, onFin: () => { if (ps === 'Acknowledged' && allDecided) this.setState({ finOpen: true, finPlanId: plan.id }); }, progressLabel: decidedCount + ' of ' + flaggedRows.length + ' flagged rows decided · ' + autoAligned + ' auto-aligned',
+        onAck: () => { if (!st.opsSubmitted[plan.id] && !plan.feedbackReceived) { this.showToast('At least one reviewer must submit feedback before you can acknowledge', '#C77B00'); return; } this.setState({ ackOpen: true, ackPlanId: plan.id }); }, onFin: () => { if (ps === 'Acknowledged' && allDecided) this.setState({ finOpen: true, finPlanId: plan.id }); },
+        onUnfreeze: () => { if (ps === 'Acknowledged') this.setState({ unfreezeOpen: true, unfreezePlanId: plan.id }); },
+        progressLabel: decidedCount + ' of ' + flaggedRows.length + ' flagged rows decided · ' + autoAligned + ' auto-aligned',
         onAcceptAllFlagged: () => { const undecN = flaggedRows.filter(r => !r.rowFullyDecided).length; if (undecN === 0) { this.showToast('No undecided flagged changes remaining', '#5A5E66'); return; } this.setState({ acceptAllPlanOpen: true, acceptAllPlanId: plan.id }); },
         acceptAllBg: flaggedRows.some(r => !r.rowFullyDecided) ? '#fff' : '#E6EBF2', acceptAllFg: flaggedRows.some(r => !r.rowFullyDecided) ? '#128A3E' : '#8E96A3', acceptAllBd: flaggedRows.some(r => !r.rowFullyDecided) ? '#128A3E' : '#E6EBF2', acceptAllCursor: flaggedRows.some(r => !r.rowFullyDecided) ? 'pointer' : 'not-allowed', acceptAllTitle: flaggedRows.some(r => !r.rowFullyDecided) ? ('Accept all ' + flaggedRows.filter(r => !r.rowFullyDecided).length + ' undecided changes') : 'All changes decided',
         onPlanValidate: () => {
@@ -6444,6 +6707,7 @@ class NDCApp extends React.Component {
     }
 
     const ackPlan = st.ackPlanId ? plans.find(p => p.id === st.ackPlanId) : null;
+    const unfreezePlan = st.unfreezePlanId ? plans.find(p => p.id === st.unfreezePlanId) : null;
     const finPlan = st.finPlanId ? plans.find(p => p.id === st.finPlanId) : null;
     // 2026-07-10 — the accepted/rejected count shown before Finalise must reflect EVERY decided
     // item — route-level (Vehicle Type) AND every individually-decided DC-level field (Route Code,
@@ -6529,6 +6793,7 @@ class NDCApp extends React.Component {
       alignBackToList: () => this.setState({ alignPlanId: null }),
       planList: planList, alignFilterSeg, alignZoneChips, planCount: listPlans.length, aSel, alignClearFilter: () => this.setState({ alignFilter: 'Pending Feedback', alignZone: 'All', alignPage: 0 }),
       ackOpen: st.ackOpen, ackPlanName: ackPlan ? (ackPlan.scCode + ' \u00b7 ' + ackPlan.scName) : '', ackReviewers: ackPlan ? ackPlan.reviewerNames.join(', ') : '', ackPendingCount: ackPending, ackHasPending: ackPending > 0, ackPendingLabel: ackPending + ' row' + (ackPending === 1 ? '' : 's') + ' still pending \u2014 they will be frozen as-is', confirmAck: () => this.confirmAck(), closeAck: () => this.setState({ ackOpen: false }),
+      unfreezeOpen: st.unfreezeOpen, unfreezePlanName: unfreezePlan ? (unfreezePlan.scCode + ' \u00b7 ' + unfreezePlan.scName) : '', unfreezeReviewers: unfreezePlan ? unfreezePlan.reviewerNames.join(', ') : '', confirmUnfreeze: () => this.confirmUnfreeze(), closeUnfreeze: () => this.setState({ unfreezeOpen: false, unfreezePlanId: null }),
       finOpen: st.finOpen, finPlanName: finPlan ? (finPlan.scCode + ' \u00b7 ' + finPlan.scName) : '', finAccepted: finAcceptedCount, finRejected: finRejectedCount, confirmFin: () => this.confirmFin(), closeFin: () => this.setState({ finOpen: false }),
       finPreviewRows, finPreviewWarnings: finPreviewHyp ? finPreviewHyp.warnings.map(w => w.t) : [], finOrigRoutes, finNewRoutes, finOrigDistance: fmtInt(finOrigDistance), finNewDistance: fmtInt(finNewDistance),
       finRoutesDelta: finDelta(finOrigRoutes, finNewRoutes, 0), finRoutesDeltaColor: finDeltaColor(finOrigRoutes, finNewRoutes),
@@ -6658,7 +6923,7 @@ class NDCApp extends React.Component {
     // §10 O2 — attribute this proposed change to the current reviewer so co-reviewers + the planner
     // see "Change proposed by <name>". Ops Lead persona is now switchable (opsPersonaName()), not
     // hardcoded, so more-than-one-reviewer scenarios can be simulated on the same plan.
-    const reviewerName = st.persona === 'planner' ? 'Pranita Sapkal' : this.opsPersonaName();
+    const reviewerName = st.persona === 'planner' ? this.plannerPersonaName() : this.opsPersonaName();
     const fb = { cells, dcCells, dcCount, remark: (st.ncRemark || '').trim() || 'Needs change', by: reviewerName };
     const a = Object.assign({}, st.opsRowFb); a[r.planId] = Object.assign({}, a[r.planId]); a[r.planId][r.idx] = fb;
     // mirror the attribution onto the live row so the Ops-Lead row indicator updates immediately
@@ -6692,6 +6957,15 @@ class NDCApp extends React.Component {
     const at = String(now.getDate()).padStart(2, '0') + ' ' + MON[now.getMonth()] + ' · ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
     const s = Object.assign({}, st.opsSubmitted); s[planId] = { by: this.opsPersonaName(), at: at };
     this.setState({ data: Object.assign({}, d, { plans }), alignStatus, opsSubmitted: s });
+    // Persist to Supabase for a real (Supabase-backed) plan — writes each Needs-Change row's latest
+    // feedback (row_id = routeCode) and flips this reviewer's plan_reviewer_status.submitted.
+    const updatedPlan = plans.find(p => p.id === planId);
+    if (updatedPlan && updatedPlan.remote) {
+      const feedbackByRoute = {};
+      updatedPlan.rows.forEach(r => { if (r.ops === 'Needs Change' && r.fb) feedbackByRoute[r.routeCode] = r.fb; });
+      this.submitFeedbackToSupabase(updatedPlan, feedbackByRoute);
+      if (updatedPlan.fileBaseName) this.saveSnapshot(planId, 'feedback', updatedPlan.fileBaseName + '_FEEDBACK', updatedPlan);
+    }
     this.showToast('Feedback submitted to planner · recorded ' + at, '#128A3E');
   }
 
@@ -7745,10 +8019,17 @@ class NDCApp extends React.Component {
     }
 
     const pushSC = st.pushSCcode ? d.scs.find(s => s.code === st.pushSCcode) : curSC;
-    const uniqPocs = pushSC ? [...new Set(pushSC.pocs)] : [];
-    const pushSelected = st.pushReviewers || [];
-    const pocChips = uniqPocs.map(n => ({ name: n, selected: pushSelected.indexOf(n) >= 0, bg: pushSelected.indexOf(n) >= 0 ? '#003F98' : '#fff', fg: pushSelected.indexOf(n) >= 0 ? '#fff' : '#5A5E66', bd: pushSelected.indexOf(n) >= 0 ? '#003F98' : '#C3C9D4', onToggle: () => this.togglePushReviewer(n) }));
-    const reviewersList = pushSelected.map(n => ({ name: n, initials: n.split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(), email: n.toLowerCase().replace(/[^a-z0-9]+/g, '.').replace(/^\.|\.$/g, '') + '@valmo.com', isPoc: uniqPocs.indexOf(n) >= 0, onRemove: () => this.removeReviewer(n) }));
+    const directory = st.opsLeadDirectory || [];
+    const dirById = {}; directory.forEach(p => { dirById[p.id] = p; });
+    const pushSelectedIds = st.pushReviewers || [];
+    const reviewersList = pushSelectedIds.map(id => {
+      const p = dirById[id]; const name = (p && (p.display_name || p.email)) || id;
+      return { id, name, initials: name.split(/[\s@.]+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase(), email: (p && p.email) || '', onRemove: () => this.removeReviewer(id) };
+    });
+    // "Add a POC" picker — any real Ops Lead not already on this plan's list. Adding here tags this
+    // plan only; it does not change the SC's standing default reviewer list (that's managed from SC Master).
+    const pushAddOptions = [{ value: '', label: directory.length ? 'Add a POC…' : 'No Ops Leads registered yet' }]
+      .concat(directory.filter(p => pushSelectedIds.indexOf(p.id) < 0).map(p => ({ value: p.id, label: (p.display_name || p.email) + (p.email ? ' \u00b7 ' + p.email : '') })));
 
     // P2 — Design Review left rail: surface Queued + In-Progress runs from the live runQueue
     // so the reviewer can see what is still cooking alongside the completed set.
@@ -7774,10 +8055,10 @@ class NDCApp extends React.Component {
       reviewIngestedPlans: (st.ingestedPlans || []).map(p => ({ name: p.name, rows: p.rows.toLocaleString('en-IN'), by: p.by, date: p.date, runId: p.runId, scCode: p.scCode })),
       hasReviewIngested: (st.ingestedPlans || []).length > 0,
       reviewPushed: !!st.pushedSCs[curCode],
-      pushOpen: st.pushOpen, pushSCname: pushSC ? (pushSC.code + ' \u00b7 ' + pushSC.name) : '', pocChips, reviewersList, pushName: st.pushName || '', pushEmail: st.pushEmail || '',
-      onPushName: (e) => this.setState({ pushName: e.target.value }), onPushEmail: (e) => this.setState({ pushEmail: e.target.value }),
-      addManualReviewer: () => this.addManualReviewer(), doPush: () => this.doPush(), closePush: () => this.closePush(),
-      pushCount: pushSelected.length, pushDisabled: pushSelected.length === 0, pushBtnBg: pushSelected.length === 0 ? '#E6EBF2' : '#003F98', pushBtnFg: pushSelected.length === 0 ? '#5A5E66' : '#fff', pushCursor: pushSelected.length === 0 ? 'not-allowed' : 'pointer',
+      pushOpen: st.pushOpen, pushSCname: pushSC ? (pushSC.code + ' \u00b7 ' + pushSC.name) : '', reviewersList, pushAddOptions, pushAddSelect: st.pushAddSelect || '',
+      onPushAddSelect: (e) => this.addPushReviewerById(e.target.value),
+      doPush: () => this.doPush(), closePush: () => this.closePush(),
+      pushCount: pushSelectedIds.length, pushDisabled: pushSelectedIds.length === 0, pushBtnBg: pushSelectedIds.length === 0 ? '#E6EBF2' : '#003F98', pushBtnFg: pushSelectedIds.length === 0 ? '#5A5E66' : '#fff', pushCursor: pushSelectedIds.length === 0 ? 'not-allowed' : 'pointer',
     };
   }
 
@@ -8182,7 +8463,7 @@ class NDCApp extends React.Component {
       ...this.inputsVals(),
       // inputs action handlers not produced by inputsVals (kept here so they survive):
       ...this.addScVals(),
-      uploadFile: () => this.ingestRlhPlan(), downloadCsv: () => this.downloadCsvFile(), nudgeReviewers: () => { const plan = (this.state.data.plans || []).find(p => p.id === this.state.alignPlanId); const names = plan && plan.reviewerNames && plan.reviewerNames.length ? plan.reviewerNames.join(', ') : 'the reviewers'; const rp = Object.assign({}, this.state.remindedPlans); if (this.state.alignPlanId) rp[this.state.alignPlanId] = true; this.setState({ remindedPlans: rp }); this.showToast('Reminder sent to ' + names, '#1E6FB8'); }, addSc: () => this.setState({ addScOpen: true, addScEditCode: null, addScForm: { type: 'LMSC', zone: 'South', localTp: '5', nonLocalTp: '3', open: '06:00', close: '22:00' } }),
+      uploadFile: () => this.ingestRlhPlan(), downloadCsv: () => this.downloadCsvFile(), nudgeReviewers: () => { const plan = (this.state.data.plans || []).find(p => p.id === this.state.alignPlanId); const names = plan && plan.reviewerNames && plan.reviewerNames.length ? plan.reviewerNames.join(', ') : 'the reviewers'; const rp = Object.assign({}, this.state.remindedPlans); if (this.state.alignPlanId) rp[this.state.alignPlanId] = true; this.setState({ remindedPlans: rp }); this.showToast('Reminder sent to ' + names, '#1E6FB8'); }, addSc: () => this.setState({ addScOpen: true, addScEditCode: null, addScForm: { type: 'LMSC', zone: 'South', localTp: '5', nonLocalTp: '3', open: '06:00', close: '22:00' }, addScReviewerIds: [] }),
       startCreation: () => this.go('creation'), recheckAutodml: () => this.showToast('AutoDML re-check queued', '#2F4FC6'),
       moduleTitle: tt[0], moduleSubtitle: tt[1], stubIcon: STUBICON[st.view] || ICON.dash,
       navGroups, cycleName: st.designCycle || 'July 2026', cycleOpen: !!st.cycleOpen,
