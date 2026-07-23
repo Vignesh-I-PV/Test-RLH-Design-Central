@@ -3319,6 +3319,34 @@ function View(B, self) {
 </div>
 </div>
 </>) : null}
+{/* RLH PLAN INGESTION ROW ERRORS (Mode 2) */}
+{(ingestErrModalOpen) ? (<>
+<div style={css(`position:fixed; inset:0; z-index:80; background:rgba(11,20,48,0.45); display:flex; align-items:center; justify-content:center; padding:24px;`)}>
+<div style={css(`width:560px; max-width:100%; background:#fff; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,0.25); overflow:hidden;`)}>
+<div style={css(`display:flex; align-items:center; gap:12px; padding:18px 20px; border-bottom:1px solid #E6EBF2;`)}>
+<div style={css(`width:38px; height:38px; border-radius:8px; background:#FBEAEA; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#D14B4B"} strokeWidth={"2"}><path d={"M12 9v4m0 4h.01M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
+<div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:14px; font-weight:700; color:#14171F;`)}>Row errors — {ingestErrModal.name}</div><div style={css(`font-size:12px; color:#5A5E66; margin-top:1px;`)}>Nothing was ingested. Fix the file and re-upload.</div></div>
+<button onClick={closeIngestErrModal} style={css(`width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8E96A3; border-radius:6px;`)} onMouseEnter={(e) => hoverOn(e, `background:#F2F5FA; color:#5A5E66;`)} onMouseLeave={(e) => hoverOff(e, `width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8E96A3; border-radius:6px;`, `background:#F2F5FA; color:#5A5E66;`)}><svg width={"16"} height={"16"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M18 6L6 18M6 6l12 12"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button>
+</div>
+<div style={css(`padding:6px 0; max-height:360px; overflow-y:auto;`)}>
+<div style={css(`display:grid; grid-template-columns:80px 1fr; background:#F2F5FA; border-bottom:1px solid #E6EBF2;`)}>
+<div style={css(`padding:8px 16px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ROW</div>
+<div style={css(`padding:8px 16px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ERROR</div>
+</div>
+{(ingestErrModal.rows || []).map((er, __i114) => (<React.Fragment key={__i114}>
+<div style={css(`display:grid; grid-template-columns:80px 1fr; border-top:1px solid #EEF1F6; align-items:center;`)} onMouseEnter={(e) => hoverOn(e, `background:#FAFBFD;`)} onMouseLeave={(e) => hoverOff(e, `display:grid; grid-template-columns:80px 1fr; border-top:1px solid #EEF1F6; align-items:center;`, `background:#FAFBFD;`)}>
+<div style={css(`padding:10px 16px; font-size:12.5px; font-weight:700; color:#D14B4B; font-variant-numeric:tabular-nums;`)}>{er.row == null ? '—' : er.row}</div>
+<div style={css(`padding:10px 16px; font-size:12.5px; color:#5A5E66;`)}>{er.msg}</div>
+</div>
+</React.Fragment>))}
+</div>
+<div style={css(`padding:14px 20px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #EEF1F6;`)}>
+<button onClick={closeIngestErrModal} style={css(`height:36px; padding:0 16px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#F2F5FA;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 16px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#F2F5FA;`)}>Close</button>
+<button onClick={ingestErrModalRetry} style={css(`height:36px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;`, `background:#00337D;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M12 16V4M7 9l5-5 5 5M5 20h14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Re-upload corrected file</button>
+</div>
+</div>
+</div>
+</>) : null}
 {/* DELETE MASTER ROW CONFIRM (top-level: renders on Design Inputs SC/Vehicle Master, independent of active view) */}
 {(delConfirmOpen) ? (<>
 <div style={css(`position:fixed; inset:0; z-index:80; background:rgba(11,20,48,0.45); display:flex; align-items:center; justify-content:center; padding:24px;`)}>
@@ -3767,6 +3795,43 @@ function NDC_haversineKm(lat1, lng1, lat2, lng2) {
   // without needing a real road-network router. Replace this with a real distance service call
   // when one exists -- this is a stand-in, not a claim about real-world road distance.
 }
+// NDC_realHaversineKm — genuine straight-line distance between two REAL lat/lng points, in km,
+// with a flat 25% buffer to approximate real road distance (e.g. 50km straight-line -> 62.5km).
+// Deliberately separate from NDC_haversineKm above: that function's ×55 multiplier only makes
+// sense for this app's fabricated, sub-degree, city-scale jittered coordinates. Real ingested
+// coordinates (RLH Plan Ingestion) span real-world distances and must never go through ×55 --
+// this is the function for those. 2026-07-23.
+function NDC_realHaversineKm(lat1, lng1, lat2, lng2) {
+  const R = 6371;
+  const toRad = (d) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  const straight = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return +(straight * 1.25).toFixed(1);
+}
+// NDC_parseCsv — minimal CSV parser: handles quoted fields (including embedded commas/quotes) and
+// CRLF/CR/LF line endings. No existing CSV parser in this app -- every upload path before this one
+// only read file.name/file.size (see validateVolCsv), never actual file content. Used by RLH Plan
+// Ingestion; returns an array of row arrays (strings), header included as row 0.
+function NDC_parseCsv(text) {
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  const s = String(text || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if (inQuotes) {
+      if (c === '"') { if (s[i + 1] === '"') { field += '"'; i++; } else { inQuotes = false; } }
+      else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else field += c;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows.filter(r => !(r.length === 1 && r[0] === ''));
+}
 class NDCApp extends React.Component {
   constructor(props) {
     super(props);
@@ -3811,7 +3876,8 @@ class NDCApp extends React.Component {
       nodeStep: 'active',
       ingestionTab: 'rlh',
       ingestedPlans: [],
-      ingestionCounter: 0,
+      ingestedRlhPlans: {}, // real per-SC "validated, ready to push" plans from RLH Plan Ingestion — keyed by LMSC code
+      ingestErrModal: null,
       resolved: {},
       creationStep: 1, creationView: 'wizard',
       fixReturnStep: null, focusSC: null,
@@ -4110,18 +4176,164 @@ class NDCApp extends React.Component {
   }
   downloadNodeCsv(rows) { rows = rows || []; const esc = (v) => { const s = String(v == null ? '' : v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }; const head = 'LMSC,LMDC Code,LMDC Name,Zone,Capacity,Status,Flag\n'; const body = rows.map(r => [r.lmsc, r.lmdc, r.lmdcName, r.zone, r.capStr, r.statusLabel, r.flagMsg].map(esc).join(',')).join('\n'); this.downloadText('autodml-node-view.csv', head + body + '\n'); this.showToast('AutoDML node view downloaded · ' + rows.length + ' node' + (rows.length === 1 ? '' : 's'), '#128A3E'); }
   pickFile(reject) { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.csv'; inp.onchange = () => { const f = inp.files && inp.files[0]; if (!f) { this.showToast('Upload cancelled', '#5A5E66'); return; } if (reject) this.showToast('Validated ' + f.name + ' · 7 rows rejected (already in AutoDML)', '#C77B00'); else this.showToast('Validated ' + f.name + ' — ready to submit', '#128A3E'); }; inp.click(); }
-  ingestRlhPlan() {
-    const n = (this.state.ingestionCounter || 0) + 1;
-    const now = new Date();
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const date = String(now.getDate()).padStart(2, '0') + ' ' + months[now.getMonth()] + ' · ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
-    const scs = (this.state.data && this.state.data.scs) || [];
-    const scCode = scs.length ? scs[(n - 1) % scs.length].code : 'BLR-S1';
-    const rows = 1000 + Math.floor(((n * 1103515245 + 12345) & 0x7fffffff) % 3001);
-    const plan = { name: 'RLH-Plan-' + n + '.csv', rows: rows, by: 'Pranita Sapkal', date: date, status: 'Validated', errors: 0, scCode: scCode, runId: 'ING-' + String(n).padStart(3, '0') };
-    const plans = [plan].concat(this.state.ingestedPlans || []);
-    this.setState({ ingestedPlans: plans, ingestionCounter: n });
-    this.showToast('Plan ingested & validated · ' + plan.name, '#128A3E');
+  // ===== RLH Plan Ingestion (Mode 2) — 2026-07-23 ===============================================
+  // Real CSV parsing + validation + plan-building, replacing the old fabricated ingestRlhPlan()
+  // stub. Grain matches the real source data: one row per DC (touch point), not per route --
+  // Volume/lat/lng/Breakdown Distance all come in at DC-level already, nothing here is synthesized.
+  // Logic was unit-tested standalone (node) against the real 571-row / 156-route / 4-SC sample
+  // before this integration -- see ingest_prototype.js in the working notes for that harness.
+
+  parseRlhIngestCsv(text) {
+    const table = NDC_parseCsv(text);
+    if (!table.length) return { fileError: 'File is empty.' };
+    const header = table[0].map(h => (h || '').trim());
+    const EXPECTED = ['Zone', 'LMSC', 'LMDC', 'DC latitude', 'DC longitude', 'Volume', 'Route Code', 'Touch Point', 'Vehicle Type', 'Breakdown Distance', 'Round Trip Distance', 'Run ID'];
+    const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
+    if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
+    const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
+    const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
+      _rowNo: i + 2,
+      zone: (r[idx['Zone']] || '').trim(), lmsc: (r[idx['LMSC']] || '').trim(), lmdc: (r[idx['LMDC']] || '').trim(),
+      lat: r[idx['DC latitude']], lng: r[idx['DC longitude']], volume: r[idx['Volume']],
+      routeCode: (r[idx['Route Code']] || '').trim(), tp: r[idx['Touch Point']], vehType: (r[idx['Vehicle Type']] || '').trim(),
+      breakdownDist: r[idx['Breakdown Distance']], roundTripDist: r[idx['Round Trip Distance']], runId: (r[idx['Run ID']] || '').trim(),
+    }));
+    return { rows };
+  }
+
+  // rows -> { errors: [{row,msg}], warnings: [{row,msg}], ok }. Cross-checks against the real
+  // SC Master (must exist) and Vehicle Master (must exist) already in this.state.data -- per the
+  // agreed scope, both are maintained manually and are NOT auto-created from the file.
+  validateRlhIngestRows(rows) {
+    const d = this.state.data;
+    const scByCode = {}; (d.scs || []).forEach(s => { scByCode[s.code] = s; });
+    const vehNames = {}; (d.VEH || []).forEach(v => { vehNames[v.name] = true; });
+    const errors = [], warnings = [];
+    const isNum = (v) => v !== '' && v != null && !isNaN(Number(v));
+
+    rows.forEach(r => {
+      if (!r.lmsc) errors.push({ row: r._rowNo, msg: 'LMSC is blank' });
+      else if (!scByCode[r.lmsc]) errors.push({ row: r._rowNo, msg: 'LMSC "' + r.lmsc + '" not found in SC Master' });
+      if (!r.lmdc) errors.push({ row: r._rowNo, msg: 'LMDC is blank' });
+      if (!isNum(r.lat) || Number(r.lat) < -90 || Number(r.lat) > 90) errors.push({ row: r._rowNo, msg: 'DC latitude invalid: ' + r.lat });
+      if (!isNum(r.lng) || Number(r.lng) < -180 || Number(r.lng) > 180) errors.push({ row: r._rowNo, msg: 'DC longitude invalid: ' + r.lng });
+      if (!isNum(r.volume) || Number(r.volume) <= 0) errors.push({ row: r._rowNo, msg: 'Volume must be a number > 0: ' + r.volume });
+      if (!r.routeCode) errors.push({ row: r._rowNo, msg: 'Route Code is blank' });
+      if (!isNum(r.tp) || Number(r.tp) <= 0 || !Number.isInteger(Number(r.tp))) errors.push({ row: r._rowNo, msg: 'Touch Point must be a positive integer: ' + r.tp });
+      if (!r.vehType) errors.push({ row: r._rowNo, msg: 'Vehicle Type is blank' });
+      else if (!vehNames[r.vehType]) errors.push({ row: r._rowNo, msg: 'Vehicle Type "' + r.vehType + '" not found in Vehicle Master' });
+      if (!isNum(r.breakdownDist) || Number(r.breakdownDist) < 0) errors.push({ row: r._rowNo, msg: 'Breakdown Distance invalid: ' + r.breakdownDist });
+      if (!isNum(r.roundTripDist) || Number(r.roundTripDist) <= 0) errors.push({ row: r._rowNo, msg: 'Round Trip Distance invalid: ' + r.roundTripDist });
+      if (!r.runId) errors.push({ row: r._rowNo, msg: 'Run ID is blank' });
+      if (r.zone && scByCode[r.lmsc] && scByCode[r.lmsc].zone && r.zone !== scByCode[r.lmsc].zone) {
+        warnings.push({ row: r._rowNo, msg: 'Zone "' + r.zone + '" does not match SC Master zone "' + scByCode[r.lmsc].zone + '" for ' + r.lmsc });
+      }
+    });
+
+    const byLmsc = {}; rows.forEach(r => { (byLmsc[r.lmsc] = byLmsc[r.lmsc] || []).push(r); });
+    Object.keys(byLmsc).forEach(lmsc => {
+      const scRows = byLmsc[lmsc];
+      const runIds = new Set(scRows.map(r => r.runId).filter(Boolean));
+      if (runIds.size > 1) errors.push({ row: null, msg: 'SC ' + lmsc + ' has multiple Run IDs in this file (' + Array.from(runIds).join(', ') + ') — expected exactly one' });
+
+      const byRoute = {}; scRows.forEach(r => { (byRoute[r.routeCode] = byRoute[r.routeCode] || []).push(r); });
+      Object.keys(byRoute).forEach(routeCode => {
+        const rr = byRoute[routeCode].slice().sort((a, b) => Number(a.tp) - Number(b.tp));
+        const seen = {};
+        rr.forEach(r => { if (seen[r.lmdc]) errors.push({ row: r._rowNo, msg: 'LMDC "' + r.lmdc + '" appears more than once in route ' + routeCode }); seen[r.lmdc] = true; });
+
+        const vehSet = new Set(rr.map(r => r.vehType).filter(Boolean));
+        if (vehSet.size > 1) errors.push({ row: null, msg: 'Route ' + routeCode + ' has more than one Vehicle Type: ' + Array.from(vehSet).join(', ') });
+
+        const rtdSet = new Set(rr.map(r => r.roundTripDist).filter(v => v !== '' && v != null));
+        if (rtdSet.size > 1) errors.push({ row: null, msg: 'Route ' + routeCode + ' has inconsistent Round Trip Distance values: ' + Array.from(rtdSet).join(', ') });
+
+        const tps = rr.map(r => Number(r.tp));
+        const expected = tps.map((_, i) => i + 1);
+        if (JSON.stringify(tps) !== JSON.stringify(expected)) errors.push({ row: null, msg: 'Route ' + routeCode + ' Touch Point sequence is not 1..' + tps.length + ' with no gaps (got ' + tps.join(',') + ')' });
+
+        // Breakdown Distance must never decrease -- a tie is a legitimate zero-distance leg
+        // between co-located DCs (confirmed against real data); only a decrease is bad data.
+        const bds = rr.map(r => Number(r.breakdownDist));
+        for (let i = 1; i < bds.length; i++) {
+          if (bds[i] < bds[i - 1]) { errors.push({ row: rr[i]._rowNo, msg: 'Breakdown Distance decreases along route ' + routeCode + ' (row has ' + bds[i] + ', previous was ' + bds[i - 1] + ')' }); break; }
+        }
+        if (rtdSet.size === 1 && bds.length) {
+          const rtd = Number(rr[0].roundTripDist), lastBd = bds[bds.length - 1];
+          if (!(rtd > lastBd)) errors.push({ row: null, msg: 'Route ' + routeCode + ': Round Trip Distance (' + rtd + ') must exceed the last Breakdown Distance (' + lastBd + ')' });
+        }
+      });
+    });
+
+    return { errors, warnings, ok: errors.length === 0 };
+  }
+
+  // Groups already-valid rows into one plan per LMSC, rows[] one per Route Code, each carrying a
+  // real dcs[] (real lat/lng/volume/tp) plus a real per-DC leg distance derived from Breakdown
+  // Distance deltas (ground truth -- not synthesized, not haversine-derived) and the route's
+  // real return leg (Round Trip Distance - last Breakdown Distance).
+  buildIngestedRlhPlans(rows) {
+    const d = this.state.data;
+    const scByCode = {}; (d.scs || []).forEach(s => { scByCode[s.code] = s; });
+    const byLmsc = {}; rows.forEach(r => { (byLmsc[r.lmsc] = byLmsc[r.lmsc] || []).push(r); });
+    const plans = {};
+    Object.keys(byLmsc).forEach(lmsc => {
+      const sc = scByCode[lmsc] || {};
+      const scRows = byLmsc[lmsc];
+      const runId = scRows[0].runId;
+      const byRoute = {}; scRows.forEach(r => { (byRoute[r.routeCode] = byRoute[r.routeCode] || []).push(r); });
+      const planRows = Object.keys(byRoute).sort((a, b) => a.localeCompare(b)).map(routeCode => {
+        const rr = byRoute[routeCode].slice().sort((a, b) => Number(a.tp) - Number(b.tp));
+        const rtd = Number(rr[0].roundTripDist);
+        let prevBd = 0;
+        const dcs = rr.map((r, i) => {
+          const bd = Number(r.breakdownDist);
+          const leg = i === 0 ? bd : (bd - prevBd);
+          prevBd = bd;
+          return { code: r.lmdc, lat: Number(r.lat), lng: Number(r.lng), vol: Number(r.volume), tpOrder: Number(r.tp), dist: +leg.toFixed(2) };
+        });
+        const lastBd = Number(rr[rr.length - 1].breakdownDist);
+        const returnLeg = +(rtd - lastBd).toFixed(2);
+        return { routeCode, veh: rr[0].vehType, dcs, returnLeg, rtDist: rtd, oLat: sc.lat, oLng: sc.lng, zone: rr[0].zone };
+      });
+      const rowCount = scRows.length;
+      plans[lmsc] = { scCode: lmsc, scName: sc.name, zone: sc.zone, fileBaseName: runId, rows: planRows, rowCount };
+    });
+    return plans;
+  }
+
+  // File picker -> read -> parse -> validate -> build -> store. All-or-nothing: matches this
+  // app's existing Volume-upload convention (an invalid file is never partially accepted).
+  ingestRlhPlanFile() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.csv';
+    inp.onchange = (e) => {
+      const f = e.target.files && e.target.files[0]; if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const { rows, fileError } = this.parseRlhIngestCsv(String(reader.result || ''));
+        if (fileError) { this.setState({ ingestErrModal: { name: f.name, rows: [{ row: null, msg: fileError }] } }); this.showToast('Could not read ' + f.name + ' — ' + fileError, '#D14B4B'); return; }
+        const { errors, warnings, ok } = this.validateRlhIngestRows(rows);
+        if (!ok) {
+          this.setState({ ingestErrModal: { name: f.name, rows: errors } });
+          this.showToast(errors.length + ' row error' + (errors.length === 1 ? '' : 's') + ' in ' + f.name + ' — fix and re-upload; nothing was ingested', '#D14B4B');
+          return;
+        }
+        const plans = this.buildIngestedRlhPlans(rows);
+        const scCodes = Object.keys(plans);
+        const now = new Date();
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const date = String(now.getDate()).padStart(2, '0') + ' ' + months[now.getMonth()] + ' · ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        const logEntries = scCodes.map(sc => ({ name: plans[sc].fileBaseName + '.csv', by: 'You (Planner)', date, rows: plans[sc].rowCount, runId: plans[sc].fileBaseName, scCode: sc }));
+        const nextIngestedRlhPlans = Object.assign({}, this.state.ingestedRlhPlans || {}, plans);
+        const nextLog = logEntries.concat(this.state.ingestedPlans || []);
+        this.setState({ ingestedRlhPlans: nextIngestedRlhPlans, ingestedPlans: nextLog, ingestErrModal: null });
+        const warnMsg = warnings.length ? (' · ' + warnings.length + ' warning' + (warnings.length === 1 ? '' : 's')) : '';
+        this.showToast('Ingested ' + f.name + ' — ' + scCodes.length + ' SC' + (scCodes.length === 1 ? '' : 's') + ' validated (' + scCodes.join(', ') + ')' + warnMsg, '#128A3E');
+      };
+      reader.readAsText(f);
+    };
+    inp.click();
   }
   // C6/C7 — single node-changes upload (additions + closures + migrations in one file). OVERRIDE:
   // the latest file fully replaces all prior node-change data. Stamps the "last uploaded by" indicator.
@@ -4898,6 +5110,9 @@ class NDCApp extends React.Component {
       nodeLmscSearch: st.nodeLmscSearch || '', onNodeLmscSearch: (e) => this.setState({ nodeLmscSearch: e.target.value, pgAutodml: 1 }), nodeFilterDirty: nodeFilterDirty, clearNodeFilters: clearNodeFilters, onDownloadNodeCsv: () => this.downloadNodeCsv(nodeRows),
       autodmlCards, nodeAdditions, nodeClosures: d.nodeClosures, migrations: d.migrations, nodeChanges,
       volErrModalOpen, volErrModal, closeVolErrModal, volErrModalReplace,
+      ingestErrModalOpen: !!(st.ingestErrModal), ingestErrModal: st.ingestErrModal || { name: '', rows: [] },
+      closeIngestErrModal: () => this.setState({ ingestErrModal: null }),
+      ingestErrModalRetry: () => { this.setState({ ingestErrModal: null }); this.ingestRlhPlanFile(); },
       zoneChips, scSearch: st.inputsSearch || '', onInputsSearch: (e) => this.setState({ inputsSearch: e.target.value, pgScMaster: 1, pgAvail: 1 }),
       isScMaster: st.mastersTab === 'sc', isVehMaster: st.mastersTab === 'vehicle', isAvail: st.mastersTab === 'avail',
       mastersTabs: [['sc', 'Sort Center Master', d.scs.length, 'Canonical SC master — one row per Sort Centre with zone, capacity and location.'], ['avail', 'SC Vehicle Availability', (d.scVehAvail || []).length, 'Vehicles available per SC (one row per vehicle type per SC) — capped by the Touch Point Limit.'], ['vehicle', 'Vehicle Master', vehTypeCount, 'Vehicle types and their capacity, distance limit, touch-point cap and LH feasibility.']].map(t => ({ label: t[1] + ' (' + t[2] + ')', tip: t[3], attention: false, active: st.mastersTab === t[0], color: st.mastersTab === t[0] ? '#003F98' : '#5A5E66', weight: st.mastersTab === t[0] ? '700' : '500', bg: st.mastersTab === t[0] ? '#fff' : 'transparent', bd: st.mastersTab === t[0] ? '#D7DCE5' : 'transparent', onClick: () => this.setState({ mastersTab: t[0] }) })),
@@ -4916,7 +5131,7 @@ class NDCApp extends React.Component {
       scMasterTemplate: () => this.downloadTemplate('Sort Centre Master', [{ k: 'SC Code' }, { k: 'Name' }, { k: 'City' }, { k: 'State' }, { k: 'SC Type' }, { k: 'Zone' }, { k: 'Volume Capacity' }, { k: 'Sort Capacity' }, { k: 'NLH Docks' }, { k: 'RLH Docks' }, { k: 'Local TP Limit' }, { k: 'Non-Local TP Limit' }, { k: 'Open Time' }, { k: 'Close Time' }, { k: 'Ops Leads' }]),
       changesTemplate: () => this.downloadTemplate('Node Changes', [{ k: 'Change Type' }, { k: 'DC Code' }, { k: 'DC Name' }, { k: 'SC Code' }, { k: 'From SC' }, { k: 'To SC' }, { k: 'Zone' }, { k: 'Capacity' }, { k: 'Reason' }]),
       nodeChangeUploadedBy: st.nodeChangeBy || 'Shashvat Jain', nodeChangeUploadedDate: st.nodeChangeDate || '10 Jul · 11:24', uploadNodeChanges: () => this.uploadNodeChanges(),
-      ingestTemplate: () => this.downloadTemplate('RLH Plan Ingestion', [{ k: 'SC Code' }, { k: 'Route Code' }, { k: 'Vehicle Type' }, { k: 'Touch Points' }, { k: 'Round-Trip Distance' }, { k: 'Out Cutoff' }]),
+      ingestTemplate: () => this.downloadTemplate('RLH Plan Ingestion', [{ k: 'Zone' }, { k: 'LMSC' }, { k: 'LMDC' }, { k: 'DC latitude' }, { k: 'DC longitude' }, { k: 'Volume' }, { k: 'Route Code' }, { k: 'Touch Point' }, { k: 'Vehicle Type' }, { k: 'Breakdown Distance' }, { k: 'Round Trip Distance' }, { k: 'Run ID' }]),
       scVehAvail: scAvailPager.pageRows, scAvailPager: scAvailPager, scVehAvailCountLabel: availQuery ? (availShownRows + ' vehicle row' + (availShownRows === 1 ? '' : 's') + ' across ' + scVehAvailFiltered.length + ' of ' + scVehAvailRows.length + ' SCs') : (scVehAvailTotalRows + ' vehicle rows across ' + scVehAvailRows.length + ' SCs'), availSearch: st.availSearch || '', onAvailSearch: (e) => this.setState({ availSearch: e.target.value, pgAvail: 1 }), availNoResults: scVehAvailFiltered.length === 0,
       ingTabs,
       ingPlans: (st.ingestedPlans || []).slice(0, 5).map(p => ({ name: p.name, by: p.by, date: p.date, rows: p.rows.toLocaleString('en-IN'), runId: p.runId })),
@@ -5601,8 +5816,57 @@ class NDCApp extends React.Component {
     const idx = plans.findIndex(p => p.scCode === code);
     let plan = idx >= 0 ? plans[idx] : null;
     const wasNewPlan = idx < 0;
-    if (plan && run && sc) {
+    // RLH Plan Ingestion (Mode 2) — a validated ingested plan for this SC always takes priority
+    // over a Network Map run: it's real, not a candidate to pick between. Build the real per-row
+    // volume/cps/util via computeHypotheticalPlan (single source of truth), then attach the
+    // workflow fields (ops/planner/fb) every row needs, matching the existing row shape exactly.
+    const ingested = (st.ingestedRlhPlans || {})[code];
+    let ingestedRows = null, ingestedMetrics = null;
+    if (ingested && sc) {
+      const hyp = this.computeHypotheticalPlan({ rows: ingested.rows }, {});
+      const vehRecordFor = (name) => (d.VEH || []).find(v => v.name === name) || {};
+      ingestedRows = ingested.rows.map((row) => {
+        const hypRoute = hyp.routes.find(rt => rt.routeCode === row.routeCode) || {};
+        const vehRecord = vehRecordFor(row.veh);
+        const util = vehRecord.cap ? Math.min(0.98, +((hypRoute.volume || 0) / vehRecord.cap).toFixed(2)) : 0;
+        return Object.assign({}, row, {
+          tp: row.dcs.length, vehTp: vehRecord.tp || 7,
+          volume: hypRoute.volume || 0, cps: hypRoute.cps || 0, util,
+          // No Breakdown TAT / Out Cutoff column exists in the real RLH Plan Ingestion template —
+          // there's no real data source for these yet (flagged as an open gap, not fabricated).
+          breakdownTat: null, outCutoff: null,
+          ops: 'Pending', planner: null, fb: null,
+        });
+      });
+      const avgUtil = ingestedRows.length ? +(ingestedRows.reduce((a, r) => a + r.util, 0) / ingestedRows.length).toFixed(2) : 0;
+      ingestedMetrics = {
+        routes: hyp.routes.length, vehicles: hyp.routes.length,
+        distance: Math.round(hyp.routes.reduce((a, r) => a + r.distance, 0)),
+        cps: hyp.scCPS, cost: Math.round(hyp.scCost),
+        coverage: 1, // every DC in the ingested file is genuinely served -- nothing is "skipped" the way an optimizer run might
+        util: avgUtil,
+        avgTat: null, // same gap as row-level breakdownTat -- no real TAT data in the ingested file yet
+      };
+    }
+    if (plan && ingested && sc) {
+      // Existing plan for this SC, and a fresh validated ingestion is available for it — the
+      // ingested file always wins over whatever was there before (re-ingestion supersedes a prior
+      // push, mirroring the "existing plan, re-push against the chosen run" case below).
+      const reviewerNamesNext = reviewers.length ? reviewers : plan.reviewerNames;
+      plan = Object.assign({}, plan, { hw: null, rows: ingestedRows, pushedBy: this.plannerPersonaName(), reviewerNames: reviewerNamesNext,
+        submittedReviewers: finaliseDirect ? reviewerNamesNext.slice() : [],
+        fileBaseName: ingested.fileBaseName, metrics: ingestedMetrics });
+      plans[idx] = plan;
+      alignStatus[plan.id] = targetStatus;
+      if (plan.remote) this.showToast('Re-pushed locally \u2014 re-push isn\u2019t yet persisted to Supabase for an already-pushed plan', '#C77B00');
+    } else if (ingested && sc) {
+      // Brand new plan straight from a validated ingested file — no Network Map run involved at all.
+      const newPlanReviewers = reviewers.length ? reviewers : [];
+      plan = { id: 'PL-' + code, name: code + ' \u00b7 ' + sc.name + ' RLH', scCode: code, scName: sc.name, zone: sc.zone, hw: null, status: targetStatus, rows: ingestedRows, pushedBy: this.plannerPersonaName(), sentDate: 'Today', sendBack: 0, feedbackReceived: false, allDecided: finaliseDirect ? true : false, reviewerNames: newPlanReviewers, submittedReviewers: finaliseDirect ? newPlanReviewers.slice() : [], fileBaseName: ingested.fileBaseName, metrics: ingestedMetrics };
+      plans.push(plan);
+    } else if (plan && run && sc) {
       // existing plan for this SC — re-push it for fresh Ops review against the CHOSEN run:
+
       // rebuild rows + metrics + HW from that run so the pushed plan reflects the picked run, not the seed.
       const VEHN = ['TATA ACE / 7ft', 'Bolero / 8ft', 'TATA 407 / 10ft', '14ft Trailer'];
       const rowCount = Math.min(Math.max(run.routes, 6), 13);
@@ -5653,9 +5917,10 @@ class NDCApp extends React.Component {
       this.saveSnapshot(plan.id, 'ingested', plan.fileBaseName, plan);
       if (finaliseDirect) this.saveSnapshot(plan.id, 'finalised', plan.fileBaseName + '_FINALISED', plan);
     }
-    const runTxt = run ? (run.runId || run.id) : code;
+    const runTxt = ingested ? ingested.fileBaseName : (run ? (run.runId || run.id) : code);
+    const hwOrIngestedTxt = ingested ? 'Ingested plan' : hwTxt;
     if (finaliseDirect) this.showToast('Finalised ' + runTxt + ' directly \u2014 skipped Ops alignment, ready for RFQ handoff', '#128A3E');
-    else this.showToast('Pushed ' + runTxt + ' (' + hwTxt + ') to alignment \u00b7 ' + reviewers.length + ' reviewer' + (reviewers.length === 1 ? '' : 's'), '#128A3E');
+    else this.showToast('Pushed ' + runTxt + ' (' + hwOrIngestedTxt + ') to alignment \u00b7 ' + reviewers.length + ' reviewer' + (reviewers.length === 1 ? '' : 's'), '#128A3E');
   }
 
   decideRow(planId, idx, val) { const a = Object.assign({}, this.state.alignDecisions); a[planId] = Object.assign({}, a[planId]); a[planId][idx] = val; this.setState({ alignDecisions: a }); }
@@ -5760,8 +6025,8 @@ class NDCApp extends React.Component {
         return {
           routeCode: rt.routeCode, veh: rt.vehName, vehTp: vehRecord.tp || (prior ? prior.vehTp : 7),
           tp: rt.dcCodes.length, dcs: rt.dcCodes, rtDist: Math.round(rt.distance),
-          breakdownTat: prior ? prior.breakdownTat : +(rt.distance / 42).toFixed(1),
-          outCutoff: prior ? prior.outCutoff : '23:00',
+          breakdownTat: (prior && prior.breakdownTat != null) ? prior.breakdownTat : +(rt.distance / 42).toFixed(1),
+          outCutoff: (prior && prior.outCutoff != null) ? prior.outCutoff : '23:00',
           oLat: scLat, oLng: scLng, volume: rt.volume, util, cps: rt.cps,
           ops: 'Aligned', planner: 'Accept', fb: null, proposedBy: null,
         };
@@ -5787,6 +6052,13 @@ class NDCApp extends React.Component {
   // LMDC cluster view — generate deterministic DC breakdown rows for a route.
   // No Math.random / Date.now: all values derived from indices and char codes.
   genDcRows(r) {
+    // Real ingested rows carry r.dcs as an array of per-DC OBJECTS (real lat/lng/volume/tp/leg-
+    // distance, built by buildIngestedRlhPlans) rather than an array of bare code strings — return
+    // them as-is, no synthesis, no jitter. `realDist`/`isReal` flow through to computeHypotheticalPlan
+    // so a real ingested leg distance is used as the route's official distance, not haversine. 2026-07-23.
+    if (Array.isArray(r.dcs) && r.dcs.length && typeof r.dcs[0] === 'object') {
+      return r.dcs.map((dc) => ({ code: dc.code, name: dc.code, vol: dc.vol, tpOrder: dc.tpOrder, lat: dc.lat, lng: dc.lng, dist: dc.dist + ' km', realDist: dc.dist, isReal: true }));
+    }
     const DC_NAMES = ['Sector Hub','Market Depot','City Point','Town Centre','Zone Gateway','North Cluster','South Cluster','East Block','West Node','Central Store','Junction Hub','Metro Point','Park Depot','Ring Station','Cross Dock'];
     const dcArr = r.dcs; // array of dc-code strings e.g. ["BDQ234","BDQ567"]
     const n = dcArr.length || 1;
@@ -5804,7 +6076,7 @@ class NDCApp extends React.Component {
       const vol  = baseVol + ((charSum + i) % 3 === 0 ? 1 : 0);
       const dist = baseDist + ((charSum + i * 7) % 5);
       const nameIdx = (charSum + i * 13) % DC_NAMES.length;
-      return { code, name: DC_NAMES[nameIdx], vol, tpOrder: i + 1, lat, lng, dist: dist + ' km' };
+      return { code, name: DC_NAMES[nameIdx], vol, tpOrder: i + 1, lat, lng, dist: dist + ' km', isReal: false };
     });
   }
 
@@ -5844,6 +6116,12 @@ class NDCApp extends React.Component {
     const routeLevelVehOverride = {}; // routeCode -> new vehicle name (from a route-level cells.vehicleType change)
     const newRouteVehicle = {};       // brand-new/split route code -> chosen vehicle name
     const newRouteVehicleConflicts = {}; // brand-new route code -> Set-like map of distinct vehicle choices seen (merge conflict detector)
+    // Real ingested rows carry a real, ground-truth return leg (Round Trip Distance - last
+    // Breakdown Distance) — keyed here by original route code so the route-building step below
+    // can use it directly instead of a haversine estimate, as long as nothing has moved the DC
+    // that was originally last on that route. 2026-07-23.
+    const returnLegByOrigRoute = {};
+    plan.rows.forEach(row => { if (row.returnLeg != null) returnLegByOrigRoute[row.routeCode] = row.returnLeg; });
 
     plan.rows.forEach((row, idx) => {
       originalVehByCode[row.routeCode] = row.veh;
@@ -5862,6 +6140,12 @@ class NDCApp extends React.Component {
           if (!newRouteVehicleConflicts[ov.routeCode]) newRouteVehicleConflicts[ov.routeCode] = {};
           newRouteVehicleConflicts[ov.routeCode][chosenVeh] = true;
         }
+        // A real ingested leg distance (dc.realDist) is ground truth -- it wins whenever there's
+        // no genuine Ops-feedback override for this DC. userDistanceIsIngested distinguishes the
+        // two sources so the variance-warning below only ever fires for a human-entered feedback
+        // distance, never for the file's own ground truth (real road legs routinely differ from
+        // straight-line-plus-buffer by well over 25% -- that's expected, not a data problem).
+        const ovDistance = (ov && ov.distance != null && ov.distance !== '') ? Number(ov.distance) : null;
         flatDcs.push({
           code: dc.code, name: dc.name,
           originalRouteCode: row.routeCode,
@@ -5869,7 +6153,9 @@ class NDCApp extends React.Component {
           tp: (ov && ov.tp != null && ov.tp !== '') ? Number(ov.tp) : dc.tpOrder,
           lat: (ov && ov.lat != null && ov.lat !== '') ? Number(ov.lat) : Number(dc.lat),
           lng: (ov && ov.lng != null && ov.lng !== '') ? Number(ov.lng) : Number(dc.lng),
-          userDistance: (ov && ov.distance != null && ov.distance !== '') ? Number(ov.distance) : null,
+          userDistance: ovDistance != null ? ovDistance : (dc.realDist != null ? dc.realDist : null),
+          userDistanceIsIngested: ovDistance == null && dc.realDist != null,
+          isReal: !!dc.isReal,
           effectiveRouteCode: targetRouteCode,
           hasOverride: !!ov,
         });
@@ -5916,9 +6202,18 @@ class NDCApp extends React.Component {
       // Legs: SC -> dcs[0] -> dcs[1] -> ... -> dcs[n-1] -> SC (return leg always calculated)
       let prevLat = scLat, prevLng = scLng, distance = 0;
       dcs.forEach((dc) => {
-        const calcLeg = NDC_haversineKm(prevLat, prevLng, dc.lat, dc.lng);
+        // Real ingested coordinates must never go through NDC_haversineKm's ×55 fudge factor
+        // (calibrated only for this app's fabricated, sub-degree seed coordinates) -- use the real
+        // formula (straight-line x1.25) for any DC that came from real ingestion.
+        const haversineFn = dc.isReal ? NDC_realHaversineKm : NDC_haversineKm;
+        const calcLeg = haversineFn(prevLat, prevLng, dc.lat, dc.lng);
         const leg = dc.userDistance != null ? dc.userDistance : calcLeg;
-        if (dc.userDistance != null && calcLeg > 0) {
+        // Variance check only applies to a genuine Ops-feedback-entered distance. An ingested
+        // ground-truth leg is authoritative, not a guess to sanity-check against a straight-line
+        // estimate -- real roads routinely differ from that by well over 25% (confirmed against
+        // the real sample: ~22% of legitimate real legs exceed this threshold), so checking it
+        // here would just be noise on every ingested route, not a useful signal.
+        if (dc.userDistance != null && !dc.userDistanceIsIngested && calcLeg > 0) {
           const variancePct = Math.abs(dc.userDistance - calcLeg) / calcLeg;
           if (variancePct > 0.25) {
             warnings.push({ t: dc.code + ' (route ' + code + '): entered distance ' + dc.userDistance + ' km differs from the calculated ' + calcLeg + ' km by ' + Math.round(variancePct * 100) + '% (>25%).', sev: 'warning', dcCode: dc.code, routeCode: code, unresolved: true });
@@ -5927,7 +6222,16 @@ class NDCApp extends React.Component {
         distance += leg;
         prevLat = dc.lat; prevLng = dc.lng;
       });
-      const returnLeg = NDC_haversineKm(prevLat, prevLng, scLat, scLng);
+      // Return leg: use the real ingested ground-truth value (Round Trip Distance - last Breakdown
+      // Distance) when this route is unmodified from ingestion -- i.e. the DC that's now last is
+      // still the SAME DC that was originally last on this exact route, untouched by any DC-level
+      // feedback override. Otherwise (a new/split route, or the last DC has moved) there's no real
+      // ground truth for this specific arrangement -- fall back to a haversine estimate, using the
+      // real formula if that last DC is itself real.
+      const lastDc = dcs[n - 1];
+      const realReturnLeg = (lastDc && !lastDc.hasOverride && lastDc.originalRouteCode === code) ? returnLegByOrigRoute[lastDc.originalRouteCode] : null;
+      const returnHaversineFn = (lastDc && lastDc.isReal) ? NDC_realHaversineKm : NDC_haversineKm;
+      const returnLeg = realReturnLeg != null ? realReturnLeg : returnHaversineFn(prevLat, prevLng, scLat, scLng);
       distance += returnLeg;
 
       // Distance vs vehicle limit warning
@@ -5978,7 +6282,7 @@ class NDCApp extends React.Component {
       const vehRecord = (d.VEH || []).find(v => v.name === rt.vehName) || {};
       const util = vehRecord.cap ? Math.min(0.98, +(rt.volume / vehRecord.cap).toFixed(2)) : (prior ? prior.util : 0.7);
       const over = util > 0.9, under = util < 0.4;
-      const tat = prior ? (prior.breakdownTat + 'h') : (+(rt.distance / 42).toFixed(1) + 'h');
+      const tat = (prior && prior.breakdownTat != null) ? (prior.breakdownTat + 'h') : (+(rt.distance / 42).toFixed(1) + 'h');
       // 2026-07-14 — Route View only ever shows 2 of the 5 change flags (Vehicle Change, New Route /
       // Split) — the other 3 (DC Movement, Route Order, Distance) are DC-level concerns Route View
       // doesn't break down to, so they stay Details-only.
@@ -6300,7 +6604,7 @@ class NDCApp extends React.Component {
         return { idx, routeCode: r.routeCode, veh: r.veh, tp: r.tp, ops: (ps !== 'Pushed' ? r.ops : 'Pending'), opsChip: (ps === 'Pushed' || r.ops === 'Pending') ? '—' : r.ops, opsBg: op.bg, opsFg: op.fg, needsAttn, hasFb: !!effFb, noFb: !effFb, fbText: effFb ? effFb.remark : '', cells, dcChips, hasDcChips: dcChips.length > 0,
           proposedBy: propBy, hasProposed: !!propBy, proposedLabel: propBy ? ('Proposed by ' + propBy) : '',
           autoApproved: autoApprovable, autoApprovedLabel: 'Auto-approved · ' + (cpsDeltaPct >= 0 ? '+' : '') + cpsDeltaPct.toFixed(1) + '% CPS',
-          dcCount: r.dcs.length, rtDist: r.rtDist + ' km', cps: '₹' + Number(r.cps).toFixed(2), tat: r.breakdownTat + 'h',
+          dcCount: r.dcs.length, rtDist: r.rtDist + ' km', cps: '₹' + Number(r.cps).toFixed(2), tat: r.breakdownTat != null ? (r.breakdownTat + 'h') : '—',
           vol: aVolVal, util: aUtilVal, cap: aCapVal, routeMeta: 'Vol ' + aVolVal + ' · Util ' + aUtilVal + ' · Cap ' + aCapVal,
           mlVehTxt: r.veh, mlTpTxt: '' + r.tp, mlDcsTxt: '' + r.dcs.length, mlDistTxt: r.rtDist + ' km', mlCpsTxt: '₹' + Number(r.cps).toFixed(2), mlVolTxt: '' + aVolVal, mlUtilTxt: '' + aUtilVal,
           mlVehBg: mlVehChg ? '#FBF1DF' : 'transparent', mlVehFg: mlVehChg ? '#9A5E00' : '#5A5E66', mlVehWt: mlVehChg ? '700' : '400',
@@ -6406,7 +6710,7 @@ class NDCApp extends React.Component {
             lat: dc.lat, lng: dc.lng, latProposed: dc.hasLatLngChange ? dc.proposedLat : '', lngProposed: dc.hasLatLngChange ? dc.proposedLng : '', hasLatLngChange: dc.hasLatLngChange, fLatLng: dc.fLatLng,
             routeCode: rr.routeCode, routeCodeProposed: dc.hasRouteCodeChange ? dc.proposedRouteCode : '', hasRouteCodeChange: dc.hasRouteCodeChange, fRouteCode: dc.fRouteCode,
             tp: dc.tpOrder, tpProposed: dc.hasChgTp ? dc.chgTp : '', hasTpChange: dc.hasChgTp, fTp: dc.fTp, hasTpRipple: dc.hasTpRipple, rippleTp: dc.rippleTp,
-            zone: plan.zone, outCutoff: plan.rows[ri].outCutoff, tat: rr.tat, inCutoff: addHoursA(plan.rows[ri].outCutoff, plan.rows[ri].breakdownTat),
+            zone: plan.zone, outCutoff: plan.rows[ri].outCutoff, tat: rr.tat, inCutoff: (plan.rows[ri].outCutoff != null && plan.rows[ri].breakdownTat != null) ? addHoursA(plan.rows[ri].outCutoff, plan.rows[ri].breakdownTat) : '—',
             vehType: rr.veh, vehTypeProposed: (routeChange && routeChange.changeVal) ? routeChange.changeVal.split(' → ')[1] : '', hasVehChange: !!routeChange,
             rtDist: dc.dist, rtDistProposed: dc.hasDistChange ? dc.proposedDist : '', hasDistChange: dc.hasDistChange, fDistance: dc.fDistance,
             isFirstInGroup: di === 0, isLastInGroup: di === (rr.dcRows || []).length - 1,
@@ -6494,7 +6798,7 @@ class NDCApp extends React.Component {
           return w;
         })(),
         // Finalised-card inputs strip -- mirrors Design Review's INPUTS row (nodes / volume / HW / vehicle mix).
-        cardHwLabel: plan.hw === 0 ? 'HW 0 \u00b7 Re-optimise' : plan.hw === 0.5 ? 'HW 0.5 \u00b7 Balanced' : 'HW 1 \u00b7 Preserve routes',
+        cardHwLabel: plan.hw === 0 ? 'HW 0 \u00b7 Re-optimise' : plan.hw === 0.5 ? 'HW 0.5 \u00b7 Balanced' : plan.hw === 1 ? 'HW 1 \u00b7 Preserve routes' : 'Ingested plan',
         cardNodes: fmtInt(plan.rows.reduce((a, r) => a + r.tp, 0)), cardVolume: fmtInt(plan.rows.reduce((a, r) => a + r.volume, 0)),
         cardVehSummary: Object.entries(plan.rows.reduce((m, r) => { m[r.veh] = (m[r.veh] || 0) + 1; return m; }, {})).map(([k, v]) => k + ' \u00d7' + v).join(' \u00b7 '),
         sections: [['details', 'Plan Detail'], ['route', 'Route View']].map(sx => ({ label: sx[1], active: (st.alignSection || 'details') === sx[0], color: (st.alignSection || 'details') === sx[0] ? '#003F98' : '#5A5E66', weight: (st.alignSection || 'details') === sx[0] ? '700' : '600', onClick: () => this.setState({ alignSection: sx[0] }) })),
@@ -6505,7 +6809,7 @@ class NDCApp extends React.Component {
         // deciding then happens in the (now-frozen) Acknowledged state, same as before Finalise.
         canDecide: ps === 'Acknowledged', decideLocked: ps !== 'Acknowledged', needsAckToDecide: ps === 'In Alignment',
         showActionBar: ps === 'In Alignment' || ps === 'Acknowledged',
-        metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: '\u20b9' + plan.metrics.cps.toFixed(2) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat + 'h' }],
+        metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: '\u20b9' + plan.metrics.cps.toFixed(2) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat != null ? (plan.metrics.avgTat + 'h') : '—' }],
         rows: rows, rowCount: rows.length, flaggedCount: flaggedRows.length, alignedCount: autoAligned, hasFlagged: flaggedRows.length > 0, noFlagged: flaggedRows.length === 0, hasAligned: autoAligned > 0, routeList: routeList, selRoute: selRoute, hasSelRoute: !!selRoute, routeCards: flaggedRows, reviewHeadline: flaggedRows.length + ' route' + (flaggedRows.length === 1 ? '' : 's') + ' need a decision', alignedNote: autoAligned + ' of ' + rows.length + ' routes already aligned — no action needed', decidedCount, acceptedCount: rows.filter(r => r.decision === 'Accept').length, rejectedCount: rows.filter(r => r.decision === 'Reject').length, allDecided,
         routeViewRows: aRouteViewRows, dcViewRows: aDcViewRows, dcGroupHeaders: aDcGroupHeaders,
         // 2026-07-10 — detailed per-field review popup, opened by clicking a route with changes.
@@ -7129,7 +7433,7 @@ class NDCApp extends React.Component {
             lat: dc.lat, lng: dc.lng, latProposed: hasLatLngChange && ov.lat != null && ov.lat !== '' ? ov.lat : '', lngProposed: hasLatLngChange && ov.lng != null && ov.lng !== '' ? ov.lng : '', hasLatLngChange,
             routeCode: r.routeCode, routeCodeProposed: hasRouteCodeChange ? ov.routeCode : '', hasRouteCodeChange,
             tp: dc.tpOrder, tpProposed: hasTpChange ? ov.tp : '', hasTpChange,
-            zone: plan.zone, outCutoff: r.outCutoff, tat: r.breakdownTat + 'h', inCutoff: addHours(r.outCutoff, r.breakdownTat),
+            zone: plan.zone, outCutoff: r.outCutoff, tat: r.breakdownTat != null ? (r.breakdownTat + 'h') : '—', inCutoff: (r.outCutoff != null && r.breakdownTat != null) ? addHours(r.outCutoff, r.breakdownTat) : '—',
             vehType: r.veh, vehTypeProposed: routeVehProposed, hasVehChange: routeVehChanged,
             rtDist: dc.dist, rtDistProposed: hasDistChange ? (ov.distance + ' km') : '', hasDistChange,
             isFirstInGroup: di === 0, isLastInGroup: di === baseDcs.length - 1,
@@ -7182,7 +7486,7 @@ class NDCApp extends React.Component {
         rows, alignedN, ncN, pendN, rowCount: rows.length, allReviewed: pendN === 0, reviewLabel: (rows.length - pendN) + ' / ' + rows.length + ' reviewed',
         hasProp: oProp > 0 && !submitted, propN: oProp, propSummary: (propByNames.join(' & ') || 'A co-reviewer') + ' proposed ' + oProp + ' change' + (oProp === 1 ? '' : 's') + ' on this plan', coReviewerLabel, hasCoReviewers: coReviewerLabel.length > 0,
         submittedRecord: submitted ? ('Submitted by ' + subBySel + (subAtSel ? ' · ' + subAtSel : '')) : '',
-        metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: '\u20b9' + plan.metrics.cps.toFixed(2) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat + 'h' }],
+        metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: '\u20b9' + plan.metrics.cps.toFixed(2) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat != null ? (plan.metrics.avgTat + 'h') : '—' }],
         mixArr, routeViewRows: oRouteViewRows, dcViewRows: oDcViewRows, dcGroupHeaders: oDcGroupHeaders, secDetails: sec === 'details', secRoute: sec === 'route',
         sections: SECS.map(s => ({ label: s[1], active: sec === s[0], color: sec === s[0] ? '#003F98' : '#5A5E66', weight: sec === s[0] ? '700' : '600', onClick: () => this.setState({ opsSection: s[0] }) })),
         onAcceptAll: () => { if (pendN > 0) this.setState({ alignAllOpen: true, alignAllPlanId: plan.id }); }, acceptAllDisabled: pendN === 0, onReset: () => this.resetOps(plan.id), onMapView: () => this.openStandaloneMap(plan.scCode, 'Ops Alignment · Ops Lead'),
@@ -8463,7 +8767,7 @@ class NDCApp extends React.Component {
       ...this.inputsVals(),
       // inputs action handlers not produced by inputsVals (kept here so they survive):
       ...this.addScVals(),
-      uploadFile: () => this.ingestRlhPlan(), downloadCsv: () => this.downloadCsvFile(), nudgeReviewers: () => { const plan = (this.state.data.plans || []).find(p => p.id === this.state.alignPlanId); const names = plan && plan.reviewerNames && plan.reviewerNames.length ? plan.reviewerNames.join(', ') : 'the reviewers'; const rp = Object.assign({}, this.state.remindedPlans); if (this.state.alignPlanId) rp[this.state.alignPlanId] = true; this.setState({ remindedPlans: rp }); this.showToast('Reminder sent to ' + names, '#1E6FB8'); }, addSc: () => this.setState({ addScOpen: true, addScEditCode: null, addScForm: { type: 'LMSC', zone: 'South', localTp: '5', nonLocalTp: '3', open: '06:00', close: '22:00' }, addScReviewerIds: [] }),
+      uploadFile: () => this.ingestRlhPlanFile(), downloadCsv: () => this.downloadCsvFile(), nudgeReviewers: () => { const plan = (this.state.data.plans || []).find(p => p.id === this.state.alignPlanId); const names = plan && plan.reviewerNames && plan.reviewerNames.length ? plan.reviewerNames.join(', ') : 'the reviewers'; const rp = Object.assign({}, this.state.remindedPlans); if (this.state.alignPlanId) rp[this.state.alignPlanId] = true; this.setState({ remindedPlans: rp }); this.showToast('Reminder sent to ' + names, '#1E6FB8'); }, addSc: () => this.setState({ addScOpen: true, addScEditCode: null, addScForm: { type: 'LMSC', zone: 'South', localTp: '5', nonLocalTp: '3', open: '06:00', close: '22:00' }, addScReviewerIds: [] }),
       startCreation: () => this.go('creation'), recheckAutodml: () => this.showToast('AutoDML re-check queued', '#2F4FC6'),
       moduleTitle: tt[0], moduleSubtitle: tt[1], stubIcon: STUBICON[st.view] || ICON.dash,
       navGroups, cycleName: st.designCycle || 'July 2026', cycleOpen: !!st.cycleOpen,
