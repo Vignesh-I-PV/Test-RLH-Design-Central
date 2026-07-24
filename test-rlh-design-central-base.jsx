@@ -4387,12 +4387,16 @@ class NDCApp extends React.Component {
     const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
     if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
     const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
+    // Strip thousands-separator commas from numeric-looking fields (e.g. a quoted "1,286" cell
+    // for a volume over 999) -- Number("1,286") is NaN in JS, so without this every such row
+    // would fail validation despite being perfectly valid data.
+    const numClean = (v) => (v == null ? v : String(v).trim().replace(/,/g, ''));
     const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
       _rowNo: i + 2,
       zone: (r[idx['Zone']] || '').trim(), lmsc: (r[idx['LMSC']] || '').trim(), lmdc: (r[idx['LMDC']] || '').trim(),
-      lat: r[idx['DC latitude']], lng: r[idx['DC longitude']], volume: r[idx['Volume']],
-      routeCode: (r[idx['Route Code']] || '').trim(), tp: r[idx['Touch Point']], vehType: (r[idx['Vehicle Type']] || '').trim(),
-      breakdownDist: r[idx['Breakdown Distance']], roundTripDist: r[idx['Round Trip Distance']], runId: (r[idx['Run ID']] || '').trim(),
+      lat: numClean(r[idx['DC latitude']]), lng: numClean(r[idx['DC longitude']]), volume: numClean(r[idx['Volume']]),
+      routeCode: (r[idx['Route Code']] || '').trim(), tp: numClean(r[idx['Touch Point']]), vehType: (r[idx['Vehicle Type']] || '').trim(),
+      breakdownDist: numClean(r[idx['Breakdown Distance']]), roundTripDist: numClean(r[idx['Round Trip Distance']]), runId: (r[idx['Run ID']] || '').trim(),
     }));
     return { rows };
   }
@@ -4512,13 +4516,16 @@ class NDCApp extends React.Component {
     const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
     if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
     const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
+    // Same fix as parseRlhIngestCsv: strip thousands-separator commas from numeric fields
+    // (Number("1,286") is NaN in JS) before validation ever sees them.
+    const numClean = (v) => (v == null ? v : String(v).trim().replace(/,/g, ''));
     const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
       _rowNo: i + 2,
       code: (r[idx['SC Code']] || '').trim().toUpperCase(), name: (r[idx['SC Name']] || '').trim(),
       city: (r[idx['SC City,State']] || '').trim(), type: (r[idx['SC Type']] || '').trim(), zone: (r[idx['Zone']] || '').trim(),
-      volCap: r[idx['Volume Capacity']], sortCap: r[idx['Sort Capacity']],
-      nlhDocks: r[idx['NLH Docks']], rlhDocks: r[idx['RLH Docks']],
-      localTp: r[idx['Local TP Limit']], nonLocalTp: r[idx['Non-Local TP Limit']],
+      volCap: numClean(r[idx['Volume Capacity']]), sortCap: numClean(r[idx['Sort Capacity']]),
+      nlhDocks: numClean(r[idx['NLH Docks']]), rlhDocks: numClean(r[idx['RLH Docks']]),
+      localTp: numClean(r[idx['Local TP Limit']]), nonLocalTp: numClean(r[idx['Non-Local TP Limit']]),
       open: (r[idx['SC Opening Time']] || '').trim(), close: (r[idx['SC Closing Time']] || '').trim(),
       opsZh: (r[idx['SC Ops ZH']] || '').trim(), lhOpsZh: (r[idx['SC-LH Ops ZH']] || '').trim(),
       opsCh: (r[idx['SC Ops CH']] || '').trim(), lhOpsCh: (r[idx['SC-LH Ops CH']] || '').trim(),
@@ -4646,11 +4653,12 @@ class NDCApp extends React.Component {
     const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
     if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
     const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
+    const numClean = (v) => (v == null ? v : String(v).trim().replace(/,/g, ''));
     const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
       _rowNo: i + 2,
       scCode: (r[idx['SC Code']] || '').trim().toUpperCase(), vehicleType: (r[idx['Vehicle Type']] || '').trim(),
-      capacity: r[idx['Capacity (Shipments)']], distanceLimit: r[idx['Distance Limit (Kms)']],
-      vehicleCount: r[idx['Vehicle Count']], tpLimit: r[idx['Touch Point Limit']],
+      capacity: numClean(r[idx['Capacity (Shipments)']]), distanceLimit: numClean(r[idx['Distance Limit (Kms)']]),
+      vehicleCount: numClean(r[idx['Vehicle Count']]), tpLimit: numClean(r[idx['Touch Point Limit']]),
       zoneFeas: (r[idx['Zone Feasibility']] || '').trim(),
     }));
     return { rows };
@@ -4834,10 +4842,11 @@ class NDCApp extends React.Component {
     const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
     if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
     const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
+    const numClean = (v) => (v == null ? v : String(v).trim().replace(/,/g, ''));
     const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
       _rowNo: i + 2,
       lmscCode: (r[idx['LMSC Code']] || '').trim(), lmdcCode: (r[idx['LMDC Code']] || '').trim(),
-      flag: (r[idx['Node Flag']] || '').trim(), lat: r[idx['LMDC Latitude']], lng: r[idx['LMDC Longitude']],
+      flag: (r[idx['Node Flag']] || '').trim(), lat: numClean(r[idx['LMDC Latitude']]), lng: numClean(r[idx['LMDC Longitude']]),
     }));
     return { rows };
   }
