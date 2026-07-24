@@ -454,9 +454,9 @@ function View(B, self) {
 {(isScMaster) ? (<>
 <div style={css(`display:flex; align-items:center; gap:14px; padding:15px 18px; background:#fff; border:1px solid #E6EBF2; border-radius:8px; margin-bottom:16px;`)}>
 <div style={css(`width:38px; height:38px; border-radius:8px; background:#EAEEFB; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width={"19"} height={"19"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#003F98"} strokeWidth={"1.6"}><path d={"M7 3h7l5 5v12a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1zM14 3v5h5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
-<div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:13.5px; font-weight:700; color:#14171F;`)}>Bulk Upload — Sort Centre Master</div><div style={css(`font-size:11.5px; color:#5A5E66;`)}>One row per Sort Centre · upload replaces all prior records</div></div>
+<div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:13.5px; font-weight:700; color:#14171F;`)}>Bulk Upload — Sort Centre Master</div><div style={css(`font-size:11.5px; color:#5A5E66;`)}>One row per Sort Centre · existing SC Codes are updated, new ones are added</div></div>
 <button onClick={scMasterTemplate} style={css(`display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#C3C9D4;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `border-color:#C3C9D4;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M12 4v12M7 11l5 5 5-5M5 20h14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Template</button>
-<button onClick={uploadFile} style={css(`display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#00337D;`)}>Upload CSV</button>
+<button onClick={uploadScMasterFile} style={css(`display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#00337D;`)}>Upload CSV</button>
 </div>
 <div style={css(`display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:13px;`)}>
 <div style={css(`display:flex; align-items:center; gap:7px; height:36px; padding:0 11px; border:1px solid #E6EBF2; border-radius:8px; background:#fff;`)}>
@@ -553,7 +553,7 @@ function View(B, self) {
 <div style={css(`width:38px; height:38px; border-radius:8px; background:#EAEEFB; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width={"19"} height={"19"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#003F98"} strokeWidth={"1.6"}><path d={"M7 3h7l5 5v12a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1zM14 3v5h5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
 <div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:13.5px; font-weight:700; color:#14171F;`)}>Bulk Upload — SC Vehicle Availability</div><div style={css(`font-size:11.5px; color:#5A5E66;`)}>One row per vehicle type per SC · upload replaces all prior records</div></div>
 <button onClick={availTemplate} style={css(`display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#C3C9D4;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `border-color:#C3C9D4;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M12 4v12M7 11l5 5 5-5M5 20h14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Template</button>
-<button onClick={uploadFile} style={css(`display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#00337D;`)}>Upload CSV</button>
+<button onClick={uploadAvailFile} style={css(`display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#00337D;`)}>Upload CSV</button>
 </div>
 <div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:10px 16px; display:flex; align-items:center; gap:14px; margin-bottom:12px;`)}>
 <div style={css(`display:flex; align-items:center; gap:7px; height:36px; padding:0 11px; border:1px solid #E6EBF2; border-radius:8px; background:#fff; flex-shrink:0;`)}>
@@ -600,19 +600,18 @@ function View(B, self) {
 {(g.addForm.tpWarn) ? (<><div style={css(`margin-top:10px; font-size:11.5px; color:#C77B00; display:inline-flex; align-items:center; gap:5px;`)}><svg width={"12"} height={"12"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"} strokeLinejoin={"round"} /><line x1={"12"} y1={"9"} x2={"12"} y2={"13"} /><line x1={"12"} y1={"17"} x2={"12.01"} y2={"17"} strokeWidth={"3"} strokeLinecap={"round"} /></svg>{g.addForm.tpWarnText}</div></>) : null}
 </div>
 </>) : null}
-<div style={css(`display:grid; grid-template-columns:1.6fr 1.1fr 1.1fr 0.95fr 0.85fr 1fr 0.95fr 108px; background:#E6EBF2; position:sticky; top:0; z-index:4;`)}>
+<div style={css(`display:grid; grid-template-columns:1.6fr 1.1fr 1.1fr 0.95fr 0.85fr 1.1fr 108px; background:#E6EBF2; position:sticky; top:0; z-index:4;`)}>
 <div style={css(`padding:9px 14px; font-size:10px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>VEHICLE TYPE</div>
 <div style={css(`padding:9px 14px; font-size:10px; font-weight:700; color:#5A5E66; letter-spacing:0.04em; text-align:right;`)}>CAPACITY</div>
 <div style={css(`padding:9px 14px; font-size:10px; font-weight:700; color:#5A5E66; letter-spacing:0.04em; text-align:right;`)}>DISTANCE LIMIT</div>
 <div style={css(`padding:9px 14px; font-size:10px; font-weight:700; color:#5A5E66; letter-spacing:0.04em; text-align:center;`)}>VEHICLES</div>
 <div style={css(`padding:9px 14px; font-size:10px; font-weight:700; color:#5A5E66; letter-spacing:0.04em; text-align:center;`)}>TP LIMIT</div>
 <div style={css(`padding:9px 14px; font-size:10px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ZONE FEASIBILITY</div>
-<div style={css(`padding:9px 14px; font-size:10px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>WITHIN LIMIT</div>
 <div />
 </div>
 <div style={css(`max-height:138px; overflow-y:auto;`)}>
 {(g.rows || []).map((r, __i21) => (<React.Fragment key={__i21}>
-<div style={css(`display:grid; grid-template-columns:1.6fr 1.1fr 1.1fr 0.95fr 0.85fr 1fr 0.95fr 108px; align-items:center; border-top:1px solid #EEF1F6; background:${r.rowEditing ? '#F7F9FC' : 'transparent'};`)}>
+<div style={css(`display:grid; grid-template-columns:1.6fr 1.1fr 1.1fr 0.95fr 0.85fr 1.1fr 108px; align-items:center; border-top:1px solid #EEF1F6; background:${r.rowEditing ? '#F7F9FC' : 'transparent'};`)}>
 {/* VEHICLE TYPE */}
 {(r.rowNotEditing) ? (<><div style={css(`padding:11px 14px; font-size:12.5px; font-weight:600; color:#14171F;`)}>{r.t}</div></>) : null}
 {(r.rowEditing) ? (<><div style={css(`padding:5px 8px;`)}><select value={r.draftType} onChange={r.onDraftType} style={css(`width:100%; height:30px; padding:0 6px; border:1px solid #C3C9D4; border-radius:7px; font-family:inherit; font-size:12.5px; font-weight:600; color:#14171F; background:#fff; outline:none; cursor:pointer; appearance:auto; box-sizing:border-box;`)}>{(r.typeOpts || []).map((to, __i19) => (<React.Fragment key={__i19}><option value={to.value}>{to.label}</option></React.Fragment>))}</select></div></>) : null}
@@ -631,8 +630,6 @@ function View(B, self) {
 {/* ZONE FEASIBILITY */}
 {(r.rowNotEditing) ? (<><div style={css(`padding:11px 14px;`)}><span style={css(`display:inline-flex; padding:2px 9px; border-radius:999px; font-size:11.5px; font-weight:600; background:${r.zfBg}; color:${r.zfFg};`)}>{r.zf}</span></div></>) : null}
 {(r.rowEditing) ? (<><div style={css(`padding:5px 8px; display:flex; gap:4px; flex-wrap:wrap; align-items:center;`)}>{(r.zfChips || []).map((zc, __i20) => (<React.Fragment key={__i20}><button onClick={zc.onSelect} style={css(`height:26px; padding:0 8px; border:1px solid ${zc.bd}; background:${zc.bg}; color:${zc.fg}; font-family:inherit; font-size:11px; font-weight:600; border-radius:999px; cursor:pointer; white-space:nowrap;`)}>{zc.label}</button></React.Fragment>))}</div></>) : null}
-{/* WITHIN LIMIT (static in both modes) */}
-<div style={css(`padding:11px 14px;`)}><span style={css(`display:inline-flex; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:600; background:${r.vmBg}; color:${r.vmFg};`)}>{r.vmLabel}</span></div>
 {/* ACTION CELL */}
 {(r.rowNotEditing) ? (<><div style={css(`padding:0 6px; display:flex; align-items:center; justify-content:center; gap:4px;`)}><button onClick={r.onEditAvail} aria-label={"Edit row"} title={"Edit"} style={css(`width:30px; height:30px; border:1px solid #E6EBF2; background:#fff; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#5A5E66;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#003F98; color:#003F98;`)} onMouseLeave={(e) => hoverOff(e, `width:30px; height:30px; border:1px solid #E6EBF2; background:#fff; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#5A5E66;`, `border-color:#003F98; color:#003F98;`)}><svg aria-hidden={"true"} width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button><button onClick={r.rowDelete} aria-label={"Delete row"} title={"Remove"} style={css(`width:30px; height:30px; border:1px solid #F2C9C9; background:#FDF3F3; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#D14B4B;`)} onMouseEnter={(e) => hoverOn(e, `background:#FBEAEA;`)} onMouseLeave={(e) => hoverOff(e, `width:30px; height:30px; border:1px solid #F2C9C9; background:#FDF3F3; border-radius:7px; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#D14B4B;`, `background:#FBEAEA;`)}><svg aria-hidden={"true"} width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M5 7h14M9 7V5h6v2M6 7l1 13h10l1-13"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></div></>) : null}
 {(r.rowEditing) ? (<><div style={css(`padding:6px 8px; display:flex; align-items:center; justify-content:flex-end; gap:5px;`)}><button onClick={r.onSaveAvailRow} title={"Save"} style={css(`height:28px; padding:0 11px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:11.5px; font-weight:600; border-radius:999px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `height:28px; padding:0 11px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:11.5px; font-weight:600; border-radius:999px; cursor:pointer;`, `background:#00337D;`)}>Save</button><button onClick={r.onCancelAvailRow} title={"Cancel"} style={css(`height:28px; padding:0 10px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:11.5px; font-weight:600; border-radius:999px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#8E96A3;`)} onMouseLeave={(e) => hoverOff(e, `height:28px; padding:0 10px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:11.5px; font-weight:600; border-radius:999px; cursor:pointer;`, `border-color:#8E96A3;`)}>Cancel</button></div></>) : null}
@@ -678,27 +675,22 @@ function View(B, self) {
 <div style={css(`display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;`)}>
 <div style={css(`flex:1.4; min-width:126px;`)}>
 <div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>Vehicle Type<span style={css(`color:#D14B4B;`)}> *</span></div>
-<input value={addVehVtype} onInput={onAddVehVtype} placeholder={"e.g. 20ft"} style={css(`width:100%; height:36px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none; box-sizing:border-box; background:#fff;`)} />
+<select value={addVehVtype} onChange={onAddVehVtype} style={css(`width:100%; height:36px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none; box-sizing:border-box; background:#fff;`)}>
+<option value={""}>Select…</option>
+{(addVehTypeOptions || []).map((o, __iVT1) => (<React.Fragment key={__iVT1}><option value={o}>{o}</option></React.Fragment>))}
+</select>
 </div>
 <div style={css(`flex:1; min-width:96px;`)}>
-<div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>Capacity</div>
+<div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>Capacity (Shipments)</div>
 <input type={"number"} min={"0"} value={addVehCapacity} onInput={onAddVehCapacity} placeholder={"0"} style={css(`width:100%; height:36px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none; box-sizing:border-box; background:#fff;`)} />
 </div>
 <div style={css(`flex:1; min-width:96px;`)}>
-<div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>Dist (KM)</div>
+<div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>Distance Limit (Kms)</div>
 <input type={"number"} min={"0"} value={addVehDist} onInput={onAddVehDist} placeholder={"0"} style={css(`width:100%; height:36px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none; box-sizing:border-box; background:#fff;`)} />
 </div>
 <div style={css(`flex:1; min-width:100px;`)}>
-<div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>TP Hard Cap<span style={css(`color:#D14B4B;`)}> *</span></div>
+<div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>Touch Point Limit<span style={css(`color:#D14B4B;`)}> *</span></div>
 <input type={"number"} min={"0"} value={addVehHardCap} onInput={onAddVehHardCap} placeholder={"0"} style={css(`width:100%; height:36px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none; box-sizing:border-box; background:#fff;`)} />
-</div>
-<div style={css(`flex:1; min-width:92px;`)}>
-<div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>TP Local</div>
-<input type={"number"} min={"0"} value={addVehLocalTp} onInput={onAddVehLocalTp} placeholder={"0"} style={css(`width:100%; height:36px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none; box-sizing:border-box; background:#fff;`)} />
-</div>
-<div style={css(`flex:1; min-width:104px;`)}>
-<div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>TP Non-Local</div>
-<input type={"number"} min={"0"} value={addVehNonLocalTp} onInput={onAddVehNonLocalTp} placeholder={"0"} style={css(`width:100%; height:36px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none; box-sizing:border-box; background:#fff;`)} />
 </div>
 <div style={css(`flex:1.4; min-width:150px;`)}>
 <div style={css(`font-size:10.5px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:5px;`)}>LH Feasibility</div>
@@ -728,7 +720,7 @@ function View(B, self) {
 <div style={css(`display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr 1.2fr 84px; align-items:center; border-top:1px solid #EEF1F6; background:${v.editing ? '#F7F9FC' : 'transparent'};`)}>
 {/* VEHICLE TYPE */}
 {(v.notEditing) ? (<><div style={css(`padding:13px 14px; font-size:13px; font-weight:700; color:#14171F;`)}>{v.name}</div></>) : null}
-{(v.editing) ? (<><div style={css(`padding:7px 10px;`)}><input value={v.draftVtype} onInput={v.onDraftVtype} placeholder={"Vehicle type"} style={css(`width:100%; height:30px; border:1px solid #C3C9D4; border-radius:7px; font-family:inherit; font-size:12.5px; font-weight:700; color:#14171F; padding:0 8px; box-sizing:border-box; outline:none; background:#fff;`)} /></div></>) : null}
+{(v.editing) ? (<><div style={css(`padding:7px 10px;`)}><select value={v.draftVtype} onChange={v.onDraftVtype} style={css(`width:100%; height:30px; border:1px solid #C3C9D4; border-radius:7px; font-family:inherit; font-size:12.5px; font-weight:700; color:#14171F; padding:0 8px; box-sizing:border-box; outline:none; background:#fff;`)}>{(addVehTypeOptions || []).map((o, __iVT2) => (<React.Fragment key={__iVT2}><option value={o}>{o}</option></React.Fragment>))}</select></div></>) : null}
 {/* CAPACITY */}
 {(v.notEditing) ? (<><div style={css(`padding:13px 14px; text-align:right; font-size:13px; color:#14171F; font-variant-numeric:tabular-nums;`)}>{v.capacity}</div></>) : null}
 {(v.editing) ? (<><div style={css(`padding:7px 10px;`)}><input type={"number"} min={"0"} value={v.draftCap} onInput={v.onDraftCap} placeholder={"0"} style={css(`width:100%; height:30px; border:1px solid #C3C9D4; border-radius:7px; font-family:inherit; font-size:12.5px; color:#14171F; padding:0 8px; box-sizing:border-box; outline:none; text-align:right; background:#fff;`)} /></div></>) : null}
@@ -966,8 +958,8 @@ function View(B, self) {
 <div style={css(`display:grid; grid-template-columns:1fr 1fr; gap:14px 18px;`)}>
 {(addScContacts || []).map((c, __i38) => (<React.Fragment key={__i38}>
 <div>
-<div style={css(`font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:6px;`)}>{c.label}</div>
-<input value={c.value} onInput={c.onInput} placeholder={c.ph} style={css(`width:100%; height:38px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none;`)} />
+<div style={css(`font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:#5A5E66; margin-bottom:6px;`)}>{c.label}{(c.req) ? (<><span style={css(`color:#D14B4B;`)}> *</span></>) : null}</div>
+<input type={"email"} value={c.value} onInput={c.onInput} placeholder={c.ph} style={css(`width:100%; height:38px; padding:0 10px; border:1px solid #C3C9D4; border-radius:8px; font-family:inherit; font-size:13px; color:#14171F; outline:none;`)} />
 </div>
 </React.Fragment>))}
 </div>
@@ -3369,6 +3361,90 @@ function View(B, self) {
 </div>
 </div>
 </>) : null}
+{/* NODE ADDITIONS/CLOSURES/MIGRATIONS ROW ERRORS */}
+{(nodeErrModalOpen) ? (<>
+<div style={css(`position:fixed; inset:0; z-index:80; background:rgba(11,20,48,0.45); display:flex; align-items:center; justify-content:center; padding:24px;`)}>
+<div style={css(`width:560px; max-width:100%; background:#fff; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,0.25); overflow:hidden;`)}>
+<div style={css(`display:flex; align-items:center; gap:12px; padding:18px 20px; border-bottom:1px solid #E6EBF2;`)}>
+<div style={css(`width:38px; height:38px; border-radius:8px; background:#FBEAEA; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#D14B4B"} strokeWidth={"2"}><path d={"M12 9v4m0 4h.01M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
+<div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:14px; font-weight:700; color:#14171F;`)}>Row errors — {nodeErrModal.name}</div><div style={css(`font-size:12px; color:#5A5E66; margin-top:1px;`)}>Nothing was applied. Fix the file and re-upload.</div></div>
+<button onClick={closeNodeErrModal} style={css(`width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8E96A3; border-radius:6px;`)} onMouseEnter={(e) => hoverOn(e, `background:#F2F5FA; color:#5A5E66;`)} onMouseLeave={(e) => hoverOff(e, `width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8E96A3; border-radius:6px;`, `background:#F2F5FA; color:#5A5E66;`)}><svg width={"16"} height={"16"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M18 6L6 18M6 6l12 12"} strokeLinecap={"round"} /></svg></button>
+</div>
+<div style={css(`padding:6px 0; max-height:360px; overflow-y:auto;`)}>
+<div style={css(`display:grid; grid-template-columns:80px 1fr; background:#F2F5FA; border-bottom:1px solid #E6EBF2;`)}>
+<div style={css(`padding:8px 16px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ROW</div>
+<div style={css(`padding:8px 16px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ERROR</div>
+</div>
+{(nodeErrModal.rows || []).map((er, __i901) => (<React.Fragment key={__i901}>
+<div style={css(`display:grid; grid-template-columns:80px 1fr; border-top:1px solid #EEF1F6; align-items:center;`)} onMouseEnter={(e) => hoverOn(e, `background:#FAFBFD;`)} onMouseLeave={(e) => hoverOff(e, `display:grid; grid-template-columns:80px 1fr; border-top:1px solid #EEF1F6; align-items:center;`, `background:#FAFBFD;`)}>
+<div style={css(`padding:10px 16px; font-size:12.5px; font-weight:700; color:#D14B4B; font-variant-numeric:tabular-nums;`)}>{er.row == null ? '—' : er.row}</div>
+<div style={css(`padding:10px 16px; font-size:12.5px; color:#5A5E66;`)}>{er.msg}</div>
+</div>
+</React.Fragment>))}
+</div>
+<div style={css(`padding:14px 20px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #EEF1F6;`)}>
+<button onClick={closeNodeErrModal} style={css(`height:36px; padding:0 16px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#F2F5FA;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 16px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#F2F5FA;`)}>Close</button>
+<button onClick={nodeErrModalRetry} style={css(`height:36px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;`, `background:#00337D;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M12 16V4M7 9l5-5 5 5M5 20h14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Re-upload corrected file</button>
+</div>
+</div>
+</div>
+</>) : null}
+{/* SC MASTER BULK UPLOAD ROW ERRORS */}
+{(scErrModalOpen) ? (<>
+<div style={css(`position:fixed; inset:0; z-index:80; background:rgba(11,20,48,0.45); display:flex; align-items:center; justify-content:center; padding:24px;`)}>
+<div style={css(`width:560px; max-width:100%; background:#fff; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,0.25); overflow:hidden;`)}>
+<div style={css(`display:flex; align-items:center; gap:12px; padding:18px 20px; border-bottom:1px solid #E6EBF2;`)}>
+<div style={css(`width:38px; height:38px; border-radius:8px; background:#FBEAEA; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#D14B4B"} strokeWidth={"2"}><path d={"M12 9v4m0 4h.01M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
+<div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:14px; font-weight:700; color:#14171F;`)}>Row errors — {scErrModal.name}</div><div style={css(`font-size:12px; color:#5A5E66; margin-top:1px;`)}>Nothing was applied. Fix the file and re-upload.</div></div>
+<button onClick={closeScErrModal} style={css(`width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8E96A3; border-radius:6px;`)} onMouseEnter={(e) => hoverOn(e, `background:#F2F5FA; color:#5A5E66;`)} onMouseLeave={(e) => hoverOff(e, `width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8E96A3; border-radius:6px;`, `background:#F2F5FA; color:#5A5E66;`)}><svg width={"16"} height={"16"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M18 6L6 18M6 6l12 12"} strokeLinecap={"round"} /></svg></button>
+</div>
+<div style={css(`padding:6px 0; max-height:360px; overflow-y:auto;`)}>
+<div style={css(`display:grid; grid-template-columns:80px 1fr; background:#F2F5FA; border-bottom:1px solid #E6EBF2;`)}>
+<div style={css(`padding:8px 16px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ROW</div>
+<div style={css(`padding:8px 16px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ERROR</div>
+</div>
+{(scErrModal.rows || []).map((er, __i902) => (<React.Fragment key={__i902}>
+<div style={css(`display:grid; grid-template-columns:80px 1fr; border-top:1px solid #EEF1F6; align-items:center;`)} onMouseEnter={(e) => hoverOn(e, `background:#FAFBFD;`)} onMouseLeave={(e) => hoverOff(e, `display:grid; grid-template-columns:80px 1fr; border-top:1px solid #EEF1F6; align-items:center;`, `background:#FAFBFD;`)}>
+<div style={css(`padding:10px 16px; font-size:12.5px; font-weight:700; color:#D14B4B; font-variant-numeric:tabular-nums;`)}>{er.row == null ? '—' : er.row}</div>
+<div style={css(`padding:10px 16px; font-size:12.5px; color:#5A5E66;`)}>{er.msg}</div>
+</div>
+</React.Fragment>))}
+</div>
+<div style={css(`padding:14px 20px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #EEF1F6;`)}>
+<button onClick={closeScErrModal} style={css(`height:36px; padding:0 16px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#F2F5FA;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 16px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#F2F5FA;`)}>Close</button>
+<button onClick={scErrModalRetry} style={css(`height:36px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;`, `background:#00337D;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M12 16V4M7 9l5-5 5 5M5 20h14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Re-upload corrected file</button>
+</div>
+</div>
+</div>
+</>) : null}
+{/* SC VEHICLE AVAILABILITY BULK UPLOAD ROW ERRORS */}
+{(availErrModalOpen) ? (<>
+<div style={css(`position:fixed; inset:0; z-index:80; background:rgba(11,20,48,0.45); display:flex; align-items:center; justify-content:center; padding:24px;`)}>
+<div style={css(`width:560px; max-width:100%; background:#fff; border-radius:12px; box-shadow:0 20px 50px rgba(0,0,0,0.25); overflow:hidden;`)}>
+<div style={css(`display:flex; align-items:center; gap:12px; padding:18px 20px; border-bottom:1px solid #E6EBF2;`)}>
+<div style={css(`width:38px; height:38px; border-radius:8px; background:#FBEAEA; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#D14B4B"} strokeWidth={"2"}><path d={"M12 9v4m0 4h.01M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
+<div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:14px; font-weight:700; color:#14171F;`)}>Row errors — {availErrModal.name}</div><div style={css(`font-size:12px; color:#5A5E66; margin-top:1px;`)}>Nothing was applied. Fix the file and re-upload.</div></div>
+<button onClick={closeAvailErrModal} style={css(`width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8E96A3; border-radius:6px;`)} onMouseEnter={(e) => hoverOn(e, `background:#F2F5FA; color:#5A5E66;`)} onMouseLeave={(e) => hoverOff(e, `width:28px; height:28px; border:none; background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8E96A3; border-radius:6px;`, `background:#F2F5FA; color:#5A5E66;`)}><svg width={"16"} height={"16"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M18 6L6 18M6 6l12 12"} strokeLinecap={"round"} /></svg></button>
+</div>
+<div style={css(`padding:6px 0; max-height:360px; overflow-y:auto;`)}>
+<div style={css(`display:grid; grid-template-columns:80px 1fr; background:#F2F5FA; border-bottom:1px solid #E6EBF2;`)}>
+<div style={css(`padding:8px 16px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ROW</div>
+<div style={css(`padding:8px 16px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ERROR</div>
+</div>
+{(availErrModal.rows || []).map((er, __i903) => (<React.Fragment key={__i903}>
+<div style={css(`display:grid; grid-template-columns:80px 1fr; border-top:1px solid #EEF1F6; align-items:center;`)} onMouseEnter={(e) => hoverOn(e, `background:#FAFBFD;`)} onMouseLeave={(e) => hoverOff(e, `display:grid; grid-template-columns:80px 1fr; border-top:1px solid #EEF1F6; align-items:center;`, `background:#FAFBFD;`)}>
+<div style={css(`padding:10px 16px; font-size:12.5px; font-weight:700; color:#D14B4B; font-variant-numeric:tabular-nums;`)}>{er.row == null ? '—' : er.row}</div>
+<div style={css(`padding:10px 16px; font-size:12.5px; color:#5A5E66;`)}>{er.msg}</div>
+</div>
+</React.Fragment>))}
+</div>
+<div style={css(`padding:14px 20px; display:flex; justify-content:flex-end; gap:10px; border-top:1px solid #EEF1F6;`)}>
+<button onClick={closeAvailErrModal} style={css(`height:36px; padding:0 16px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#F2F5FA;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 16px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#F2F5FA;`)}>Close</button>
+<button onClick={availErrModalRetry} style={css(`height:36px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;`, `background:#00337D;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M12 16V4M7 9l5-5 5 5M5 20h14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Re-upload corrected file</button>
+</div>
+</div>
+</div>
+</>) : null}
 {/* DELETE MASTER ROW CONFIRM (top-level: renders on Design Inputs SC/Vehicle Master, independent of active view) */}
 {(delConfirmOpen) ? (<>
 <div style={css(`position:fixed; inset:0; z-index:80; background:rgba(11,20,48,0.45); display:flex; align-items:center; justify-content:center; padding:24px;`)}>
@@ -3865,6 +3941,13 @@ const SC_POC_FIELDS = [
   ['opsAm1', 'Ops AM-1'], ['lhOpsAm1', 'LH Ops AM-1'],
   ['opsAm2', 'Ops AM-2'], ['lhOpsAm2', 'LH Ops AM-2'],
 ];
+// VEH_TYPE_OPTIONS — the fixed 10 vehicle sizes from the Vehicle Master template's Validation
+// Rule (Selection field, not free text). Shared by the Add Vehicle Type form and the Vehicle
+// Master list's inline row-rename dropdown.
+const VEH_TYPE_OPTIONS = ['7FT Trailer', '8FT Trailer', '10FT Trailer', '14FT Trailer', '17FT Trailer', '20FT Trailer', '22FT Trailer', '24FT Trailer', '32FT Trailer', '42FT Trailer'];
+// NDC_isValidEmail — shared email-format check used by the SC Master form (submitAddSc) and the
+// SC Master CSV bulk-upload validator, so both enforce the identical rule.
+function NDC_isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v == null ? '' : v).trim()); }
 class NDCApp extends React.Component {
   constructor(props) {
     super(props);
@@ -3911,6 +3994,9 @@ class NDCApp extends React.Component {
       ingestedPlans: [],
       ingestedRlhPlans: {}, // real per-SC "validated, ready to push" plans from RLH Plan Ingestion — keyed by LMSC code
       ingestErrModal: null,
+      nodeErrModal: null,
+      scErrModal: null,
+      availErrModal: null,
       resolved: {},
       creationStep: 1, creationView: 'wizard',
       fixReturnStep: null, focusSC: null,
@@ -3978,20 +4064,15 @@ class NDCApp extends React.Component {
     // is untouched — this only changes what buildSeed() hands them at startup, from "80 fabricated
     // Sort Centres + demo plans" to "nothing, ready for real ingested data."
     //
-    // Vehicle Master (VEH) is the one exception, kept as real system config rather than fictitious
-    // scenario data — computeHypotheticalPlan (cost/cap/feasibility) depends on it existing to
-    // compute anything at all. Replace these entries with your organisation's real fleet before
-    // ingesting real plans if they differ from this placeholder set.
-    const VEH = [
-      { name: 'TATA ACE / 7ft',  tp: 4, cap: 1600,  caps: [1400, 1600, 1800],  dist: 250,  feas: ['RLH'] },
-      { name: 'Bolero / 8ft',    tp: 7, cap: 2600,  caps: [2400, 2600, 2800],  dist: 400,  feas: ['RLH'] },
-      { name: 'TATA 407 / 10ft', tp: 7, cap: 3500,  caps: [3300, 3500, 3700],  dist: 600,  feas: ['NLH', 'RLH'] },
-      { name: '17ft / MCV',      tp: 6, cap: 5000,  caps: [4800, 5000, 5200],  dist: 700,  feas: ['NLH', 'RLH'] },
-      { name: '19ft / MCV',      tp: 5, cap: 6500,  caps: [6300, 6500, 6700],  dist: 800,  feas: ['NLH', 'RLH'] },
-      { name: '22ft / LCV',      tp: 4, cap: 8000,  caps: [7800, 8000, 8200],  dist: 900,  feas: ['NLH', 'RLH'] },
-      { name: '14ft Trailer',    tp: 7, cap: 4500,  caps: [4300, 4500, 4700],  dist: 800,  feas: ['NLH'] },
-      { name: '32ft XL Trailer', tp: 3, cap: 14000, caps: [13800, 14000, 14200], dist: 1200, feas: ['NLH'] },
-    ];
+    // 2026-07-24 — Vehicle Master fleet cleared per explicit user instruction, now that the Add/
+    // Edit Vehicle Type form matches the real Vehicle Master template (fixed Vehicle Type dropdown
+    // of 10 sizes, Capacity/Distance Limit/Touch Point Limit, LH Feasibility). Previously this
+    // array was deliberately kept non-empty as placeholder fleet config; the user will now enter
+    // real vehicle types through that form instead. NOTE: computeHypotheticalPlan/genDcRows/etc.
+    // all already read d.VEH defensively (`(d.VEH || []).find(...)`), so an empty fleet won't
+    // crash anything — Design Creation / Ops Alignment vehicle dropdowns will just show no options
+    // until real vehicle types are added here.
+    const VEH = [];
 
     return {
       scs: [], runs: [], plans: [],
@@ -4078,13 +4159,13 @@ class NDCApp extends React.Component {
       txt('sortCap', 'Sort Capacity', true, 'shipments / day'),
       txt('nlhDocks', 'NLH Docks', true, ''),
       txt('rlhDocks', 'RLH Docks', true, ''),
-      txt('localTp', 'Local TP Limit', true, ''),
-      txt('nonLocalTp', 'Non-Local TP Limit', true, ''),
+      txt('localTp', 'Local TP Limit', false, ''),
+      txt('nonLocalTp', 'Non-Local TP Limit', false, ''),
       tm('open', 'SC Opening Time', '06:00'),
       tm('close', 'SC Closing Time', '22:00'),
     ];
-    const contacts = [['opsZh', 'SC Ops ZH'], ['lhOpsZh', 'SC-LH Ops ZH'], ['opsCh', 'SC Ops CH'], ['lhOpsCh', 'SC-LH Ops CH'], ['opsAm1', 'SC Ops AM-1'], ['lhOpsAm1', 'SC-LH Ops AM-1'], ['opsAm2', 'SC Ops AM-2'], ['lhOpsAm2', 'SC-LH Ops AM-2']];
-    const addScContacts = contacts.map(c => ({ key: c[0], label: c[1], value: f[c[0]] || '', ph: 'name@meesho.com', onInput: set(c[0]) }));
+    const contacts = [['opsZh', 'SC Ops ZH', true], ['lhOpsZh', 'SC-LH Ops ZH', true], ['opsCh', 'SC Ops CH', true], ['lhOpsCh', 'SC-LH Ops CH', true], ['opsAm1', 'SC Ops AM-1', false], ['lhOpsAm1', 'SC-LH Ops AM-1', false], ['opsAm2', 'SC Ops AM-2', false], ['lhOpsAm2', 'SC-LH Ops AM-2', false]];
+    const addScContacts = contacts.map(c => ({ key: c[0], label: c[1], req: !!c[2], value: f[c[0]] || '', ph: 'name@meesho.com', onInput: set(c[0]) }));
     const editing = !!st.addScEditCode;
     const directory = st.opsLeadDirectory || [];
     const selectedIds = st.addScReviewerIds || [];
@@ -4104,7 +4185,7 @@ class NDCApp extends React.Component {
     // never had a pocs field at all) by treating anything non-object as "no POCs on file".
     const pocsSrc = (sc.pocs && !Array.isArray(sc.pocs)) ? sc.pocs : {};
     const form = {
-      code: sc.code, name: sc.name, city: (sc.name || '') + (sc.zone ? ', ' + sc.zone : ''),
+      code: sc.code, name: sc.name, city: sc.city != null ? sc.city : ((sc.name || '') + (sc.zone ? ', ' + sc.zone : '')),
       type: sc.type || 'LMSC', zone: sc.zone || 'South',
       volCap: String(sc.volCap || ''), sortCap: String(sc.sortCap || ''),
       // Real stored values when present; blank/default only for legacy seed SCs that never had
@@ -4139,16 +4220,36 @@ class NDCApp extends React.Component {
     const code = (f.code || '').trim().toUpperCase();
     if (!code) { this.showToast('SC Code is required', '#C77B00'); return; }
     const num = (x) => { const n = parseInt(String(x == null ? '' : x).replace(/[^0-9]/g, ''), 10); return isNaN(n) ? 0 : n; };
+    // Email validation — hard block, per template ("Input Format: email ID" is a distinct format
+    // rule, not a warning-tagged one like the TP limits below). Mandatory fields must be present
+    // AND valid; optional fields may be blank, but must be valid if filled in at all.
+    const MANDATORY_POC = ['opsZh', 'lhOpsZh', 'opsCh', 'lhOpsCh'];
+    for (const k of MANDATORY_POC) {
+      const v = (f[k] || '').trim();
+      const label = (SC_POC_FIELDS.find(p => p[0] === k) || [k, k])[1];
+      if (!v) { this.showToast('SC ' + label + ' is required', '#C77B00'); return; }
+      if (!NDC_isValidEmail(v)) { this.showToast('SC ' + label + ' must be a valid email address: "' + v + '"', '#C77B00'); return; }
+    }
+    for (const [k, label] of SC_POC_FIELDS) {
+      if (MANDATORY_POC.indexOf(k) >= 0) continue;
+      const v = (f[k] || '').trim();
+      if (v && !NDC_isValidEmail(v)) { this.showToast('SC ' + label + ' must be a valid email address: "' + v + '"', '#C77B00'); return; }
+    }
     // Capture all 8 POC/contact fields, keyed by field name (not a filtered flat array) -- see
     // SC_POC_FIELDS. This is what makes reopening the edit form show each name back in the exact
     // field it was entered under, regardless of which other fields were left blank.
     const pocs = {}; SC_POC_FIELDS.forEach(([k]) => { pocs[k] = (f[k] || '').trim(); });
     const reviewerIds = st.addScReviewerIds || [];
-    // Real-input fields that used to be silently dropped on save (type) or collapsed into a
+    // Local/Non-Local TP Limit: Optional per template, "Max=7 (Warning)" -- doesn't block saving,
+    // just flags. Same non-blocking-warning pattern as Vehicle Master's RLH TP>7 check.
+    if (num(f.localTp) > 7) this.showToast('Local TP Limit ' + num(f.localTp) + ' exceeds the recommended max of 7 — saved, but flagged.', '#C77B00');
+    if (num(f.nonLocalTp) > 7) this.showToast('Non-Local TP Limit ' + num(f.nonLocalTp) + ' exceeds the recommended max of 7 — saved, but flagged.', '#C77B00');
+    // Real-input fields that used to be silently dropped on save (type, city) or collapsed into a
     // single combined number the list view then re-derived from a code hash anyway (docks/TP/
     // hours) -- now stored explicitly so the SC Master list can read the actual entered values.
     const realFields = {
       type: f.type || 'LMSC',
+      city: (f.city || '').trim(),
       localTp: num(f.localTp), nonLocalTp: num(f.nonLocalTp),
       open: f.open || '', close: f.close || '',
       nlhDocks: num(f.nlhDocks), rlhDocks: num(f.rlhDocks),
@@ -4183,12 +4284,12 @@ class NDCApp extends React.Component {
     // Edit mode — update the type's params via a vehEdits override keyed by the original name.
     if (st.addVehEditName) {
       const ve = Object.assign({}, st.vehEdits || {});
-      ve[st.addVehEditName] = { capacity: num(f.capacity), dist: num(f.dist), tp: num(hardCap), localTp: num(f.localTp), nonLocalTp: num(f.nonLocalTp), feas: (f.feas || []).slice() };
+      ve[st.addVehEditName] = { capacity: num(f.capacity), dist: num(f.dist), tp: num(hardCap), feas: (f.feas || []).slice() };
       this.setState({ vehEdits: ve, addVehOpen: false, addVehForm: {}, addVehEditName: null });
       this.showToast(st.addVehEditName + ' updated in vehicle master', '#128A3E');
       return;
     }
-    const veh = { name: name, capacity: num(f.capacity), dist: num(f.dist), tp: num(hardCap), localTp: num(f.localTp), nonLocalTp: num(f.nonLocalTp), feas: (f.feas || []).slice() };
+    const veh = { name: name, capacity: num(f.capacity), dist: num(f.dist), tp: num(hardCap), feas: (f.feas || []).slice() };
     this.setState({ addedVehTypes: (st.addedVehTypes || []).concat([veh]), addVehOpen: false, addVehForm: {} });
     this.showToast(name + ' added to vehicle master', '#128A3E');
   }
@@ -4362,6 +4463,240 @@ class NDCApp extends React.Component {
     return plans;
   }
 
+  // ===== SC Master bulk CSV upload — real pipeline, replacing the previously-broken "Upload CSV"
+  // button (it silently called ingestRlhPlanFile — the wrong feature entirely). Upsert-by-SC-Code:
+  // a code already present (in data.scs or addedScs) is treated as an update, routed through the
+  // same scEdits overlay the single-entry Edit SC form uses; a new code is added fresh. The
+  // template didn't specify update-vs-insert semantics for a re-uploaded code — this is a judgment
+  // call, flagged to the user as such. All-or-nothing per file, matching the existing convention.
+  parseScMasterCsv(text) {
+    const table = NDC_parseCsv(text);
+    if (!table.length) return { fileError: 'File is empty.' };
+    const header = table[0].map(h => (h || '').trim());
+    const EXPECTED = ['SC Code', 'SC Name', 'SC City,State', 'SC Type', 'Zone', 'Volume Capacity', 'Sort Capacity', 'NLH Docks', 'RLH Docks', 'Local TP Limit', 'Non-Local TP Limit', 'SC Opening Time', 'SC Closing Time', 'SC Ops ZH', 'SC-LH Ops ZH', 'SC Ops CH', 'SC-LH Ops CH', 'SC Ops AM-1', 'SC-LH Ops AM-1', 'SC Ops AM-2', 'SC-LH Ops AM-2'];
+    const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
+    if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
+    const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
+    const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
+      _rowNo: i + 2,
+      code: (r[idx['SC Code']] || '').trim().toUpperCase(), name: (r[idx['SC Name']] || '').trim(),
+      city: (r[idx['SC City,State']] || '').trim(), type: (r[idx['SC Type']] || '').trim(), zone: (r[idx['Zone']] || '').trim(),
+      volCap: r[idx['Volume Capacity']], sortCap: r[idx['Sort Capacity']],
+      nlhDocks: r[idx['NLH Docks']], rlhDocks: r[idx['RLH Docks']],
+      localTp: r[idx['Local TP Limit']], nonLocalTp: r[idx['Non-Local TP Limit']],
+      open: (r[idx['SC Opening Time']] || '').trim(), close: (r[idx['SC Closing Time']] || '').trim(),
+      opsZh: (r[idx['SC Ops ZH']] || '').trim(), lhOpsZh: (r[idx['SC-LH Ops ZH']] || '').trim(),
+      opsCh: (r[idx['SC Ops CH']] || '').trim(), lhOpsCh: (r[idx['SC-LH Ops CH']] || '').trim(),
+      opsAm1: (r[idx['SC Ops AM-1']] || '').trim(), lhOpsAm1: (r[idx['SC-LH Ops AM-1']] || '').trim(),
+      opsAm2: (r[idx['SC Ops AM-2']] || '').trim(), lhOpsAm2: (r[idx['SC-LH Ops AM-2']] || '').trim(),
+    }));
+    return { rows };
+  }
+
+  validateScMasterRows(rows) {
+    const errors = [], warnings = [];
+    const isNum = (v) => v !== '' && v != null && !isNaN(Number(v));
+    const TYPES = { fmsc: 'FMSC', lmsc: 'LMSC', hybrid: 'Hybrid' };
+    const ZONES = ['North', 'South', 'East', 'West'];
+    const timeOk = (v) => !v || /^\d{2}:\d{2}$/.test(v);
+    const seen = {};
+    rows.forEach(r => {
+      if (!r.code) errors.push({ row: r._rowNo, msg: 'SC Code is blank' });
+      else if (!/^[A-Za-z0-9]{3,6}$/.test(r.code)) errors.push({ row: r._rowNo, msg: 'SC Code must be alphanumeric, 3-6 characters: "' + r.code + '"' });
+      else { if (seen[r.code]) errors.push({ row: r._rowNo, msg: 'SC Code "' + r.code + '" appears more than once in this file' }); seen[r.code] = true; }
+      const typeNorm = TYPES[r.type.toLowerCase()];
+      if (!r.type) errors.push({ row: r._rowNo, msg: 'SC Type is blank' });
+      else if (!typeNorm) errors.push({ row: r._rowNo, msg: 'SC Type must be one of FMSC / LMSC / Hybrid: "' + r.type + '"' });
+      else r.type = typeNorm;
+      if (!r.zone) errors.push({ row: r._rowNo, msg: 'Zone is blank' });
+      else if (ZONES.indexOf(r.zone) < 0) errors.push({ row: r._rowNo, msg: 'Zone must be one of ' + ZONES.join('/') + ': "' + r.zone + '"' });
+      if (!isNum(r.volCap) || Number(r.volCap) < 0) errors.push({ row: r._rowNo, msg: 'Volume Capacity must be a non-negative number: ' + r.volCap });
+      if (!isNum(r.sortCap) || Number(r.sortCap) < 0) errors.push({ row: r._rowNo, msg: 'Sort Capacity must be a non-negative number: ' + r.sortCap });
+      if (!isNum(r.nlhDocks) || Number(r.nlhDocks) < 0) errors.push({ row: r._rowNo, msg: 'NLH Docks must be a non-negative number: ' + r.nlhDocks });
+      if (!isNum(r.rlhDocks) || Number(r.rlhDocks) < 0) errors.push({ row: r._rowNo, msg: 'RLH Docks must be a non-negative number: ' + r.rlhDocks });
+      // Local/Non-Local TP Limit: optional, "Max=7 (Warning)" -- non-blocking, matches the form.
+      if (r.localTp !== '' && r.localTp != null) {
+        if (!isNum(r.localTp)) errors.push({ row: r._rowNo, msg: 'Local TP Limit must be a number: ' + r.localTp });
+        else if (Number(r.localTp) > 7) warnings.push({ row: r._rowNo, msg: 'Local TP Limit ' + r.localTp + ' exceeds the recommended max of 7' });
+      }
+      if (r.nonLocalTp !== '' && r.nonLocalTp != null) {
+        if (!isNum(r.nonLocalTp)) errors.push({ row: r._rowNo, msg: 'Non-Local TP Limit must be a number: ' + r.nonLocalTp });
+        else if (Number(r.nonLocalTp) > 7) warnings.push({ row: r._rowNo, msg: 'Non-Local TP Limit ' + r.nonLocalTp + ' exceeds the recommended max of 7' });
+      }
+      if (!timeOk(r.open)) errors.push({ row: r._rowNo, msg: 'SC Opening Time must be HH:MM: "' + r.open + '"' });
+      if (!timeOk(r.close)) errors.push({ row: r._rowNo, msg: 'SC Closing Time must be HH:MM: "' + r.close + '"' });
+      // POC emails: 4 mandatory, 4 optional-but-validated-if-present -- hard block, per user decision.
+      const MANDATORY = [['opsZh', 'SC Ops ZH'], ['lhOpsZh', 'SC-LH Ops ZH'], ['opsCh', 'SC Ops CH'], ['lhOpsCh', 'SC-LH Ops CH']];
+      const OPTIONAL = [['opsAm1', 'SC Ops AM-1'], ['lhOpsAm1', 'SC-LH Ops AM-1'], ['opsAm2', 'SC Ops AM-2'], ['lhOpsAm2', 'SC-LH Ops AM-2']];
+      MANDATORY.forEach(([k, label]) => {
+        if (!r[k]) errors.push({ row: r._rowNo, msg: label + ' is blank' });
+        else if (!NDC_isValidEmail(r[k])) errors.push({ row: r._rowNo, msg: label + ' must be a valid email address: "' + r[k] + '"' });
+      });
+      OPTIONAL.forEach(([k, label]) => {
+        if (r[k] && !NDC_isValidEmail(r[k])) errors.push({ row: r._rowNo, msg: label + ' must be a valid email address: "' + r[k] + '"' });
+      });
+    });
+    return { errors, warnings, ok: errors.length === 0 };
+  }
+
+  buildScMasterRows(rows) {
+    const num = (x) => { const n = parseInt(String(x == null ? '' : x).replace(/[^0-9.]/g, ''), 10); return isNaN(n) ? 0 : n; };
+    return rows.map(r => ({
+      code: r.code, name: r.name || r.code, cityCode: r.code.replace(/[^A-Z]/g, '').slice(0, 3) || r.code, city: r.city,
+      type: r.type, zone: r.zone, dcCount: 0,
+      volume: num(r.volCap), volCap: num(r.volCap), sortCap: num(r.sortCap),
+      nlhDocks: num(r.nlhDocks), rlhDocks: num(r.rlhDocks), docks: num(r.nlhDocks) + num(r.rlhDocks),
+      localTp: r.localTp !== '' ? num(r.localTp) : 0, nonLocalTp: r.nonLocalTp !== '' ? num(r.nonLocalTp) : 0,
+      open: r.open || '', close: r.close || '',
+      lat: 0, lng: 0, hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0,
+      pocs: { opsZh: r.opsZh, lhOpsZh: r.lhOpsZh, opsCh: r.opsCh, lhOpsCh: r.lhOpsCh, opsAm1: r.opsAm1, lhOpsAm1: r.lhOpsAm1, opsAm2: r.opsAm2, lhOpsAm2: r.lhOpsAm2 },
+    }));
+  }
+
+  uploadScMasterFile() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.csv';
+    inp.onchange = (e) => {
+      const f = e.target.files && e.target.files[0]; if (!f) { this.showToast('Upload cancelled', '#5A5E66'); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const { rows, fileError } = this.parseScMasterCsv(String(reader.result || ''));
+        if (fileError) { this.setState({ scErrModal: { name: f.name, rows: [{ row: null, msg: fileError }] } }); this.showToast('Could not read ' + f.name + ' — ' + fileError, '#D14B4B'); return; }
+        const { errors, warnings, ok } = this.validateScMasterRows(rows);
+        if (!ok) {
+          this.setState({ scErrModal: { name: f.name, rows: errors } });
+          this.showToast(errors.length + ' row error' + (errors.length === 1 ? '' : 's') + ' in ' + f.name + ' — fix and re-upload; nothing was applied', '#D14B4B');
+          return;
+        }
+        const built = this.buildScMasterRows(rows);
+        const st = this.state;
+        const existingCodes = {}; (st.data.scs || []).forEach(s => { existingCodes[s.code] = true; }); (st.addedScs || []).forEach(s => { existingCodes[s.code] = true; });
+        const edits = Object.assign({}, st.scEdits || {});
+        const newAdds = [];
+        built.forEach(sc => { if (existingCodes[sc.code]) edits[sc.code] = sc; else newAdds.push(sc); });
+        const addedScs = (st.addedScs || []).map(s => edits[s.code] ? Object.assign({}, s, edits[s.code]) : s).concat(newAdds);
+        this.setState({ addedScs, scEdits: edits, scErrModal: null });
+        const warnMsg = warnings.length ? (' · ' + warnings.length + ' warning' + (warnings.length === 1 ? '' : 's')) : '';
+        this.showToast('Uploaded ' + f.name + ' — ' + built.length + ' SC' + (built.length === 1 ? '' : 's') + ' applied' + warnMsg, '#128A3E');
+      };
+      reader.readAsText(f);
+    };
+    inp.click();
+  }
+
+  // Effective Vehicle Master pool -- same VEH + vehEdits + addedVehTypes chain the render layer
+  // builds as VEHMA, reconstructed here for use inside validate/build (which run outside that
+  // render closure).
+  effectiveVehPool() {
+    const st = this.state, d = st.data;
+    const vehEdits = st.vehEdits || {};
+    return (d.VEH || []).filter(v => !(st.vehRemoved || {})[v.name]).map(v => {
+      const ov = vehEdits[v.name] || {};
+      return { name: v.name, cap: ov.capacity != null ? ov.capacity : v.cap, dist: ov.dist != null ? ov.dist : v.dist, tp: ov.hardCap != null ? ov.hardCap : v.tp };
+    }).concat((st.addedVehTypes || []).map(v => {
+      const ov = vehEdits[v.name] || {};
+      return { name: v.name, cap: ov.capacity != null ? ov.capacity : (v.capacity || v.cap || 2000), dist: ov.dist != null ? ov.dist : (v.dist || 600), tp: ov.hardCap != null ? ov.hardCap : (v.tp || 7) };
+    }));
+  }
+
+  // ===== SC Vehicle Availability bulk CSV upload — real pipeline, replacing the previously-broken
+  // "Upload CSV" button (it silently called ingestRlhPlanFile too). "Upload replaces all prior
+  // records" per the existing UI copy -- a successful upload clears availAdded/availEdits/
+  // availRemoved entirely and rebuilds availAdded fresh, grouped by SC Code.
+  parseAvailCsv(text) {
+    const table = NDC_parseCsv(text);
+    if (!table.length) return { fileError: 'File is empty.' };
+    const header = table[0].map(h => (h || '').trim());
+    const EXPECTED = ['SC Code', 'Vehicle Type', 'Capacity (Shipments)', 'Distance Limit (Kms)', 'Vehicle Count', 'Touch Point Limit', 'Zone Feasibility'];
+    const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
+    if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
+    const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
+    const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
+      _rowNo: i + 2,
+      scCode: (r[idx['SC Code']] || '').trim().toUpperCase(), vehicleType: (r[idx['Vehicle Type']] || '').trim(),
+      capacity: r[idx['Capacity (Shipments)']], distanceLimit: r[idx['Distance Limit (Kms)']],
+      vehicleCount: r[idx['Vehicle Count']], tpLimit: r[idx['Touch Point Limit']],
+      zoneFeas: (r[idx['Zone Feasibility']] || '').trim(),
+    }));
+    return { rows };
+  }
+
+  // SC Code cross-check against SC Master IS a hard error here (unlike the Node Changes precedent,
+  // where an unresolved LMSC was left as a future enhancement) -- because this tab's cards are now
+  // derived strictly from the real SC list; a row for a code that doesn't exist has nowhere to
+  // attach and would silently vanish rather than just being unvalidated.
+  validateAvailRows(rows) {
+    const d = this.state.data;
+    const scCodes = {}; (this.state.addedScs || []).forEach(s => { scCodes[s.code] = true; }); (d.scs || []).forEach(s => { scCodes[s.code] = true; });
+    const vehPool = this.effectiveVehPool();
+    const vehByName = {}; vehPool.forEach(v => { vehByName[v.name] = v; });
+    const isNum = (v) => v !== '' && v != null && !isNaN(Number(v));
+    const ZF = { local: 'Local', 'non-local': 'Non-Local', both: 'Both' };
+    const errors = [];
+    rows.forEach(r => {
+      if (!r.scCode) errors.push({ row: r._rowNo, msg: 'SC Code is blank' });
+      else if (!/^[A-Za-z0-9]{3,6}$/.test(r.scCode)) errors.push({ row: r._rowNo, msg: 'SC Code must be alphanumeric, 3-6 characters: "' + r.scCode + '"' });
+      else if (!scCodes[r.scCode]) errors.push({ row: r._rowNo, msg: 'SC Code "' + r.scCode + '" not found in SC Master' });
+      if (!r.vehicleType) errors.push({ row: r._rowNo, msg: 'Vehicle Type is blank' });
+      else if (!vehByName[r.vehicleType]) errors.push({ row: r._rowNo, msg: 'Vehicle Type "' + r.vehicleType + '" not found in Vehicle Master' });
+      if (r.capacity !== '' && r.capacity != null && (!isNum(r.capacity) || Number(r.capacity) < 0)) errors.push({ row: r._rowNo, msg: 'Capacity (Shipments) must be a non-negative number: ' + r.capacity });
+      if (r.distanceLimit !== '' && r.distanceLimit != null && (!isNum(r.distanceLimit) || Number(r.distanceLimit) < 0)) errors.push({ row: r._rowNo, msg: 'Distance Limit (Kms) must be a non-negative number: ' + r.distanceLimit });
+      if (r.vehicleCount !== '' && r.vehicleCount != null && (!isNum(r.vehicleCount) || Number(r.vehicleCount) <= 0)) errors.push({ row: r._rowNo, msg: 'Vehicle Count must be a positive number: ' + r.vehicleCount });
+      if (r.tpLimit !== '' && r.tpLimit != null && (!isNum(r.tpLimit) || Number(r.tpLimit) < 0)) errors.push({ row: r._rowNo, msg: 'Touch Point Limit must be a non-negative number: ' + r.tpLimit });
+      if (r.zoneFeas) {
+        const zfNorm = ZF[r.zoneFeas.toLowerCase()];
+        if (!zfNorm) errors.push({ row: r._rowNo, msg: 'Zone Feasibility must be one of Local / Non-Local / Both: "' + r.zoneFeas + '"' });
+        else r.zoneFeas = zfNorm;
+      }
+    });
+    return { errors, ok: errors.length === 0 };
+  }
+
+  // Groups validated rows by SC Code. Capacity/Distance Limit/Touch Point Limit default to the
+  // matched Vehicle Type's Vehicle Master values when blank (optional per-row override, confirmed
+  // with the user); Vehicle Count defaults to 1; Zone Feasibility defaults to "Both".
+  buildAvailRows(rows) {
+    const vehPool = this.effectiveVehPool();
+    const vehByName = {}; vehPool.forEach(v => { vehByName[v.name] = v; });
+    const grouped = {};
+    rows.forEach(r => {
+      const vm = vehByName[r.vehicleType] || { cap: 2000, dist: 600, tp: 7 };
+      const capacity = (r.capacity === '' || r.capacity == null) ? vm.cap : Number(r.capacity);
+      const dist = (r.distanceLimit === '' || r.distanceLimit == null) ? vm.dist : Number(r.distanceLimit);
+      const tpLimit = (r.tpLimit === '' || r.tpLimit == null) ? vm.tp : Number(r.tpLimit);
+      const vehicleCount = (r.vehicleCount === '' || r.vehicleCount == null) ? 1 : Number(r.vehicleCount);
+      const row = { vehicleType: r.vehicleType, capacity, distanceLimit: dist + ' km', vehicleCount, tpLimit, zoneFeas: r.zoneFeas || 'Both' };
+      (grouped[r.scCode] = grouped[r.scCode] || []).push(row);
+    });
+    return grouped;
+  }
+
+  uploadAvailFile() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.csv';
+    inp.onchange = (e) => {
+      const f = e.target.files && e.target.files[0]; if (!f) { this.showToast('Upload cancelled', '#5A5E66'); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const { rows, fileError } = this.parseAvailCsv(String(reader.result || ''));
+        if (fileError) { this.setState({ availErrModal: { name: f.name, rows: [{ row: null, msg: fileError }] } }); this.showToast('Could not read ' + f.name + ' — ' + fileError, '#D14B4B'); return; }
+        const { errors, ok } = this.validateAvailRows(rows);
+        if (!ok) {
+          this.setState({ availErrModal: { name: f.name, rows: errors } });
+          this.showToast(errors.length + ' row error' + (errors.length === 1 ? '' : 's') + ' in ' + f.name + ' — fix and re-upload; nothing was applied', '#D14B4B');
+          return;
+        }
+        const grouped = this.buildAvailRows(rows);
+        const scCount = Object.keys(grouped).length;
+        // OVERRIDE, per the existing UI copy: latest upload fully replaces all prior records.
+        this.setState({ availAdded: grouped, availEdits: {}, availRemoved: {}, availErrModal: null });
+        this.showToast('Uploaded ' + f.name + ' — ' + rows.length + ' vehicle row' + (rows.length === 1 ? '' : 's') + ' across ' + scCount + ' SC' + (scCount === 1 ? '' : 's'), '#128A3E');
+      };
+      reader.readAsText(f);
+    };
+    inp.click();
+  }
+
   // File picker -> read -> parse -> validate -> build -> store. All-or-nothing: matches this
   // app's existing Volume-upload convention (an invalid file is never partially accepted).
   ingestRlhPlanFile() {
@@ -4395,9 +4730,94 @@ class NDCApp extends React.Component {
     };
     inp.click();
   }
+  // ===== Node Additions/Closures/Migrations upload — real pipeline, replacing the old
+  // uploadNodeChanges() cosmetic stub. Template: LMSC Code, LMDC Code, Node Flag (Addition/
+  // Closure/Migration), LMDC Latitude, LMDC Longitude. Confirmed with the user (2026-07-24):
+  // - Lat/Long mandatory-ness follows the template's Validation Rule row (conditional on Node
+  //   Flag), which overrides that same row's own blanket "Mandatory" tag for these two columns:
+  //   Addition -> mandatory; Closure / Migration -> optional (validated if given, not required).
+  // - A Migration row's LMSC Code is the DESTINATION SC — the DC is retagged there and dropped
+  //   from its old SC. Resolving/updating the *old* SC association is not done here (this pass
+  //   only ingests the change rows into the display table; wiring this into the live Node/SC
+  //   Master is a separate, later step).
+  // - LMSC Code is explicitly NOT cross-checked against SC Master in this pass (user decision,
+  //   2026-07-24) — flagged as a future enhancement once this ties into Node Master properly.
+  parseNodeChangesCsv(text) {
+    const table = NDC_parseCsv(text);
+    if (!table.length) return { fileError: 'File is empty.' };
+    const header = table[0].map(h => (h || '').trim());
+    const EXPECTED = ['LMSC Code', 'LMDC Code', 'Node Flag', 'LMDC Latitude', 'LMDC Longitude'];
+    const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
+    if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
+    const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
+    const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
+      _rowNo: i + 2,
+      lmscCode: (r[idx['LMSC Code']] || '').trim(), lmdcCode: (r[idx['LMDC Code']] || '').trim(),
+      flag: (r[idx['Node Flag']] || '').trim(), lat: r[idx['LMDC Latitude']], lng: r[idx['LMDC Longitude']],
+    }));
+    return { rows };
+  }
+
+  // rows -> { errors: [{row,msg}], ok }. Mutates r.flag in place to its canonical casing on
+  // success, matching the pattern of other validators in this app.
+  validateNodeChangeRows(rows) {
+    const errors = [];
+    const isNum = (v) => v !== '' && v != null && !isNaN(Number(v));
+    const FLAGS = { addition: 'Addition', closure: 'Closure', migration: 'Migration' };
+    rows.forEach(r => {
+      if (!r.lmscCode) errors.push({ row: r._rowNo, msg: 'LMSC Code is blank' });
+      else if (!/^[A-Za-z0-9]{3,6}$/.test(r.lmscCode)) errors.push({ row: r._rowNo, msg: 'LMSC Code must be alphanumeric, 3-6 characters: "' + r.lmscCode + '"' });
+      if (!r.lmdcCode) errors.push({ row: r._rowNo, msg: 'LMDC Code is blank' });
+      else if (!/^[A-Za-z0-9]{3,6}$/.test(r.lmdcCode)) errors.push({ row: r._rowNo, msg: 'LMDC Code must be alphanumeric, 3-6 characters: "' + r.lmdcCode + '"' });
+      const flagNorm = FLAGS[r.flag.toLowerCase()];
+      if (!r.flag) errors.push({ row: r._rowNo, msg: 'Node Flag is blank' });
+      else if (!flagNorm) errors.push({ row: r._rowNo, msg: 'Node Flag must be one of Addition / Closure / Migration: "' + r.flag + '"' });
+      else r.flag = flagNorm;
+      const latGiven = r.lat !== '' && r.lat != null, lngGiven = r.lng !== '' && r.lng != null;
+      if (flagNorm === 'Addition') {
+        if (!isNum(r.lat) || Number(r.lat) < -90 || Number(r.lat) > 90) errors.push({ row: r._rowNo, msg: 'LMDC Latitude invalid (required for Addition): ' + r.lat });
+        if (!isNum(r.lng) || Number(r.lng) < -180 || Number(r.lng) > 180) errors.push({ row: r._rowNo, msg: 'LMDC Longitude invalid (required for Addition): ' + r.lng });
+      } else {
+        // Closure / Migration: optional, but still validate range if a value was actually given.
+        if (latGiven && (!isNum(r.lat) || Number(r.lat) < -90 || Number(r.lat) > 90)) errors.push({ row: r._rowNo, msg: 'LMDC Latitude invalid: ' + r.lat });
+        if (lngGiven && (!isNum(r.lng) || Number(r.lng) < -180 || Number(r.lng) > 180)) errors.push({ row: r._rowNo, msg: 'LMDC Longitude invalid: ' + r.lng });
+      }
+    });
+    return { errors, ok: errors.length === 0 };
+  }
+
+  buildNodeChangeRows(rows) {
+    return rows.map(r => ({ lmscCode: r.lmscCode, lmdcCode: r.lmdcCode, flag: r.flag, lat: (r.lat === '' || r.lat == null) ? null : Number(r.lat), lng: (r.lng === '' || r.lng == null) ? null : Number(r.lng) }));
+  }
   // C6/C7 — single node-changes upload (additions + closures + migrations in one file). OVERRIDE:
-  // the latest file fully replaces all prior node-change data. Stamps the "last uploaded by" indicator.
-  uploadNodeChanges() { const inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.csv'; inp.onchange = () => { const f = inp.files && inp.files[0]; if (!f) { this.showToast('Upload cancelled', '#5A5E66'); return; } const now = new Date(); const date = String(now.getDate()).padStart(2, '0') + ' ' + ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][now.getMonth()] + ' · ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'); this.setState({ nodeChangeBy: 'You (Planner)', nodeChangeDate: date }); this.showToast('6 nodes rejected as they are already part of AutoDML', '#C77B00'); }; inp.click(); }
+  // the latest valid file fully replaces all prior node-change data (nodeChangesUnified), matching
+  // the existing UI copy. Real parse/validate/store, replacing the old cosmetic stub.
+  uploadNodeChanges() {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = '.csv';
+    inp.onchange = (e) => {
+      const f = e.target.files && e.target.files[0]; if (!f) { this.showToast('Upload cancelled', '#5A5E66'); return; }
+      const reader = new FileReader();
+      reader.onload = () => {
+        const { rows, fileError } = this.parseNodeChangesCsv(String(reader.result || ''));
+        if (fileError) { this.setState({ nodeErrModal: { name: f.name, rows: [{ row: null, msg: fileError }] } }); this.showToast('Could not read ' + f.name + ' — ' + fileError, '#D14B4B'); return; }
+        const { errors, ok } = this.validateNodeChangeRows(rows);
+        if (!ok) {
+          this.setState({ nodeErrModal: { name: f.name, rows: errors } });
+          this.showToast(errors.length + ' row error' + (errors.length === 1 ? '' : 's') + ' in ' + f.name + ' — fix and re-upload; nothing was applied', '#D14B4B');
+          return;
+        }
+        const changeRows = this.buildNodeChangeRows(rows);
+        const now = new Date();
+        const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        const date = String(now.getDate()).padStart(2, '0') + ' ' + months[now.getMonth()] + ' · ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        this.setState({ nodeChangesUnified: changeRows, nodeChangeBy: 'You (Planner)', nodeChangeDate: date, nodeErrModal: null });
+        this.showToast('Uploaded ' + f.name + ' — ' + changeRows.length + ' node change' + (changeRows.length === 1 ? '' : 's') + ' applied', '#128A3E');
+      };
+      reader.readAsText(f);
+    };
+    inp.click();
+  }
 
   componentDidMount() {
     if (!supabase) {
@@ -4830,7 +5250,7 @@ class NDCApp extends React.Component {
     const zf = st.inputsZone || 'All';
     const zoneChips = ['All', 'North', 'South', 'East', 'West'].map(z => ({ label: z, active: z === zf, bg: z === zf ? '#003F98' : '#fff', fg: z === zf ? '#fff' : '#5A5E66', bd: z === zf ? '#003F98' : '#E6EBF2', onClick: () => this.setState({ inputsZone: z, pgScMaster: 1, pgAvail: 1 }) }));
     const nstep = st.nodeStep || 'active';
-    const nodeChangeCount = (d.nodeAdditions || []).length + (d.nodeClosures || []).length + (d.migrations || []).length;
+    const nodeChangeCount = (d.nodeChangesUnified || []).length;
     const nodeStepMeta = [['active', 'AutoDML node view', (d.autodmlNodes || []).length, remaining.length > 0, 'Flagged LMSC → LMDC links from AutoDML — resolve before planning.'], ['changes', 'Additions, closures & migrations', nodeChangeCount, nodeChangeCount > 0, 'Node changes this cycle vs the last finalised network.']];
     const nodeSteps = nodeStepMeta.map(s => ({ label: s[1] + ' (' + s[2] + ')', tip: s[4], attention: s[3], active: nstep === s[0], color: nstep === s[0] ? '#003F98' : '#5A5E66', weight: nstep === s[0] ? '700' : '500', bg: nstep === s[0] ? '#fff' : 'transparent', bd: nstep === s[0] ? '#D7DCE5' : 'transparent', onClick: () => this.setState({ nodeStep: s[0] }) }));
     const anFiltered = d.scs.filter(s => (zf === 'All' || s.zone === zf) && (!q || s.code.toLowerCase().indexOf(q) >= 0 || s.name.toLowerCase().indexOf(q) >= 0));
@@ -4957,7 +5377,7 @@ class NDCApp extends React.Component {
       const closeTime = s.close || '—';
       const codeLC = s.code.toLowerCase().replace(/[^a-z0-9]/g, '');
       const pocOpenRect = st.pocOpenRect || { top: 0, left: 0 };
-      return { code: s.code, name: s.name, zone: s.zone, cityState: s.name + ' / ' + (ZSTATE[s.zone] || s.zone), scType: s.type || '—', sortCap: fmtInt(s.sortCap), volCap: fmtInt(s.volCap), docks: s.docks, nlhDocks: nlhDocks, rlhDocks: rlhDocks, localTp: localTp, nonLocalTp: nonLocalTp, openTime: openTime, closeTime: closeTime, dcCount: s.dcCount,
+      return { code: s.code, name: s.name, zone: s.zone, cityState: s.city ? s.city : (s.name + ' / ' + (ZSTATE[s.zone] || s.zone)), scType: s.type || '—', sortCap: fmtInt(s.sortCap), volCap: fmtInt(s.volCap), docks: s.docks, nlhDocks: nlhDocks, rlhDocks: rlhDocks, localTp: localTp, nonLocalTp: nonLocalTp, openTime: openTime, closeTime: closeTime, dcCount: s.dcCount,
         pocCount: pocEntries.length, pocSummary: pocEntries.length ? (pocEntries.length + ' lead' + (pocEntries.length === 1 ? '' : 's')) : 'None on file',
         pocList: pocEntries.map(p => ({ name: p.name, role: p.role, email: p.name.toLowerCase().replace(/[^a-z\s]/g, '').trim().replace(/\s+/g, '.') + '@valmo.in' })),
         pocOpen: pocOpenRow === s.code, pocOpenRect: pocOpenRect,
@@ -4971,7 +5391,7 @@ class NDCApp extends React.Component {
     // vehEdits = per-type param overrides from the Edit modal, applied by name over both library + added rows.
     const vehEdits = st.vehEdits || {};
     const VEH_FEAS_OPTS_M = ['FM Carting', 'NLH', 'RLH'];
-    const openEditVeh = (name, eff) => this.setState({ editVehName: name, editVehDraft: { vtype: name, capacity: String(eff.capacity == null ? '' : eff.capacity), dist: String(eff.dist == null ? '' : eff.dist), tp: String(eff.tp == null ? '' : eff.tp), localTp: String(eff.localTp == null ? '' : eff.localTp), nonLocalTp: String(eff.nonLocalTp == null ? '' : eff.nonLocalTp), feas: (eff.feas || []).slice() } });
+    const openEditVeh = (name, eff) => this.setState({ editVehName: name, editVehDraft: { vtype: name, capacity: String(eff.capacity == null ? '' : eff.capacity), dist: String(eff.dist == null ? '' : eff.dist), tp: String(eff.tp == null ? '' : eff.tp), feas: (eff.feas || []).slice() } });
     // Inline row-edit helpers for Vehicle Master
     const evName = st.editVehName || null;
     const evDraft = st.editVehDraft || {};
@@ -4982,7 +5402,7 @@ class NDCApp extends React.Component {
         onToggle: () => { const cur = ((this.state.editVehDraft || {}).feas || []); const next = cur.indexOf(opt) >= 0 ? cur.filter(x => x !== opt) : cur.concat([opt]); evSetDraft({ feas: next }); } };
     });
     const vehMasterBase = (d.VEH || []).filter(v => !vehRemoved[v.name]).map(v => {
-      const eff = Object.assign({ capacity: v.cap, dist: v.dist, tp: v.tp, localTp: v.localTp, nonLocalTp: v.nonLocalTp, feas: v.feas }, vehEdits[v.name] || {});
+      const eff = Object.assign({ capacity: v.cap, dist: v.dist, tp: v.tp, feas: v.feas }, vehEdits[v.name] || {});
       const editing = evName === v.name;
       const tpOverCap = (eff.feas || []).indexOf('RLH') >= 0 && Number(eff.tp) > 7;
       return { name: v.name, capacity: (eff.capacity === '' || eff.capacity == null) ? '—' : String(eff.capacity), dist: (eff.dist === '' || eff.dist == null) ? '—' : Number(eff.dist).toLocaleString('en-IN'), tp: eff.tp, feas: (eff.feas && eff.feas.length ? eff.feas : ['—']), tpOverCap,
@@ -4997,7 +5417,7 @@ class NDCApp extends React.Component {
           const d2 = this.state.editVehDraft || {};
           const num = (x) => { const n = parseInt(String(x == null ? '' : x).replace(/[^0-9]/g, ''), 10); return isNaN(n) ? '' : n; };
           const ve = Object.assign({}, this.state.vehEdits || {});
-          ve[v.name] = { capacity: num(d2.capacity), dist: num(d2.dist), tp: num(d2.tp), localTp: eff.localTp, nonLocalTp: eff.nonLocalTp, feas: (d2.feas || eff.feas || []).slice() };
+          ve[v.name] = { capacity: num(d2.capacity), dist: num(d2.dist), tp: num(d2.tp), feas: (d2.feas || eff.feas || []).slice() };
           this.setState({ vehEdits: ve, editVehName: null, editVehDraft: null });
           this.showToast(v.name + ' updated in vehicle master', '#128A3E');
         },
@@ -5007,7 +5427,7 @@ class NDCApp extends React.Component {
     });
     // Add Vehicle Type modal appends user-added types to the master table (same row shape as the library rows).
     const addedVehRows = (st.addedVehTypes || []).map((v, i) => {
-      const eff = Object.assign({ capacity: v.capacity, dist: v.dist, tp: v.tp, localTp: v.localTp, nonLocalTp: v.nonLocalTp, feas: v.feas }, vehEdits[v.name] || {});
+      const eff = Object.assign({ capacity: v.capacity, dist: v.dist, tp: v.tp, feas: v.feas }, vehEdits[v.name] || {});
       const editing = evName === v.name;
       const tpOverCap = (eff.feas || []).indexOf('RLH') >= 0 && Number(eff.tp) > 7;
       return { name: v.name, capacity: (eff.capacity === '' || eff.capacity == null) ? '—' : String(eff.capacity), dist: (eff.dist === '' || eff.dist == null) ? '—' : Number(eff.dist).toLocaleString('en-IN'), tp: eff.tp, feas: (eff.feas && eff.feas.length ? eff.feas : ['—']), tpOverCap,
@@ -5022,7 +5442,7 @@ class NDCApp extends React.Component {
           const d2 = this.state.editVehDraft || {};
           const num = (x) => { const n = parseInt(String(x == null ? '' : x).replace(/[^0-9]/g, ''), 10); return isNaN(n) ? '' : n; };
           const ve = Object.assign({}, this.state.vehEdits || {});
-          ve[v.name] = { capacity: num(d2.capacity), dist: num(d2.dist), tp: num(d2.tp), localTp: eff.localTp, nonLocalTp: eff.nonLocalTp, feas: (d2.feas || eff.feas || []).slice() };
+          ve[v.name] = { capacity: num(d2.capacity), dist: num(d2.dist), tp: num(d2.tp), feas: (d2.feas || eff.feas || []).slice() };
           this.setState({ vehEdits: ve, editVehName: null, editVehDraft: null });
           this.showToast(v.name + ' updated in vehicle master', '#128A3E');
         },
@@ -5052,7 +5472,27 @@ class NDCApp extends React.Component {
     const availEdits = st.availEdits || {};
     const availRemovedMap = st.availRemoved || {};
     const fmtIntAvail = (n) => (typeof n === 'number' ? n.toLocaleString('en-IN') : (n == null ? '—' : n));
-    const scByCode = (code) => (d.scs || []).find(s => s.code === code) || {};
+    const scEditsForAvail = st.scEdits || {};
+    // scByCode now searches the full REAL SC list (addedScs + data.scs, scEdits applied), not just
+    // data.scs -- previously an SC added via Add SC / CSV upload wouldn't resolve here at all.
+    const scByCode = (code) => {
+      const fromAdded = (st.addedScs || []).find(s => s.code === code);
+      const base = fromAdded || (d.scs || []).find(s => s.code === code);
+      if (!base) return {};
+      return scEditsForAvail[code] ? Object.assign({}, base, scEditsForAvail[code]) : base;
+    };
+    // allRealScs — the actual grouping source for this tab. Previously this mapped over
+    // d.scVehAvail directly, which is empty in this real-data build (no seed), so NO SC -- old or
+    // newly-added -- ever got a card to add vehicles to, regardless of anything in availAdded.
+    // Now every real SC (SC Master's merged addedScs + data.scs, honoring scRemoved) gets a card;
+    // any base rows already in d.scVehAvail (e.g. future Supabase-loaded data) are merged in by
+    // SC code where present, defaulting to an empty rows[] otherwise.
+    const scRemovedForAvail = st.scRemoved || {};
+    const availByCode = {}; (d.scVehAvail || []).forEach(g => { availByCode[g.code] = g; });
+    const allRealScs = (st.addedScs || []).concat(d.scs || []).filter(s => !scRemovedForAvail[s.code]).map(s => {
+      const g = availByCode[s.code];
+      return { code: s.code, name: s.name, zone: s.zone, rows: (g && g.rows) || [] };
+    });
     // Add-Vehicle to an SC's availability — mirrors the Design-Creation Step-2 inline add flow (addForm pattern).
     // VEHMA = live fleet with vehEdits/vehRemoved/addedVehTypes applied (same chain as VEHM in creationVals).
     const VEHMA = (d.VEH || []).filter(v => !(st.vehRemoved || {})[v.name]).map(v => {
@@ -5090,7 +5530,7 @@ class NDCApp extends React.Component {
     const ead = st.editAvailDraft || {};
     const eadSet = (patch) => { this.setState({ editAvailDraft: Object.assign({}, this.state.editAvailDraft || {}, patch) }); };
     const ZF_OPTS = ['Both', 'Local', 'Non-Local'];
-    const scVehAvailRows = (d.scVehAvail || []).map(g => {
+    const scVehAvailRows = allRealScs.map(g => {
       const src = scByCode(g.code);
       const rows = g.rows.concat(availAdded[g.code] || []).filter(r => !availRemovedMap[g.code + '|' + r.vehicleType]).map(r => {
         const availKey = g.code + '|' + r.vehicleType;
@@ -5113,7 +5553,6 @@ class NDCApp extends React.Component {
         const typeOpts = VEHMA.map(x => ({ value: x.name, label: x.name, selected: x.name === (rowEditing ? (ead.type || displayType) : displayType) }));
         return {
           t: displayType, cap: cap, dist: distNum + ' km', cnt: cnt, tp: tp, zf: zf, zfBg: zfBg, zfFg: zfFg,
-          vmLabel: exceeds ? (cntExceeds ? 'Exceeds limit' : '\u26a0 TP over master') : 'OK', vmBg: exceeds ? (cntExceeds ? '#FBEAEA' : '#FBF1DF') : '#E7F4EC', vmFg: exceeds ? (cntExceeds ? '#D14B4B' : '#C77B00') : '#128A3E',
           rowEditing: rowEditing, rowNotEditing: !rowEditing,
           draftType: rowEditing ? (ead.type || displayType) : displayType,
           draftCap: rowEditing ? (ead.cap != null ? ead.cap : cap) : cap,
@@ -5173,23 +5612,34 @@ class NDCApp extends React.Component {
       ingestErrModalOpen: !!(st.ingestErrModal), ingestErrModal: st.ingestErrModal || { name: '', rows: [] },
       closeIngestErrModal: () => this.setState({ ingestErrModal: null }),
       ingestErrModalRetry: () => { this.setState({ ingestErrModal: null }); this.ingestRlhPlanFile(); },
+      nodeErrModalOpen: !!(st.nodeErrModal), nodeErrModal: st.nodeErrModal || { name: '', rows: [] },
+      closeNodeErrModal: () => this.setState({ nodeErrModal: null }),
+      nodeErrModalRetry: () => { this.setState({ nodeErrModal: null }); this.uploadNodeChanges(); },
+      scErrModalOpen: !!(st.scErrModal), scErrModal: st.scErrModal || { name: '', rows: [] },
+      closeScErrModal: () => this.setState({ scErrModal: null }),
+      scErrModalRetry: () => { this.setState({ scErrModal: null }); this.uploadScMasterFile(); },
+      uploadScMasterFile: () => this.uploadScMasterFile(),
+      availErrModalOpen: !!(st.availErrModal), availErrModal: st.availErrModal || { name: '', rows: [] },
+      closeAvailErrModal: () => this.setState({ availErrModal: null }),
+      availErrModalRetry: () => { this.setState({ availErrModal: null }); this.uploadAvailFile(); },
+      uploadAvailFile: () => this.uploadAvailFile(),
       zoneChips, scSearch: st.inputsSearch || '', onInputsSearch: (e) => this.setState({ inputsSearch: e.target.value, pgScMaster: 1, pgAvail: 1 }),
       isScMaster: st.mastersTab === 'sc', isVehMaster: st.mastersTab === 'vehicle', isAvail: st.mastersTab === 'avail',
       mastersTabs: [['sc', 'Sort Center Master', d.scs.length, 'Canonical SC master — one row per Sort Centre with zone, capacity and location.'], ['avail', 'SC Vehicle Availability', (d.scVehAvail || []).length, 'Vehicles available per SC (one row per vehicle type per SC) — capped by the Touch Point Limit.'], ['vehicle', 'Vehicle Master', vehTypeCount, 'Vehicle types and their capacity, distance limit, touch-point cap and LH feasibility.']].map(t => ({ label: t[1] + ' (' + t[2] + ')', tip: t[3], attention: false, active: st.mastersTab === t[0], color: st.mastersTab === t[0] ? '#003F98' : '#5A5E66', weight: st.mastersTab === t[0] ? '700' : '500', bg: st.mastersTab === t[0] ? '#fff' : 'transparent', bd: st.mastersTab === t[0] ? '#D7DCE5' : 'transparent', onClick: () => this.setState({ mastersTab: t[0] }) })),
       scRows, scMasterPager: scMasterPager, scShown: scRows.length, scTotal: scFiltered.length, vehMaster, vehTypeCount,
-      addVehType: () => this.setState({ addVehOpen: true, addVehEditName: null, addVehForm: { vtype: '', capacity: '', dist: '', hardCap: '', localTp: '', nonLocalTp: '', feas: [] } }),
+      addVehType: () => this.setState({ addVehOpen: true, addVehEditName: null, addVehForm: { vtype: '', capacity: '', dist: '', hardCap: '', feas: [] } }),
       addVehOpen: !!st.addVehOpen,
       addVehNotOpen: !st.addVehOpen,
       addVehInlineHint: st.addVehEditName ? 'Editing vehicle type…' : 'Adding a vehicle type…',
       addVehModalTitle: st.addVehEditName ? 'Edit Vehicle Type' : 'Add Vehicle Type', addVehSubmitLabel: st.addVehEditName ? 'Save changes' : 'Add Vehicle Type',
-      addVehVtype: vf.vtype || '', addVehCapacity: vf.capacity || '', addVehDist: vf.dist || '', addVehHardCap: vf.hardCap || '', addVehLocalTp: vf.localTp || '', addVehNonLocalTp: vf.nonLocalTp || '',
-      onAddVehVtype: vset('vtype'), onAddVehCapacity: vset('capacity'), onAddVehDist: vset('dist'), onAddVehHardCap: vset('hardCap'), onAddVehLocalTp: vset('localTp'), onAddVehNonLocalTp: vset('nonLocalTp'),
+      addVehVtype: vf.vtype || '', addVehCapacity: vf.capacity || '', addVehDist: vf.dist || '', addVehHardCap: vf.hardCap || '', addVehTypeOptions: VEH_TYPE_OPTIONS,
+      onAddVehVtype: vset('vtype'), onAddVehCapacity: vset('capacity'), onAddVehDist: vset('dist'), onAddVehHardCap: vset('hardCap'),
       addVehFeasChips: addVehFeasChips, addVehValid: addVehValid,
       addVehBtnBg: addVehValid ? '#003F98' : '#E6EBF2', addVehBtnFg: addVehValid ? '#fff' : '#8E96A3', addVehBtnCursor: addVehValid ? 'pointer' : 'not-allowed',
       closeAddVeh: () => this.setState({ addVehOpen: false, addVehForm: {}, addVehEditName: null }),
-      submitAddVeh: () => this.submitAddVeh(),      availTemplate: () => this.downloadTemplate('SC Vehicle Availability', [{ k: 'SC Code' }, { k: 'Vehicle Type' }, { k: 'Available Count' }, { k: 'Zone Feasibility' }]),
-      scMasterTemplate: () => this.downloadTemplate('Sort Centre Master', [{ k: 'SC Code' }, { k: 'Name' }, { k: 'City' }, { k: 'State' }, { k: 'SC Type' }, { k: 'Zone' }, { k: 'Volume Capacity' }, { k: 'Sort Capacity' }, { k: 'NLH Docks' }, { k: 'RLH Docks' }, { k: 'Local TP Limit' }, { k: 'Non-Local TP Limit' }, { k: 'Open Time' }, { k: 'Close Time' }, { k: 'Ops Leads' }]),
-      changesTemplate: () => this.downloadTemplate('Node Changes', [{ k: 'Change Type' }, { k: 'DC Code' }, { k: 'DC Name' }, { k: 'SC Code' }, { k: 'From SC' }, { k: 'To SC' }, { k: 'Zone' }, { k: 'Capacity' }, { k: 'Reason' }]),
+      submitAddVeh: () => this.submitAddVeh(),      availTemplate: () => this.downloadTemplate('SC Vehicle Availability', [{ k: 'SC Code' }, { k: 'Vehicle Type' }, { k: 'Capacity (Shipments)' }, { k: 'Distance Limit (Kms)' }, { k: 'Vehicle Count' }, { k: 'Touch Point Limit' }, { k: 'Zone Feasibility' }]),
+      scMasterTemplate: () => this.downloadTemplate('Sort Centre Master', [{ k: 'SC Code' }, { k: 'SC Name' }, { k: 'SC City,State' }, { k: 'SC Type' }, { k: 'Zone' }, { k: 'Volume Capacity' }, { k: 'Sort Capacity' }, { k: 'NLH Docks' }, { k: 'RLH Docks' }, { k: 'Local TP Limit' }, { k: 'Non-Local TP Limit' }, { k: 'SC Opening Time' }, { k: 'SC Closing Time' }, { k: 'SC Ops ZH' }, { k: 'SC-LH Ops ZH' }, { k: 'SC Ops CH' }, { k: 'SC-LH Ops CH' }, { k: 'SC Ops AM-1' }, { k: 'SC-LH Ops AM-1' }, { k: 'SC Ops AM-2' }, { k: 'SC-LH Ops AM-2' }]),
+      changesTemplate: () => this.downloadTemplate('Node Additions Closures Migrations', [{ k: 'LMSC Code' }, { k: 'LMDC Code' }, { k: 'Node Flag' }, { k: 'LMDC Latitude' }, { k: 'LMDC Longitude' }]),
       nodeChangeUploadedBy: st.nodeChangeBy || 'Shashvat Jain', nodeChangeUploadedDate: st.nodeChangeDate || '10 Jul · 11:24', uploadNodeChanges: () => this.uploadNodeChanges(),
       ingestTemplate: () => this.downloadTemplate('RLH Plan Ingestion', [{ k: 'Zone' }, { k: 'LMSC' }, { k: 'LMDC' }, { k: 'DC latitude' }, { k: 'DC longitude' }, { k: 'Volume' }, { k: 'Route Code' }, { k: 'Touch Point' }, { k: 'Vehicle Type' }, { k: 'Breakdown Distance' }, { k: 'Round Trip Distance' }, { k: 'Run ID' }]),
       scVehAvail: scAvailPager.pageRows, scAvailPager: scAvailPager, scVehAvailCountLabel: availQuery ? (availShownRows + ' vehicle row' + (availShownRows === 1 ? '' : 's') + ' across ' + scVehAvailFiltered.length + ' of ' + scVehAvailRows.length + ' SCs') : (scVehAvailTotalRows + ' vehicle rows across ' + scVehAvailRows.length + ' SCs'), availSearch: st.availSearch || '', onAvailSearch: (e) => this.setState({ availSearch: e.target.value, pgAvail: 1 }), availNoResults: scVehAvailFiltered.length === 0,
