@@ -3854,6 +3854,17 @@ function NDC_parseCsv(text) {
   if (field.length || row.length) { row.push(field); rows.push(row); }
   return rows.filter(r => !(r.length === 1 && r[0] === ''));
 }
+// SC_POC_FIELDS — canonical list of the 8 SC contact/POC fields (key + display role), shared
+// between the Add/Edit SC form (submitAddSc), the edit-reopen prefill (openScEdit), and the SC
+// Master list's POC dropdown (scRows). Storing POCs as an object keyed by these 8 keys (rather
+// than a flat name array) means a field's value can never shift to a different role just because
+// an earlier field was left blank -- each of the 8 keys always maps to the same stored slot.
+const SC_POC_FIELDS = [
+  ['opsZh', 'Ops ZH'], ['lhOpsZh', 'LH Ops ZH'],
+  ['opsCh', 'Ops CH'], ['lhOpsCh', 'LH Ops CH'],
+  ['opsAm1', 'Ops AM-1'], ['lhOpsAm1', 'LH Ops AM-1'],
+  ['opsAm2', 'Ops AM-2'], ['lhOpsAm2', 'LH Ops AM-2'],
+];
 class NDCApp extends React.Component {
   constructor(props) {
     super(props);
@@ -4088,8 +4099,23 @@ class NDCApp extends React.Component {
   openScEdit(code) {
     const sc = (this.state.data.scs || []).concat(this.state.addedScs || []).find(s => s.code === code);
     if (!sc) { this.comingSoon('Edit SC'); return; }
-    const pl = sc.pocs || [];
-    const form = { code: sc.code, name: sc.name, city: (sc.name || '') + (sc.zone ? ', ' + sc.zone : ''), type: 'LMSC', zone: sc.zone || 'South', volCap: String(sc.volCap || ''), sortCap: String(sc.sortCap || ''), nlhDocks: String(sc.docks || ''), rlhDocks: '0', localTp: '5', nonLocalTp: '3', open: '06:00', close: '22:00', opsZh: pl[0] || '', opsCh: pl[1] || '', opsAm1: pl[2] || '', opsAm2: pl[3] || '' };
+    // sc.pocs is the new role-keyed object (SC_POC_FIELDS) for anything added/edited post-fix;
+    // guard against the old flat-array shape (or absence, for the ~80 fabricated seed SCs, which
+    // never had a pocs field at all) by treating anything non-object as "no POCs on file".
+    const pocsSrc = (sc.pocs && !Array.isArray(sc.pocs)) ? sc.pocs : {};
+    const form = {
+      code: sc.code, name: sc.name, city: (sc.name || '') + (sc.zone ? ', ' + sc.zone : ''),
+      type: sc.type || 'LMSC', zone: sc.zone || 'South',
+      volCap: String(sc.volCap || ''), sortCap: String(sc.sortCap || ''),
+      // Real stored values when present; blank/default only for legacy seed SCs that never had
+      // these fields at all -- no fabricated guess in either case.
+      nlhDocks: sc.nlhDocks != null ? String(sc.nlhDocks) : '',
+      rlhDocks: sc.rlhDocks != null ? String(sc.rlhDocks) : '',
+      localTp: sc.localTp != null ? String(sc.localTp) : '',
+      nonLocalTp: sc.nonLocalTp != null ? String(sc.nonLocalTp) : '',
+      open: sc.open || '06:00', close: sc.close || '22:00',
+    };
+    SC_POC_FIELDS.forEach(([k]) => { form[k] = pocsSrc[k] || ''; });
     this.setState({ addScOpen: true, addScEditCode: code, addScForm: form, pocOpenRow: null, addScReviewerIds: [] });
     // Real default reviewers (sc_reviewers), separate from the decorative contact-role fields above.
     this.loadScReviewers(code).then(reviewers => { if (this.state.addScEditCode === code) this.setState({ addScReviewerIds: reviewers.map(r => r.id) }); });
@@ -4113,12 +4139,24 @@ class NDCApp extends React.Component {
     const code = (f.code || '').trim().toUpperCase();
     if (!code) { this.showToast('SC Code is required', '#C77B00'); return; }
     const num = (x) => { const n = parseInt(String(x == null ? '' : x).replace(/[^0-9]/g, ''), 10); return isNaN(n) ? 0 : n; };
-    const pocs = ['opsZh', 'opsCh', 'opsAm1', 'opsAm2'].map(k => (f[k] || '').trim()).filter(Boolean);
+    // Capture all 8 POC/contact fields, keyed by field name (not a filtered flat array) -- see
+    // SC_POC_FIELDS. This is what makes reopening the edit form show each name back in the exact
+    // field it was entered under, regardless of which other fields were left blank.
+    const pocs = {}; SC_POC_FIELDS.forEach(([k]) => { pocs[k] = (f[k] || '').trim(); });
     const reviewerIds = st.addScReviewerIds || [];
+    // Real-input fields that used to be silently dropped on save (type) or collapsed into a
+    // single combined number the list view then re-derived from a code hash anyway (docks/TP/
+    // hours) -- now stored explicitly so the SC Master list can read the actual entered values.
+    const realFields = {
+      type: f.type || 'LMSC',
+      localTp: num(f.localTp), nonLocalTp: num(f.nonLocalTp),
+      open: f.open || '', close: f.close || '',
+      nlhDocks: num(f.nlhDocks), rlhDocks: num(f.rlhDocks),
+    };
     if (st.addScEditCode) {
       // Edit mode — apply changes to a session-edited overlay so the existing SC row reflects them.
       const edits = Object.assign({}, st.scEdits || {});
-      edits[st.addScEditCode] = { name: (f.name || '').trim() || code, zone: f.zone || 'South', sortCap: num(f.sortCap), volCap: num(f.volCap), docks: num(f.nlhDocks) + num(f.rlhDocks), pocs: pocs.length ? pocs : ['—'] };
+      edits[st.addScEditCode] = Object.assign({ name: (f.name || '').trim() || code, zone: f.zone || 'South', sortCap: num(f.sortCap), volCap: num(f.volCap), docks: num(f.nlhDocks) + num(f.rlhDocks), pocs: pocs }, realFields);
       // also patch any session-added SC in place
       const addedScs = (st.addedScs || []).map(s => s.code === st.addScEditCode ? Object.assign({}, s, edits[st.addScEditCode]) : s);
       this.setState({ scEdits: edits, addedScs: addedScs, addScOpen: false, addScEditCode: null, addScForm: {} });
@@ -4126,7 +4164,7 @@ class NDCApp extends React.Component {
       this.showToast('Sort Centre ' + st.addScEditCode + ' updated', '#128A3E');
       return;
     }
-    const sc = { code: code, name: (f.name || '').trim() || code, cityCode: code.replace(/[^A-Z]/g, '').slice(0, 3) || code, zone: f.zone || 'South', dcCount: 0, volume: num(f.volCap), sortCap: num(f.sortCap), volCap: num(f.volCap), docks: num(f.nlhDocks) + num(f.rlhDocks), lat: 0, lng: 0, hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0, pocs: pocs.length ? pocs : ['—'] };
+    const sc = Object.assign({ code: code, name: (f.name || '').trim() || code, cityCode: code.replace(/[^A-Z]/g, '').slice(0, 3) || code, zone: f.zone || 'South', dcCount: 0, volume: num(f.volCap), sortCap: num(f.sortCap), volCap: num(f.volCap), docks: num(f.nlhDocks) + num(f.rlhDocks), lat: 0, lng: 0, hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0, pocs: pocs }, realFields);
     this.setState({ addedScs: [sc].concat(st.addedScs || []), addScOpen: false, addScForm: {}, inputsZone: 'All', inputsSearch: '' });
     this.saveScReviewers(code, reviewerIds);
     this.showToast('Sort Centre ' + code + ' added to the master', '#128A3E');
@@ -4895,33 +4933,33 @@ class NDCApp extends React.Component {
     const _addedScs = (st.addedScs || []).filter(s => (zf === 'All' || s.zone === zf) && (!q || s.code.toLowerCase().indexOf(q) >= 0 || (s.name || '').toLowerCase().indexOf(q) >= 0));
     const scRemovedMap = st.scRemoved || {};
     const scFiltered = _addedScs.concat(anFiltered).filter(s => !scRemovedMap[s.code]);
-    // PARITY §6 — identity columns City / State + Type. State is the representative state for the SC's
-    // zone (deterministic); Type derives from scale (large LMSC = Hub, mid = Regional, small = Spoke).
+    // PARITY §6 — identity columns City / State + Type. State is the representative state for the SC's zone (deterministic).
+    // Type/Docks/TP-limits/Hours are read from real stored fields (see submitAddSc) -- previously
+    // this block fabricated all of these from a hash of the SC code, which silently overrode
+    // whatever the user actually entered in the Add/Edit SC form. '—' means the field was
+    // genuinely never entered (true for all ~80 fabricated seed SCs, which predate these fields).
     const ZSTATE = { North: 'Delhi NCR', West: 'Maharashtra', South: 'Karnataka', East: 'West Bengal', Central: 'Madhya Pradesh' };
-    // C9 — POC details: up to 6 POCs/SC, names visible via a per-row dropdown (no separate screen).
-    const POC_ROLES = ['Ops ZH', 'LH Ops ZH', 'Ops CH', 'LH Ops CH', 'Ops AM-1', 'Ops AM-2'];
     const pocOpenRow = st.pocOpenRow;
     const scEdits = st.scEdits || {};
     // Pagination — page the full filtered SC list (10/page) instead of the old hard 16-row cap.
     const scMasterPager = this.pager(scFiltered, st.pgScMaster, 'pgScMaster');
     const scRows = scMasterPager.pageRows.map(s0 => {
       const s = scEdits[s0.code] ? Object.assign({}, s0, scEdits[s0.code]) : s0;
-      const pl = (s.pocs || []).slice(0, 6);
-      // Synthetic per-SC values derived deterministically from code so the table looks realistic
-      const h = s.code.split('').reduce((a, c) => (a * 31 + c.charCodeAt(0)) >>> 0, 0);
-      const nlhDocks = 3 + (h % 7);
-      const rlhDocks = 2 + ((h >> 3) % 6);
-      const localTp = 4 + (h % 3);
-      const nonLocalTp = 2 + ((h >> 2) % 3);
-      const openHour = 5 + (h % 3);
-      const closeHour = 21 + ((h >> 4) % 3);
-      const openTime = String(openHour).padStart(2, '0') + ':00';
-      const closeTime = String(closeHour).padStart(2, '0') + ':00';
+      // sc.pocs is the role-keyed object (SC_POC_FIELDS); guard the old flat-array shape / absence
+      // (seed SCs never had a pocs field) by treating anything non-object as "no POCs on file".
+      const pocsSrc = (s.pocs && !Array.isArray(s.pocs)) ? s.pocs : {};
+      const pocEntries = SC_POC_FIELDS.map(([k, role]) => ({ role, name: (pocsSrc[k] || '').trim() })).filter(p => p.name);
+      const nlhDocks = s.nlhDocks != null ? s.nlhDocks : '—';
+      const rlhDocks = s.rlhDocks != null ? s.rlhDocks : '—';
+      const localTp = s.localTp != null ? s.localTp : '—';
+      const nonLocalTp = s.nonLocalTp != null ? s.nonLocalTp : '—';
+      const openTime = s.open || '—';
+      const closeTime = s.close || '—';
       const codeLC = s.code.toLowerCase().replace(/[^a-z0-9]/g, '');
       const pocOpenRect = st.pocOpenRect || { top: 0, left: 0 };
-      return { code: s.code, name: s.name, zone: s.zone, cityState: s.name + ' / ' + (ZSTATE[s.zone] || s.zone), scType: s.dcCount >= 170 ? 'Hybrid' : s.dcCount >= 110 ? 'LMSC' : 'FMSC', sortCap: fmtInt(s.sortCap), volCap: fmtInt(s.volCap), docks: s.docks, nlhDocks: nlhDocks, rlhDocks: rlhDocks, localTp: localTp, nonLocalTp: nonLocalTp, openTime: openTime, closeTime: closeTime, dcCount: s.dcCount,
-        pocCount: pl.length, pocSummary: pl.length ? (pl.length + ' lead' + (pl.length === 1 ? '' : 's')) : 'None on file',
-        pocList: pl.map((n, i) => ({ name: n, role: POC_ROLES[i] || ('Ops Lead ' + (i + 1)), email: n.toLowerCase().replace(/[^a-z\s]/g, '').trim().replace(/\s+/g, '.') + '@valmo.in' })),
+      return { code: s.code, name: s.name, zone: s.zone, cityState: s.name + ' / ' + (ZSTATE[s.zone] || s.zone), scType: s.type || '—', sortCap: fmtInt(s.sortCap), volCap: fmtInt(s.volCap), docks: s.docks, nlhDocks: nlhDocks, rlhDocks: rlhDocks, localTp: localTp, nonLocalTp: nonLocalTp, openTime: openTime, closeTime: closeTime, dcCount: s.dcCount,
+        pocCount: pocEntries.length, pocSummary: pocEntries.length ? (pocEntries.length + ' lead' + (pocEntries.length === 1 ? '' : 's')) : 'None on file',
+        pocList: pocEntries.map(p => ({ name: p.name, role: p.role, email: p.name.toLowerCase().replace(/[^a-z\s]/g, '').trim().replace(/\s+/g, '.') + '@valmo.in' })),
         pocOpen: pocOpenRow === s.code, pocOpenRect: pocOpenRect,
         togglePoc: (e) => { if (pocOpenRow === s.code) { this.setState({ pocOpenRow: null }); return; } const r = e.currentTarget.getBoundingClientRect(); this.setState({ pocOpenRow: s.code, pocOpenRect: { top: r.bottom + 4, left: Math.min(r.left, window.innerWidth - 270) } }); },
         rowEdit: () => this.openScEdit(s.code), rowDelete: () => { const r = Object.assign({}, this.state.scRemoved || {}); r[s.code] = true; this.setState({ scRemoved: r }); this.showToast(s.code + ' removed from SC master', '#D14B4B', () => { const rr = Object.assign({}, this.state.scRemoved || {}); delete rr[s.code]; this.setState({ scRemoved: rr }); }); }, rowDeleteConfirm: () => this.setState({ delConfirm: { kind: 'sc', key: s.code, label: s.code + ' / ' + s.name } }) };
