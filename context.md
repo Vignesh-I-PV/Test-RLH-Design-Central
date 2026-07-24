@@ -486,3 +486,19 @@ policy (a draft is only ever inserted fresh or deleted, never patched in place).
 - No audit history on any override-on-upload table — unchanged from the prior round's notes.
 - A confirm-before-delete step for SC Vehicle Availability's individual row removal, to match
   SC/Vehicle Master's existing confirmation dialog — flagged above, not built.
+
+### 2026-07-24 (later same day) — Fixed a real-data bug: thousands-separator commas rejected as invalid numbers
+User tested RLH Plan Ingestion against a real 571-row sample file and hit "Volume must be a
+number > 0" errors on ~29 rows, all with volumes >= 1,000. Root cause: the sample file (and
+presumably every real export from this system) quotes any numeric field over 999 with a comma
+thousands-separator (e.g. `"1,286"`), which is valid CSV, but `Number("1,286")` evaluates to
+`NaN` in JavaScript — every validator's `isNum()` check was rejecting these as invalid rather
+than parsing them. Fixed at the parse stage in all four CSV pipelines built this session
+(`parseRlhIngestCsv`, `parseScMasterCsv`, `parseAvailCsv`, `parseNodeChangesCsv`): numeric-
+looking fields now have commas stripped (`numClean()`) before any validation or downstream use
+sees them, so `"1,286"` becomes `"1286"` at the point of parsing, not scattered fix-ups later.
+Verified against the actual sample file: unique LMSC codes are `D5LS, HBS, PYS, SBLS`; unique
+Vehicle Types are `7FT Trailer, 8FT Trailer, 10FT Trailer` — **both cross-checked against SC
+Master / Vehicle Master respectively**, so if either master doesn't yet have these exact
+codes/types entered, ingestion will still correctly fail with a "not found" error (a separate,
+expected gate, not a bug) rather than silently succeeding.
