@@ -227,3 +227,47 @@ bring this fork back in line with production behaviour:
    more advanced than main's (working Accept/Revert buttons vs. main's read-only text) — the
    real gap was section *ordering* (lifecycle banners to the top, tab strip below Validation
    Flags), not missing data.
+
+### 2026-07-24 (later same day) — SC Master data-integrity fixes, found during first real-data UAT pass
+User began ingesting real SC nodes via Add/Edit SC and found the SC Master list silently
+discarding or misrepresenting real input. Root cause across all three: the SC Master list view
+(`scRows` in `adminMasterVals`, formerly with inline hash-derivation) was originally built to
+make ~80 *fabricated* seed SCs look plausible, and was never updated once `submitAddSc()` began
+accepting real form input — the list kept fabricating values instead of reading what was
+actually saved. Three concrete symptoms, all now fixed:
+1. **SC Type always showed FMSC regardless of form selection.** `submitAddSc()` never stored
+   `f.type` at all, and the list derived a displayed `scType` from a `dcCount >= 170/110` scale
+   heuristic — a freshly-added SC always starts at `dcCount: 0`, so it always fell into the
+   `else → FMSC` bucket no matter what was picked. Fixed: `type` is now stored on save (both new
+   and edit paths) and read directly in the list (`s.type`, falling back to `—` only for the
+   pre-existing fabricated seed SCs, which never had a stored type to begin with). `openScEdit`
+   also no longer hardcodes `type: 'LMSC'` on reopen.
+2. **POC name entered under the form didn't appear in the POC list or on edit-reopen.** Two
+   compounding bugs: (a) only 4 of the form's 8 contact fields (`opsZh/opsCh/opsAm1/opsAm2`)
+   were ever read into storage — the 4 "LH Ops …" fields were silently dropped on save; (b) even
+   the 4 that were captured were stored as a flat, blank-filtered array with no role tag, so
+   `openScEdit` remapped them back onto form fields **by array position** — if an earlier field
+   was left blank, a later-filled name would reopen under the wrong role entirely (looked like it
+   vanished from where it was typed). Fixed by introducing `SC_POC_FIELDS`, a canonical 8-entry
+   `[key, role]` list shared by `submitAddSc`, `openScEdit`, and the list's POC dropdown builder.
+   POCs are now stored as an object keyed by field name (e.g. `{ opsZh: 'Name', lhOpsAm1: '' }`),
+   so a value can never shift to a different role and all 8 fields are captured, not 4.
+3. **NLH/RLH Docks, Local/Non-Local TP Limit, and Opening/Closing Time were also fabricated**,
+   not just Type — same root pattern, found while fixing #1. The list derived all six from a hash
+   of the SC code (`s.code.split('').reduce(...)`), completely ignoring whatever the Add/Edit SC
+   form actually submitted. Fixed: `submitAddSc()` now stores `localTp`/`nonLocalTp`/`open`/
+   `close`/`nlhDocks`/`rlhDocks` explicitly (previously NLH+RLH docks were combined into a single
+   `docks` sum with no split retained, and the other four weren't stored at all); the list reads
+   these directly, showing `—` only where genuinely never entered.
+
+**Explicitly deferred, by user request** — this pass fixes storage/display *within session
+state only*; it does **not** add Supabase persistence for SC Master or Vehicle Master. That
+gap (SC data lost on refresh, flagged the same session) is unchanged and still real — schema
+design for `sc_master`/`vehicle_master`-equivalent tables is a separate, upcoming discussion.
+User also confirmed no fabricated/demo data is needed on this panel going forward, so the ~80
+seed SCs are expected to show `—` for Type/TP-limits/Hours (they predate all of these fields)
+rather than a fabricated guess — this is intentional, not a regression.
+
+**Not yet done, worth a click-through**: Vehicle Master (`submitAddVeh`) has the exact same
+"real form input silently discarded/fabricated" risk pattern as SC Master did — it wasn't
+audited this pass since the user's report was SC-Master-specific. Worth a dedicated check next.
