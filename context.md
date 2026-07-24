@@ -1,273 +1,229 @@
-# Handover — Network Design Central (NDC) v2.0 / RLH Design Central
-## SKELETON BUILD — for Ops-Lead UAT with real ingested data
+# context.md — Network Design Central (NDC) v2.0 / RLH Design Central — UAT fork
+
+This is the one place to read before changing anything in this fork — either yourself, or by
+attaching this whole file (plus the repo link) to an AI assistant along with your question.
+
+**This file was reconciled on 2026-07-24** — it had been appended to three times (skeleton
+build → Supabase + Mode 2 → six parity fixes) without ever being corrected, which had left
+real contradictions (e.g. one section calling a bug "not yet fixed" while a later section
+described fixing it) and a top section that still described pre-Supabase behaviour as current
+fact. The section below is the accurate current state; the dated changelog further down is
+kept as history, with corrections noted inline where an earlier entry has since been resolved.
 
 ## What this is
-This is a forked/duplicated copy of the main NDC v2.0 prototype, created 2026-07-14
-specifically to run Ops-Lead UAT with real plans instead of fabricated demo data. The main
-repo continues on as the actively-iterated line (Figma freeze + ongoing changes); this repo
-is the "real data" testing ground, and Supabase integration (real auth, real persistence) is
-the next planned step here, not yet done as of this handover.
 
-**Every screen, engine calculation, and interaction is identical to the main repo.** The
-only change is what `buildSeed()` returns at startup:
+A forked copy of the main NDC v2.0 prototype (`V2.0-RLH-Design-Central`), created to run
+Ops-Lead UAT with **real data** instead of the main repo's ~80 fabricated demo Sort Centres.
+The main repo continues on as the actively-iterated visual/interaction reference (Figma
+remains the source of truth for design); this repo is the real-data testing ground, and has
+since diverged from main in two ways: a real Supabase backend, and a real RLH Plan Ingestion
+pipeline (neither exists in main).
 
-| | Main repo | This skeleton |
-|---|---|---|
-| Sort Centres | 80 fabricated | **0 — empty** |
-| Plans | ~45 fabricated, various statuses | **0 — empty** |
-| Vehicle Master | 8 types (canonical) | **same 8 types, kept as real system config** |
-| AutoDML / ingestion / volume-file history | fabricated | **0 — empty** |
-| SC Vehicle Availability | fabricated | **0 — empty** |
+## Current state — what's real vs. session-only, as of 2026-07-24
 
-Vehicle Master was deliberately kept, not stripped — it's canonical system config (cost/cap/
-touch-point/feasibility rules) the cost-and-distance engine (`computeHypotheticalPlan`)
-needs to compute anything at all, not a fictitious scenario. **Replace the 8 entries in
-`buildSeed()` with your organisation's real fleet before running UAT if they differ.**
+**Real, backed by Supabase** (not session-only, survives a refresh):
+- Auth — real magic-link login. Identity and role (`planner` / `ops_lead`) come from the
+  logged-in user's `profiles` row, set by hand in Table Editor. A planner can never be tagged
+  as a reviewer (enforced at the database level).
+- The full Ops Alignment lifecycle — Push → Submit feedback → Acknowledge → Finalise →
+  Unfreeze all write through to real tables (`plans`, `plan_reviewers`, `plan_row_feedback`,
+  `plan_reviewer_status`). Status can only change through three dedicated Postgres functions
+  (`acknowledge_plan`, `finalise_plan`, `unfreeze_plan`) — a plain client update to `status`
+  is rejected at the grant level.
+- SC Master's default-reviewer list (`sc_reviewers` table) and the Push modal's real Ops Lead
+  picker (no more free-text name/email entry).
+- The 3-file plan-snapshot naming/versioning (`plan_snapshots` table) — see naming convention
+  below.
 
-## What changed to make "zero data" actually safe
-Emptying `buildSeed()`'s arrays surfaced a few spots that assumed at least one SC/plan
-always existed (crash on `array[0].property` when the array is empty). Fixed:
-- Constructor: `this.state.reviewSC` / `this.state.mapSC` initial selection — now null-safe
-  when `data.scs` is empty (falls back to `null` instead of crashing on `scs[0].code`).
-- `opsSubmitted` initial state had 3 hardcoded demo plan IDs seeded with fake submission
-  records — cleared to `{}` since those plan IDs don't exist here.
-- **Map Visualization tab** (`mapVals()`) was the one view genuinely built assuming a
-  current SC always exists (arcs/DC markers/legend all derive from it) — rather than
-  threading null-guards through ~120 lines of geometry math, it now short-circuits to a
-  safe empty stub with an inline banner ("No Sort Centres ingested yet…") when
-  `data.scs.length === 0`. Once at least one real SC exists, this guard stops firing and
-  the view behaves exactly as it always has. **This is the one screen worth a dedicated
-  click-through once you've ingested your first SC**, since it wasn't independently
-  click-tested against real data before this handover — only reasoned through.
-- Design Review, Design Creation, and Ops Alignment were **not** found to have equivalent
-  hard crash points on empty data during this pass (they already used defensive
-  `? :` / `|| []` / `|| {}` patterns for "nothing found" cases) — but, per this project's
-  usual caution, that was verified by tracing the code, not by clicking through the live
-  UI with zero data. Budget a real click-through of all four areas before trusting this in
-  front of actual Ops Leads.
+**Real, but still session-only** (works, but a refresh loses it — not yet Supabase-backed):
+- SC Master and Vehicle Master themselves (only SC Master's *reviewer list* is Supabase-backed,
+  not the SC records; `submitAddSc()` / Add Vehicle Type are real, working forms).
+- **RLH Plan Ingestion (Mode 2)** — real file-upload → validate → create-a-plan pipeline (see
+  below). Produces a real plan object with real distances/costs, but that plan only becomes
+  Supabase-backed once it's actually pushed via `doPush()`.
+- Design Creation "runs" — this was never wired to anything real, in either repo (see gap #1
+  below); Design Creation cannot currently produce a pushable plan on its own.
 
-## How to get real data in, right now (before Supabase lands)
-Two paths exist already, both untouched by this skeleton pass:
-1. **Design Inputs → Sort Centre Master → Add SC** — a real, working form
-   (`submitAddSc()`) for adding one SC at a time by hand. Same for **Add Vehicle Type**
-   under Vehicle Master if the fleet differs from the kept placeholder.
-2. **The "Ingest RLH Plan" button** under Design Review's Ingestion tab
-   (`ingestRlhPlan()`) — flagged here explicitly: **this is a cosmetic demo stub**, not a
-   real file-parsing pipeline. It fakes a counter increment and a toast; it does not
-   parse an uploaded file into a real plan. Per the original handover, Design Ingestion
-   has "no build visibility — never touched, never verified" — that remains true here.
-   **Do not rely on this button to get real plans in for UAT.** Until Supabase lands (or
-   this gets built out for real), the practical way to seed a real plan is to hand-construct
-   a plan object matching the existing shape (see `plans.push({...})` in the main repo's
-   former `buildSeed()`, now removed here, for the exact field list) and insert it directly,
-   or wait for the Supabase ingestion path.
+**Still cosmetic stubs** (do not rely on these for real data — true in main too, not a
+UAT-specific regression):
+- Volume tab uploads (`validateVolCsv()`, both LMSC and LMDC Landing types) — random pass/fail
+  seeded from the filename, never reads actual file content.
+- Nodes/AutoDML upload (`uploadNodeChanges()`) — hardcoded toast, never reads the file.
+- Design Creation's "Trigger Runs" (`triggerRuns()`) — a cosmetic progress-bar simulator; never
+  produces a real run. `d.runs` is always empty in this fork.
 
-## Architecture essentials (unchanged from main repo — repeated here for a standalone reader)
-- **No build step.** Babel compiles the JSX in-browser at page load. Validate any edit with
-  `node check.js test-rlh-design-central-base.jsx` (a small Babel-based syntax checker — not
-  included in this handover bundle by default, recreate it or ask for it if needed) before
-  considering a change done.
-- **`with (B) { ... }` pattern.** Each major view has an `xVals()` method computing a big
-  object of derived values/handlers, merged into JSX scope via `with`. A binding referenced
-  in JSX must exist as a property on that object, in the same render pass.
-- **`computeHypotheticalPlan(plan, effectiveFbByIdx)`** is the single source of truth for
-  distance, cost, CPS, and validation errors/warnings. Never approximate separately.
-- **`effectiveFbFor(plan)` vs raw `row.fb`** — always read proposed changes through
-  `effectiveFbFor(plan)`, never raw `row.fb`/`r.fb` directly.
-- **Nothing persists.** Like the main repo, this is still 100% browser-session state as of
-  this handover — a refresh loses everything. That's the specific gap Supabase is meant to
-  close next.
+## RLH Plan Ingestion (Mode 2) — real, built 2026-07-23
 
-## Recent feature history inherited from the main repo (all present here)
-- Change-flag taxonomy (Vehicle Change / DC Movement / Route Order Change / Distance
-  Change / New Route·Split) — amber bar (5 flags), Route View (2 flags), Review Changes
-  popup (bucketed).
-- Acting Ops-Lead persona switcher ("Acting as" dropdown, top bar) — lets one browser
-  session simulate multiple named reviewers submitting feedback on the same plan. **This
-  will likely be replaced by real Supabase Auth logins in this repo once that lands** — the
-  persona switcher was a simulation workaround for the single-session demo, not meant to
-  coexist with real per-user login.
-- Honest per-reviewer submission tracking (`plan.submittedReviewers`) — Acknowledge &
-  Freeze no longer silently implies every assigned reviewer submitted; shows "Not-Submitted"
-  per reviewer who hasn't.
-- Distance-variance Accept/Revert flow, cross-browser favicon set, and everything else
-  logged in the main repo's `context.md` — not re-detailed here to avoid drift between the
-  two files; treat the main repo's `context.md` as the authoritative feature history up to
-  the fork point, and this file as the delta (skeleton + whatever diverges from here on).
+The old "Ingest RLH Plan" button is a real pipeline now, **not** the cosmetic stub earlier
+versions of this file described — do not trust any earlier line telling you otherwise.
 
-## Working-style notes for this project (unchanged)
-- Discuss non-trivial changes before executing — lay out the plan, wait for a response.
-- Prefer Add/Replace/Remove-style deltas over wholesale rewrites when touching existing
-  documentation.
-- This file should be treated as a living changelog from this fork point forward — append,
-  don't rewrite, so future sessions (AI or human) can see what changed and why.
+**Template** — one row per DC (touch point), not per route: `Zone, LMSC, LMDC, DC latitude,
+DC longitude, Volume, Route Code, Touch Point, Vehicle Type, Breakdown Distance, Round Trip
+Distance, Run ID`. Breakdown Distance is **cumulative from the SC**, not leg-to-leg, despite
+the column name — `Round Trip Distance − last Breakdown Distance` gives the return leg. Run ID
+is unique per LMSC and becomes `plan.fileBaseName` directly (already matches the snapshot
+naming convention below, no renaming needed). One file can contain multiple SCs, each
+producing its own independent plan.
 
-## UPDATE 2026-07-23 — Supabase landed since this file was last written; RLH Plan Ingestion built
+**Pipeline**: `parseRlhIngestCsv` → `validateRlhIngestRows` → `buildIngestedRlhPlans` →
+`ingestRlhPlanFile` (file picker → read → parse → validate → build → store). All-or-nothing
+per file (any row error rejects the whole file), matching the Volume-tab convention. LMSC and
+Vehicle Type must already exist in their respective Masters (maintained manually, not
+auto-created from the file — by explicit decision). Breakdown Distance must never *decrease*
+along a route — a **tie is legitimate** (co-located DCs can share a cumulative distance;
+confirmed against real sample data), only an actual decrease is bad data.
 
-**This file was stale going into this session** — it still describes the pre-Supabase
-skeleton. Supabase auth (magic-link, `profiles.role`), the full Ops Alignment lifecycle
-(push/submit/acknowledge/finalise/unfreeze via real Postgres functions), SC Master's
-`sc_reviewers` default-reviewer picker, and the plan-snapshot file-naming/versioning writes
-all landed between that version and this session — see the handover this session started
-from for the full detail; treat that as authoritative for the Supabase layer, this section
-as the delta on top of it.
+**Engine integration** — real ingested distance is the route's official distance by default
+(`genDcRows`/`computeHypotheticalPlan`/`doPush` all updated, additively; legacy
+Network-Map-driven synthetic plans are completely unaffected). A validated ingested plan for
+an SC always takes priority over a Network Map run in `doPush()` — no run needed at all.
+`metrics.coverage` is `1` for an ingested plan (every DC in the file is genuinely served).
 
-### RLH Plan Ingestion (Mode 2) — real file-upload → validate → create-a-plan, built this session
+**No Breakdown TAT / Out Cutoff data exists for an ingested plan** — the real template has no
+such columns, and per explicit product decision this isn't needed (also dropped from the Ops
+Feedback override model in both repos already). These fields are `null` for a freshly-ingested
+plan; every display spot that formats them is null-guarded to show `'—'`.
 
-This is the two-stage-simulation split agreed this session: **Mode 1** (ingest data to
-simulate the Design Input sheets through to plan creation — Volume/Node master uploads,
-no solver) is a separate, not-yet-built track. **Mode 2** (ingest an already-created plan
-straight into Design Review / Ops Alignment, as a live example of the feedback flow) is
-what this section covers, and is real, working code as of this session — not a stub.
+Verified end-to-end against a real 571-row / 156-route / 4-SC sample: computed distances
+matched the file's real Round Trip Distance sums almost exactly (rounding only), zero spurious
+warnings, brand-new push / re-push / Finalise Directly / full Ops Feedback + Finalise cycle all
+produce correct results with real data preserved throughout (see gap #2's resolution below).
 
-**Template** — one row per DC (touch point), not per route, matching the real source data:
-`Zone, LMSC, LMDC, DC latitude, DC longitude, Volume, Route Code, Touch Point, Vehicle Type,
-Breakdown Distance, Round Trip Distance, Run ID`. Breakdown Distance is **cumulative from the
-SC**, not leg-to-leg, despite the column name — `Round Trip Distance − last Breakdown Distance`
-gives the return leg. Run ID is unique per LMSC and becomes `plan.fileBaseName` directly (no
-renaming needed — the real format `SC_YYYYMMDD_HHMMSS` already matches the existing snapshot
-naming convention). One file can contain multiple SCs — grouped and validated independently,
-each producing its own plan.
+## Two haversine functions — never interchange them
 
-**New functions** (all in `test-rlh-design-central-base.jsx`):
+- `NDC_haversineKm` — has a **×55 fudge factor**, calibrated only for this app's fabricated,
+  sub-degree, city-scale seed coordinates. Legacy/demo data only.
 - `NDC_realHaversineKm` — genuine straight-line distance (R=6371, no fudge factor) × 1.25
-  road-distance buffer. Deliberately separate from the pre-existing `NDC_haversineKm`, whose
-  ×55 multiplier is calibrated only for this app's fabricated, sub-degree, city-scale seed
-  coordinates — applying it to real ingested coordinates would be badly wrong (a real 50km gap
-  would come back as ~2,750km). Real ingested coordinates always use the new function; the
-  legacy Network-Map/demo flow is completely untouched and still uses the old one.
-- `NDC_parseCsv` — minimal CSV parser (quoted fields, embedded commas, CRLF/CR/LF). Nothing in
-  the app read actual file content before this — every upload path (Volume, Nodes) only ever
-  read `file.name`/`file.size` to seed a random pass/fail, never the file body.
-- `parseRlhIngestCsv`, `validateRlhIngestRows`, `buildIngestedRlhPlans` — replace the old
-  `ingestRlhPlan()` cosmetic stub entirely. Validates: LMSC/Vehicle Type must exist in their
-  respective Masters (both maintained manually — not auto-created from the file, by explicit
-  decision); Zone cross-checked against SC Master's zone as a warning, not a hard error; LMDC
-  unique per route; one Vehicle Type and one Round Trip Distance per route; Touch Point
-  sequential 1..n; Breakdown Distance must never *decrease* along a route (a **tie is legitimate**
-  — two DCs can be co-located with a genuine zero-distance leg between them, confirmed against
-  real sample data — only an actual decrease is bad data). All-or-nothing per file, matching the
-  existing Volume-tab convention: any row error rejects the whole file, nothing partially lands.
-- `ingestRlhPlanFile` — file picker → read → parse → validate → build → store, wired to the
-  real "Ingest CSV" button (previously pointed at the stub). New state: `ingestedRlhPlans`
-  (real per-SC "validated, ready to push" plans, keyed by LMSC code) and `ingestErrModal` (new
-  error-list modal, modeled on the existing `volErrModal`).
+  road-distance buffer. Real ingested coordinates only. Applying the ×55 version to real
+  coordinates is badly wrong (a real 50km gap would come back as ~2,750km).
 
-**Engine integration** (`genDcRows`, `computeHypotheticalPlan`, `doPush` — all additive, legacy
-synthetic-plan behaviour is unchanged):
-- `genDcRows` returns real per-DC data as-is (real lat/lng/volume/leg-distance) when a row
-  carries ingested DC objects, tagging each `isReal: true`; falls through to the existing
-  jitter/synthesis path for legacy string-array rows exactly as before.
-- `computeHypotheticalPlan` now treats a real ingested leg distance as the route's official
-  distance by default (not just as an Ops-feedback override) via a new `userDistanceIsIngested`
-  flag. The existing `>25%` variance warning now **only fires for a genuine feedback override**,
-  never for ingestion ground truth — confirmed against the real sample that ~22% of legitimate
-  real legs exceed 25% variance vs. the buffered-haversine estimate even after the 1.25× buffer
-  (real roads wind around terrain; that's expected, not bad data, so checking it would just be
-  noise). The return leg uses the real ground-truth value when a route is unmodified from
-  ingestion, falling back to haversine (the correct real/legacy variant, chosen per-DC) otherwise.
-- `doPush` — a validated ingested plan for an SC always takes priority over a Network Map run
-  (no run needed at all). Computes real per-route `volume`/`cps`/`util` via
-  `computeHypotheticalPlan`, attaches the workflow fields (`ops`/`planner`/`fb`) every row needs
-  to match the existing shape. `metrics.coverage` is `1` for an ingested plan (every DC in the
-  file is genuinely served — nothing is "skipped" the way an optimizer run might); `metrics.util`
-  is a real average of real per-route utilisation, matching the exact averaging convention
-  already used elsewhere in the app (`avgUtil`).
-- Verified end-to-end against a real 571-row / 156-route / 4-SC sample: computed total distance
-  matched the file's real Round Trip Distance sums almost exactly (rounding only), zero spurious
-  variance warnings, brand-new push / re-push-of-same-SC / Finalise Directly all produce correct
-  `status`/`fileBaseName`/`allDecided`.
+Selection is per-DC via each DC record's `isReal` flag, not per-plan — a route mixing real and
+legacy DCs is an unsolved edge case (see gap #3 below), not currently possible via normal use.
 
-**No Breakdown TAT / Out Cutoff data exists anywhere for an ingested plan** — the real template
-has no such columns, and per product decision this isn't needed (also dropped from the Ops
-Feedback override model already). `row.breakdownTat`/`row.outCutoff`/`plan.metrics.avgTat` are
-`null` for a freshly-ingested plan; every display spot that formats these (`+'h'` string concat,
-`addHours`/`addHoursA` cutoff math) is now null-guarded to show `'—'` instead of crashing or
-showing `"nullh"`. Once an ingested plan goes through Ops Feedback + Finalise, the existing
-finalise-commit fallback (originally only for genuinely brand-new routes) now also covers this
-case, so post-finalise rows pick up the same generic default every other route gets
-(`distance / 42` hours estimate, `23:00` cutoff) rather than carrying `null` forward indefinitely.
+## Known gaps
 
-**Known gap, not yet fixed — flag before Ops Feedback is exercised on an ingested plan**: the
-finalise-commit step (the code that actually writes `computeHypotheticalPlan`'s hypothetical
-structure back into `plan.rows` — search for `dcCodes: dcs.map(x => x.code)`) flattens each
-route's DCs down to bare code strings, discarding real lat/lng/volume/distance. On the *next*
-read of that row, `genDcRows` sees plain strings (not the real per-DC objects) and falls back
-to synthetic jittered geometry — so a single Ops Feedback + Finalise cycle on an ingested plan
-will silently replace its real DC-level data with fabricated data. Not touched this session
-(pre-existing code, out of the agreed #1–7 scope) — needs its own fix (preserve real per-DC
-objects through the commit step, mirroring what `genDcRows`/`computeHypotheticalPlan` do) before
-Mode 2's "live example of the feedback flow" goal is fully real end-to-end.
+1. **Mode 1 (Design Input ingestion) not built.** Volume/Node master uploads are still
+   cosmetic stubs (see "Current state" above); there is no run-generation/optimiser step
+   anywhere in this codebase — `triggerRuns()` is cosmetic in both this fork and main. By
+   explicit decision, no solver is being built; Mode 1's scope (when built) is bounded at
+   making the Design Input masters genuinely ingestible, not at producing a plan.
+2. ~~Finalise-commit flattens real DCs to bare code strings, losing real data~~ — **fixed
+   2026-07-24** (see changelog). `computeHypotheticalPlan`'s route object now returns
+   `dcRecords` (full real per-DC records incl. `isReal`, `resolvedLeg`); `confirmFin` and the
+   Finalise preview both use it directly instead of re-deriving via `genDcRows`.
+3. **Edge case, not solved**: a route mixing real-ingested DCs with legacy-synthetic DCs (e.g.
+   a hypothetical future cross-plan merge via Ops feedback) is geometrically nonsensical
+   regardless (real and fake coordinate systems don't align) and isn't fully guarded against.
+   Not expected before a genuine solver/cross-plan-merge feature exists.
+4. `aSel.hwLabel` / `oSel.hwLabel` are referenced in JSX (Ops Alignment "Historical weight"
+   line) but never actually assigned in either repo's object builders — confirmed pre-existing
+   in main too, not something this fork regressed. Not fixed, low priority.
+5. Main's own `context.md` lists Breakdown TAT / Out Cutoff as Ops-Lead-flaggable cells — that
+   is stale documentation in main itself; neither repo's actual feedback model has ever
+   supported editing those fields. Not a functional difference between the two repos, don't
+   relitigate it as one.
 
-## UPDATE 2026-07-24 — Six parity fixes ported from the main prototype
+## Supabase migration history — run in this order if standing up a fresh project
 
-Following a systematic diff against the main prototype repo (`V2.0-RLH-Design-Central`),
-six confirmed gaps were fixed to bring this fork back in line with production behaviour.
-Goal, per this session: the UAT should show users what they'll actually see in production.
+| Order | Reference name | What it does |
+|---|---|---|
+| 1 | `01_core_schema_and_rls` | Core tables (`profiles`, `plans`, `plan_reviewers`, `plan_row_feedback`, `plan_reviewer_status`) + base RLS |
+| 2 | `02_planner_sees_all_reviewer_tags` | Any planner sees who's tagged on any plan |
+| 3 | `03_prevent_self_tagged_review` | Blocks a plan's creator from being tagged as its own reviewer |
+| — | ~~`04_equal_planner_edit_rights`~~ | Superseded by #4 below — skip |
+| 4 | `05_acknowledge_finalize_unfreeze_flow` | The real Pending → Acknowledged → Finalized flow, as three dedicated functions; `status` locked from direct client edits |
+| 5 | `06_acknowledge_threshold_and_terminal_finalize` | Acknowledge needs ≥1 reviewer submitted (not all); Finalized is truly terminal, no unfreeze from there |
+| 6 | `07_equal_planner_tag_management` | Any planner can manage tags on any plan; a planner can never be tagged as a reviewer (general rule, not just self-tagging) |
+| 7 | `08_sc_default_reviewers` | `sc_reviewers` table — SC Master's default reviewer list |
+| 8 | `09_plan_snapshots` | The 3-file naming/versioning table (see below) |
+| — | `admin_readonly_role` | Still parked/deferred, not run |
 
-1. **Screen-jump bug** (Planner + Ops Lead) — `curId`'s "is my open plan still valid" check
-   now tests membership against the full plan set (`plans`/`assigned`), not the tab-filtered
-   list (`listPlans`/`filteredAssigned`). Previously, an action that moved a plan to a
-   different status tab (Submit/Acknowledge/Finalise) would silently bounce the user to an
-   unrelated plan instead of keeping their detail view open.
+**Plan-snapshot naming** — exactly 3 named rows per plan in `plan_snapshots`:
+1. `{name}` at push (stage `ingested`) — for an ingested plan, `{name}` = the file's Run ID
+   directly (already matches this format, e.g. `SBLS_20260716_142020`); for a Network-Map-driven
+   plan, generated at push time.
+2. `{name}_FEEDBACK` at each feedback submission (overwrites in place, doesn't grow).
+3. `{name}_FINALISED` at Finalise. Acknowledge does not create a new file (same `_FEEDBACK`
+   file, frozen). Finalise Directly skips stage 2 — only `{name}` and `{name}_FINALISED` exist.
+
+## Architecture essentials
+
+- No build step. Babel compiles the JSX in-browser at page load. Validate any edit with a
+  Babel-based syntax checker (`sourceType: 'script'` to tolerate the top-level `with`) before
+  considering a change done.
+- `with (B) { ... }` binding pattern in `View()` — every JSX identifier must exist as a
+  property on the object returned by `renderVals()`/its sub-`*Vals()` methods, in the same
+  render pass, or the screen silently blanks.
+- `computeHypotheticalPlan(plan, effectiveFbByIdx)` — single source of truth for
+  distance/cost/CPS/validation, **and** for which DCs are real (`dcRecords[].isReal`) and what
+  distance is real (`dcRecords[].resolvedLeg`, `userDistanceIsIngested`). Read these rather
+  than re-deriving elsewhere.
+- `effectiveFbFor(plan)` vs raw `row.fb` — always read proposed changes through
+  `effectiveFbFor(plan)`, never raw `row.fb`/`r.fb` directly.
+- Acting Ops-Lead persona switcher (pre-Supabase demo workaround) has been **retired** — real
+  per-user login replaced it. If you see references to a persona switcher anywhere, that's
+  dead/superseded, not a current feature.
+
+## Working-style notes for this project
+
+- Discuss non-trivial changes before executing — lay out the plan, wait for a response.
+- Prefer additive, clearly-labelled changes over rewriting existing code/SQL.
+- Prefer surgical, targeted edits over wholesale file rewrites given the file's size.
+- Validate every edit with the syntax checker; re-run the RLH ingestion regression test (a
+  real 571-row sample) after any change touching `genDcRows`, `computeHypotheticalPlan`,
+  `doPush`, or `confirmFin` — it has caught real bugs more than once, don't skip it.
+- **Keep this file reconciled, not just appended to.** A dated changelog entry describing a
+  fix is only useful if earlier entries that it supersedes get corrected or struck through in
+  place (see gap #2 above for the pattern) — otherwise the file accumulates contradictions
+  that cost more time to untangle than a rewrite would have saved.
+
+---
+
+## Changelog (historical — dated entries, oldest first)
+
+### 2026-07-14 — Skeleton build for zero-data UAT
+Forked from main; `buildSeed()` emptied (Sort Centres, Plans, AutoDML/ingestion/volume-file
+history, SC Vehicle Availability all → 0; Vehicle Master kept at its 8 canonical types as real
+system config, since the cost engine needs it to compute anything). Fixed a few empty-data
+crash points (constructor's `reviewSC`/`mapSC` null-safety, `opsSubmitted`'s hardcoded demo
+IDs, Map Visualization's empty-state guard). Design Review/Design Creation/Ops Alignment
+verified by tracing code (not live click-through) to already handle empty data safely.
+
+### 2026-07-23 — Supabase landed; RLH Plan Ingestion (Mode 2) built
+Real Supabase auth, the full Ops Alignment lifecycle, `sc_reviewers`, and `plan_snapshots` all
+landed (see "Current state" and migration table above — this entry originally said these
+"landed between [the last version] and this session" without saying what changed; that detail
+has now been folded into the current-state section above rather than left as a dangling
+reference). RLH Plan Ingestion (Mode 2) built as a real pipeline (see dedicated section
+above). At the time, this entry flagged the Finalise-commit DC-flattening issue as a known,
+not-yet-fixed gap — **that was fixed the next day, 2026-07-24, see below.**
+
+### 2026-07-24 — Six parity fixes ported from the main prototype
+Following a systematic diff against `V2.0-RLH-Design-Central`, six confirmed gaps fixed to
+bring this fork back in line with production behaviour:
+1. **Screen-jump bug** (Planner + Ops Lead) — `curId`'s validity check now tests against the
+   full plan set (`plans`/`assigned`), not the tab-filtered list. Previously, an action that
+   moved a plan to a different status tab bounced the user to an unrelated plan.
 2. **Touch-point auto-reorder tie-break was direction-blind** — `computeHypotheticalPlan`'s
-   route sort now distinguishes moving a DC to an *earlier* position (insert-before, correct
-   as-was) from a *later* one (needs insert-after — only residents at-and-before the target
-   shift back by one, the mover lands cleanly on the target slot). Needed a new `originalTp`
-   field on the flattened DC record to detect direction.
+   route sort now distinguishes moving a DC earlier (insert-before) from later (insert-after),
+   via a new `originalTp` field on the flattened DC record.
 3. **Planner's Ops Alignment rail now has 4 stages**, not 3 — `Acknowledged` split out of
-   `Feedback Received` into its own tab (`FILTERS`/`fmap`/`PSEG`/`segCount` simplified to a
-   direct 1:1 status mapping now that there's no more dual-matching). Matches the Ops Lead
-   rail, which already had 4.
-4. **Mandatory + reset Touch Point when moving a DC into a new/not-yet-committed route** —
-   `setNcDcRouteCode` now clears and requires TP whenever the target route code isn't yet a
-   real row in `plan.rows` (a fresh split, or an already-pending split another DC proposed).
+   `Feedback Received` into its own tab, matching the Ops Lead rail.
+4. **Mandatory + reset Touch Point** when moving a DC into a new/not-yet-committed route.
 5. **Finalise confirmation is now a full-screen tabbed preview** (Plan Details / Route View),
-   replacing the old modal. Building this surfaced a real, more consequential bug underneath:
-   the commit step (`confirmFin`) and this new preview both used to flatten a route's DCs
-   down to bare code strings (`dcCodes: dcs.map(x => x.code)`), discarding real ingested
-   lat/lng/volume/distance — meaning a single Ops Feedback + Finalise cycle on an ingested
-   plan would silently replace its real data with fabricated synthetic geometry. Fixed at the
-   source: `computeHypotheticalPlan`'s route object now also returns `dcRecords` (the full
-   real per-DC records) and each DC gets a `resolvedLeg` (the actual distance used, ground
-   truth or calculated) attached during the leg-sum loop. Both the preview and `confirmFin`
-   now use `dcRecords` directly. `genDcRows` was updated to read either shape (`dist` from a
-   freshly-ingested row, `resolvedLeg` from a post-Finalise committed row) and to respect each
-   DC's own `isReal` flag rather than assuming every object-shaped DC is real — a legacy
-   synthetic plan's DCs are *also* object-shaped after Finalise now (confirmFin commits
-   `dcRecords` for every plan, not just ingested ones) and must keep using the ×55 legacy
-   haversine, not the real formula. `returnLeg` is now carried forward through the commit too,
-   so a re-computed Finalised plan keeps using the exact real return leg rather than a
-   haversine approximation. Verified end-to-end against the real sample: ingest → push →
-   finalise → re-read all show the identical, correct real distance with zero errors/warnings.
-6. **Unified L4 structure** (Plan Inputs → Plan Outputs → Validation Flags → Plan Details,
-   each its own titled section) applied to Design Review, Ops Alignment Planner, and Ops
-   Alignment Ops Lead. Design Review needed a real restructure: the old nested
-   "Detail View (DC × Route) / Route View" inner toggle (buried one level inside a "Plan
-   Detail" tab) is now flattened — the flat DC × Route table shows directly under the outer
-   "Plan Details" tab, Route View's pivot table directly under its own tab, no inner toggle.
-   Ops Alignment Planner and Ops Lead turned out to already have all the same data computed
-   (`inputNodes`/`inputVehArr`/`hasPlanFlags`/etc.) and — for the Planner side specifically —
-   an inline distance-variance banner that's actually *more* advanced than main's (main's is
-   read-only text; this fork's has working per-entry Accept-anyway/Revert-to-calculated
-   buttons, `hasDistanceVariance`/`distanceVarianceEntries`). The only real gap there was
-   section *ordering*: lifecycle status banners (Pushed/Acknowledged/Finalised messaging)
-   moved to right after the sticky header (matching main), and the outer Plan Details/Route
-   View tab strip moved to after Validation Flags with its own titled section header (also
-   matching main) — previously the tabs sat at the very top, before Plan Inputs. Tab label
-   renamed 'Plan Detail'/'Details' → 'Plan Details' everywhere for consistency.
-
-Also confirmed, not fixed (deliberately out of scope, pre-existing in main too, not
-something this fork regressed): `aSel.hwLabel`/`oSel.hwLabel` are referenced in JSX on the
-Ops Alignment "Historical weight" line but never actually assigned in either repo's object
-builders — a pre-existing minor bug in both, unrelated to this session's work.
-
-**Mode 1 (Design Input ingestion) — not built this session.** `validateVolCsv()` (Volume tab,
-LMSC/LMDC Landing types) and `uploadNodeChanges()` (Nodes tab) are both still cosmetic stubs
-exactly as this file previously described — real parsing/validation for these was explicitly
-decoupled from Mode 2 this session (per-DC volume for Plan Ingestion comes from the plan file
-itself, not from Volume Inputs) and remains a separate, later piece of work. There is also still
-no run-generation/optimiser step anywhere in this codebase (`triggerRuns()` is a cosmetic
-progress-bar simulator; `d.runs` is always empty in this fork) — by explicit decision this
-session, no solver is being built; Mode 1's scope is bounded at "the Design Input masters are
-genuinely ingestible," not at producing a plan.
+   replacing the old modal. Building this surfaced and fixed the DC-flattening data-loss bug
+   flagged the day before (see gap #2 above): `computeHypotheticalPlan`'s route object now
+   returns `dcRecords` (full real per-DC records) and each DC gets a `resolvedLeg` (actual
+   distance used); `confirmFin` and the preview both use `dcRecords` directly instead of
+   re-deriving via `genDcRows`. Caught two follow-on bugs during verification before shipping:
+   an `isReal` discriminator that would have wrongly forced the real-coordinate haversine
+   formula onto legacy synthetic DCs, and a missing `returnLeg` carry-forward through commit.
+   Verified end-to-end: ingest → push → finalise → re-read all show identical, correct real
+   distance with zero errors.
+6. **Unified L4 structure** (Plan Inputs → Plan Outputs → Validation Flags → Plan Details)
+   applied to Design Review, Ops Alignment Planner, and Ops Alignment Ops Lead. Design Review
+   needed a real restructure (flattened an old nested Detail-View/Route-View inner toggle).
+   Ops Alignment already had nearly everything built, including a distance-variance banner
+   more advanced than main's (working Accept/Revert buttons vs. main's read-only text) — the
+   real gap was section *ordering* (lifecycle banners to the top, tab strip below Validation
+   Flags), not missing data.
