@@ -199,6 +199,69 @@ will silently replace its real DC-level data with fabricated data. Not touched t
 objects through the commit step, mirroring what `genDcRows`/`computeHypotheticalPlan` do) before
 Mode 2's "live example of the feedback flow" goal is fully real end-to-end.
 
+## UPDATE 2026-07-24 — Six parity fixes ported from the main prototype
+
+Following a systematic diff against the main prototype repo (`V2.0-RLH-Design-Central`),
+six confirmed gaps were fixed to bring this fork back in line with production behaviour.
+Goal, per this session: the UAT should show users what they'll actually see in production.
+
+1. **Screen-jump bug** (Planner + Ops Lead) — `curId`'s "is my open plan still valid" check
+   now tests membership against the full plan set (`plans`/`assigned`), not the tab-filtered
+   list (`listPlans`/`filteredAssigned`). Previously, an action that moved a plan to a
+   different status tab (Submit/Acknowledge/Finalise) would silently bounce the user to an
+   unrelated plan instead of keeping their detail view open.
+2. **Touch-point auto-reorder tie-break was direction-blind** — `computeHypotheticalPlan`'s
+   route sort now distinguishes moving a DC to an *earlier* position (insert-before, correct
+   as-was) from a *later* one (needs insert-after — only residents at-and-before the target
+   shift back by one, the mover lands cleanly on the target slot). Needed a new `originalTp`
+   field on the flattened DC record to detect direction.
+3. **Planner's Ops Alignment rail now has 4 stages**, not 3 — `Acknowledged` split out of
+   `Feedback Received` into its own tab (`FILTERS`/`fmap`/`PSEG`/`segCount` simplified to a
+   direct 1:1 status mapping now that there's no more dual-matching). Matches the Ops Lead
+   rail, which already had 4.
+4. **Mandatory + reset Touch Point when moving a DC into a new/not-yet-committed route** —
+   `setNcDcRouteCode` now clears and requires TP whenever the target route code isn't yet a
+   real row in `plan.rows` (a fresh split, or an already-pending split another DC proposed).
+5. **Finalise confirmation is now a full-screen tabbed preview** (Plan Details / Route View),
+   replacing the old modal. Building this surfaced a real, more consequential bug underneath:
+   the commit step (`confirmFin`) and this new preview both used to flatten a route's DCs
+   down to bare code strings (`dcCodes: dcs.map(x => x.code)`), discarding real ingested
+   lat/lng/volume/distance — meaning a single Ops Feedback + Finalise cycle on an ingested
+   plan would silently replace its real data with fabricated synthetic geometry. Fixed at the
+   source: `computeHypotheticalPlan`'s route object now also returns `dcRecords` (the full
+   real per-DC records) and each DC gets a `resolvedLeg` (the actual distance used, ground
+   truth or calculated) attached during the leg-sum loop. Both the preview and `confirmFin`
+   now use `dcRecords` directly. `genDcRows` was updated to read either shape (`dist` from a
+   freshly-ingested row, `resolvedLeg` from a post-Finalise committed row) and to respect each
+   DC's own `isReal` flag rather than assuming every object-shaped DC is real — a legacy
+   synthetic plan's DCs are *also* object-shaped after Finalise now (confirmFin commits
+   `dcRecords` for every plan, not just ingested ones) and must keep using the ×55 legacy
+   haversine, not the real formula. `returnLeg` is now carried forward through the commit too,
+   so a re-computed Finalised plan keeps using the exact real return leg rather than a
+   haversine approximation. Verified end-to-end against the real sample: ingest → push →
+   finalise → re-read all show the identical, correct real distance with zero errors/warnings.
+6. **Unified L4 structure** (Plan Inputs → Plan Outputs → Validation Flags → Plan Details,
+   each its own titled section) applied to Design Review, Ops Alignment Planner, and Ops
+   Alignment Ops Lead. Design Review needed a real restructure: the old nested
+   "Detail View (DC × Route) / Route View" inner toggle (buried one level inside a "Plan
+   Detail" tab) is now flattened — the flat DC × Route table shows directly under the outer
+   "Plan Details" tab, Route View's pivot table directly under its own tab, no inner toggle.
+   Ops Alignment Planner and Ops Lead turned out to already have all the same data computed
+   (`inputNodes`/`inputVehArr`/`hasPlanFlags`/etc.) and — for the Planner side specifically —
+   an inline distance-variance banner that's actually *more* advanced than main's (main's is
+   read-only text; this fork's has working per-entry Accept-anyway/Revert-to-calculated
+   buttons, `hasDistanceVariance`/`distanceVarianceEntries`). The only real gap there was
+   section *ordering*: lifecycle status banners (Pushed/Acknowledged/Finalised messaging)
+   moved to right after the sticky header (matching main), and the outer Plan Details/Route
+   View tab strip moved to after Validation Flags with its own titled section header (also
+   matching main) — previously the tabs sat at the very top, before Plan Inputs. Tab label
+   renamed 'Plan Detail'/'Details' → 'Plan Details' everywhere for consistency.
+
+Also confirmed, not fixed (deliberately out of scope, pre-existing in main too, not
+something this fork regressed): `aSel.hwLabel`/`oSel.hwLabel` are referenced in JSX on the
+Ops Alignment "Historical weight" line but never actually assigned in either repo's object
+builders — a pre-existing minor bug in both, unrelated to this session's work.
+
 **Mode 1 (Design Input ingestion) — not built this session.** `validateVolCsv()` (Volume tab,
 LMSC/LMDC Landing types) and `uploadNodeChanges()` (Nodes tab) are both still cosmetic stubs
 exactly as this file previously described — real parsing/validation for these was explicitly
