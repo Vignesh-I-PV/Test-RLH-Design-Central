@@ -399,3 +399,90 @@ accordingly, and applied planner-only from the start to the other three).
 - SC Code is not cross-checked against SC Master in Node Changes' validator (explicit user
   decision) — but IS cross-checked in SC Vehicle Availability's validator (different call,
   reasoned above). Worth remembering these two intentionally differ.
+
+### 2026-07-24 (later same day) — All 4 masters + RLH pre-push wired to real Supabase
+User tested Vehicle Master, found data lost on refresh — confirmed this was the explicitly
+deferred gap (schema existed, app code didn't read/write it), not a regression. Wired real
+Supabase read/write for all 4 masters plus a fifth item (RLH Plan Ingestion's pre-push state),
+per user's explicit request. Answers locked in before building: load all 4 at the same point
+auth resolves (mirroring the existing `loadPlansFromSupabase` pattern); writes are
+wait-for-confirm (button disabled + "Saving…" while in flight, not optimistic); ops_lead gets
+no access to these screens at all (**already true** — `opsNav` only ever contained Ops
+Alignment + Network Map, confirmed by reading the nav construction code, nothing to build);
+Node Changes' and SC Vehicle Availability's upload-replace is the simple client-side
+delete-then-insert (the atomic Postgres-function alternative was explained and explicitly
+declined — accepted risk: a failed insert after a successful delete leaves the table empty).
+
+**Loading** — `loadMastersFromSupabase()` fetches `sc_master`/`vehicle_master`/`node_changes`/
+`sc_vehicle_availability` in parallel and reconstructs each into the exact shapes the rest of
+the app already expects (`data.scs`/`data.VEH`/`data.nodeChangesUnified`/`data.scVehAvail`) —
+every existing overlay/builder (`scEdits`, `vehEdits`, `scRows`, `vehMaster`,
+`scVehAvailRows`) needed zero changes, since they already treated these as "the base list"
+regardless of where it came from. Availability rows resolve their Capacity/Distance/TP Limit
+defaults against the freshly-loaded Vehicle Master **at load time**, matching how
+`buildAvailRows()` already does it for a CSV upload — the existing display code reads these as
+concrete values, it doesn't re-resolve against Vehicle Master itself. Called from
+`loadAuthProfile()`, planner-only (`ops_lead` can't reach these screens and is blocked by RLS
+regardless, so no point fetching).
+
+**SC Master** — `submitAddSc()` now does a real upsert-by-`sc_code` (`saveScMasterRow`/
+`scToDbRow`), replacing the old `scEdits`/`addedScs` local-only bookkeeping entirely: a
+successful write refetches all 4 masters rather than patching local overlays, so there's a
+single source of truth rather than two systems that could drift. Row delete
+(`confirmDelete('sc')`) now issues a real `DELETE`. The bulk CSV upload (`uploadScMasterFile`)
+was **still local-only from the previous session's build** — found and fixed this pass too:
+now does one batch `upsert()` call for the whole file via `upsertScMasterRows`.
+
+**Vehicle Master** — `submitAddVeh()` now does a real upsert-by-`vehicle_type`
+(`saveVehicleMasterRow`); the modal's own `addVehEditName` edit branch was dead code anyway
+(never reachable from the UI — only the inline row-edit is a real edit path), so this
+simplified rather than complicated the function. Inline row-edit save now writes for real too,
+handling a type-reassignment via the dropdown as delete-old+insert-new (`vehicle_type` is the
+unique key). Row delete now issues a real `DELETE`.
+
+**Node Changes** — `uploadNodeChanges()` now does the agreed simple delete-then-insert
+(`replaceNodeChanges`) against `node_changes`, wait-for-confirm.
+
+**SC Vehicle Availability** — same delete-then-insert pattern for the bulk CSV upload
+(`replaceAvailability`). Also found and fixed, beyond what was explicitly discussed: the
+**individual** per-SC "Add Vehicle" inline form, row-edit save, and row-delete on this tab
+were all still session-state-only (`availAdded`/`availEdits`/`availRemoved`) from the previous
+session's build. Left as-is, this would have reintroduced the exact bug class that started
+this whole conversation, just less obviously — e.g. deleting a row would only hide it locally;
+on refresh, the row reloads straight from Supabase (since it was never actually deleted there)
+and silently reappears. All three now write for real (`saveAvailabilityRow`/
+`deleteAvailabilityRow`), same delete-old+insert-new handling for a type reassignment as
+Vehicle Master.
+
+**Deletion UX change, worth knowing about**: SC Master's and Vehicle Master's row-delete
+previously used a "soft-remove with an Undo button on the toast" pattern (nothing was actually
+removed until/unless the undo window was ignored — meaningless when nothing was persisted
+anyway). Now that delete is a real, already-confirmed (via the existing delete-confirmation
+dialog) remote operation, the Undo button was dropped for these two specifically — offering an
+undo on a completed remote delete would be misleading, since clicking it couldn't actually put
+the row back. Replaced with a plain success/error toast. SC Vehicle Availability's individual
+row-delete never had a confirmation dialog to begin with, so this change doesn't apply there in
+the same way — flagging in case a confirm-before-delete step is wanted for consistency later.
+
+**RLH Plan Ingestion pre-push persistence** — user also asked about this gap during the
+Supabase discussion (an ingested-but-not-yet-pushed plan was lost on refresh, same bug class,
+predates this session). Deliberately built as a **new, separate table**
+(`rlh_ingested_plans`) rather than threading a pre-push state through the existing `plans`
+table + its three RPC functions (`acknowledge_plan`/`finalise_plan`/`unfreeze_plan`) — those
+are an already-working system whose RPC bodies and CHECK constraints aren't visible from the
+app code alone, so extending that lifecycle carried real risk of breaking something already in
+production use. `ingestRlhPlanFile()` now persists via `saveIngestedRlhPlanDrafts` (upsert-by-
+`sc_code`, matching the app's own "re-ingesting an SC replaces its prior draft" behaviour);
+`loadIngestedRlhPlanDrafts()` restores `ingestedRlhPlans` + the "Recently ingested" log on load;
+`doPush()` now calls `deleteIngestedRlhPlanDraft(code)` once a plan is actually pushed into the
+real `plans` table, so the draft table only ever holds the genuine not-yet-pushed gap.
+
+SQL: `14_rlh_ingested_plans.sql` — planner-only RLS, same pattern as the 4 masters, no update
+policy (a draft is only ever inserted fresh or deleted, never patched in place).
+
+**Not built this pass**:
+- The atomic replace-on-upload Postgres function (discussed, explicitly declined in favour of
+  the simple approach) — still just the plain client-side delete-then-insert.
+- No audit history on any override-on-upload table — unchanged from the prior round's notes.
+- A confirm-before-delete step for SC Vehicle Availability's individual row removal, to match
+  SC/Vehicle Master's existing confirmation dialog — flagged above, not built.
