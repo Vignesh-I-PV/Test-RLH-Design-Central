@@ -271,3 +271,131 @@ rather than a fabricated guess — this is intentional, not a regression.
 **Not yet done, worth a click-through**: Vehicle Master (`submitAddVeh`) has the exact same
 "real form input silently discarded/fabricated" risk pattern as SC Master did — it wasn't
 audited this pass since the user's report was SC-Master-specific. Worth a dedicated check next.
+
+### 2026-07-24 (later same day) — Four masters rebuilt against real templates, real CSV pipelines
+User supplied real Excel templates (2-4 metadata rows: Mandatory/Optional, Input Format,
+Validation Rule, Column Name, with real data starting after) for four masters in sequence:
+Node Additions/Closures/Migrations, Vehicle Master, Sort Centre Master, and SC Vehicle
+Availability. Working method for each: read the template's real column list + validation
+rules, reconcile the existing form/list against it (match what exists, drop what doesn't
+belong, add what's missing), then build a real CSV bulk-upload pipeline where requested.
+Supabase SQL (schema + planner-only RLS) delivered per-master as each was finished; code
+changes batched and delivered together at the end of the round (this handoff).
+
+**1. Node Additions/Closures/Migrations** — `uploadNodeChanges()` was a cosmetic stub (never
+read the file); replaced with a real `parseNodeChangesCsv` → `validateNodeChangeRows` →
+`buildNodeChangeRows` → `uploadNodeChanges()` pipeline. Template: LMSC Code, LMDC Code, Node
+Flag (Addition/Closure/Migration), LMDC Latitude, LMDC Longitude. Confirmed with user: Lat/Long
+mandatory-ness follows the template's *conditional* Validation Rule (Addition: mandatory;
+Closure/Migration: optional-but-validated-if-given), not its blanket "Mandatory" tag on those
+two columns — a real inconsistency in the template itself, resolved in the app's favor of the
+more specific rule. A Migration row's LMSC Code is the **destination** SC (DC retagged there,
+dropped from its old SC — old-SC resolution deferred, not built). LMSC Code is explicitly NOT
+cross-checked against SC Master this pass (user decision — flagged as a future enhancement).
+The existing "Template" download button was stale (wrong 9-column format matching nothing);
+fixed to the real 5 columns. `nodeChangeCount` was summing three dead legacy arrays nothing
+populated — now reads the real uploaded data (`nodeChangesUnified`) directly. New row-error
+modal (`nodeErrModal`) added, cloned from the RLH ingestion pattern. **The panel's view/table
+already matched the template exactly — zero changes needed there.**
+SQL: `10_node_changes_master.sql` (table + planner-only RLS; corrected mid-session from an
+initially-too-open `select` policy to fully planner-only, per explicit user instruction that
+ALL masters are visible/editable to the planner persona only, no ops_lead access at all).
+
+**2. Vehicle Master** — reconciled against a 5-column template (Vehicle Type, Capacity
+(Shipments), Distance Limit (Kms), Touch Point Limit, LH Feasibility). Vehicle Type converted
+from free-text to a fixed 10-option dropdown (`VEH_TYPE_OPTIONS` — the exact truck-size list
+from the template's Validation Rule), applied both to the Add form and the inline row-rename
+control. Removed TP Local / TP Non-Local entirely (form fields, `submitAddVeh()`, inline-edit
+draft/save logic) — not in this template, unlike SC Master's own (different) TP Limit fields.
+Relabeled fields to the template's exact column names. List view already matched — no changes
+needed. Per explicit user instruction, cleared the 8 fabricated seed vehicle types
+(`VEH: []`) — verified first that every `d.VEH` read in the codebase already guards with
+`|| []`/`|| {}`, so this doesn't crash anything; dependent dropdowns (Design Creation, Ops
+Alignment) just show no options until real fleet data is entered. No CSV upload built here,
+per explicit user instruction (single-entry form only, matching the template's intent).
+SQL: `11_vehicle_master.sql` (table + planner-only RLS incl. `update`, since Vehicle Master
+edits in place rather than replacing wholesale; `vehicle_type` UNIQUE + CHECK-constrained to
+the 10 template values).
+
+**3. Sort Centre (SC) Master** — reconciled against a 21-column template. Found: Local/
+Non-Local TP Limit were marked required in the form but are Optional per template (with a
+non-blocking "Max=7" warning, not a hard cap) — fixed. The 8 POC/contact fields have a real
+email-format rule in the template (4 mandatory: SC/SC-LH Ops ZH and CH; 4 optional-but-
+validated-if-filled: the AM-1/AM-2 variants) that the form never enforced at all — added
+`NDC_isValidEmail()` and wired it into `submitAddSc()` as a **hard block** (user's explicit
+choice) for both the mandatory and optional-but-present cases, plus a required-asterisk on the
+4 mandatory contact labels. Found and fixed another instance of the exact same "form field
+never actually saved" bug class from earlier this session: "SC City,State" existed in the Add
+SC form but was never read into `submitAddSc()`, never restored in `openScEdit()`, and the
+list's `cityState` column was always a fabricated zone-derived guess, never the real input —
+now stored, restored, and displayed for real. Built a real bulk CSV pipeline
+(`parseScMasterCsv`/`validateScMasterRows`/`buildScMasterRows`/`uploadScMasterFile`) — SC
+Master previously had *no* bulk upload at all, only single-entry Add/Edit. Upsert-by-SC-Code:
+an already-existing code is routed through the same `scEdits` overlay the single-entry Edit
+form uses (update); a new code is added fresh — the template didn't specify update-vs-insert
+semantics for a re-uploaded code, this was a judgment call, flagged to the user as such. Fixed
+the stale template-download column list to the real 21 columns.
+SQL: `12_sc_master.sql` (table + planner-only RLS incl. `update`; email columns get the same
+regex CHECK at the DB level as the app's JS validator, so the hard-block rule holds even
+against a direct API call; `local_tp_limit`/`non_local_tp_limit` intentionally have NO DB
+constraint capping at 7, since that's a soft app-side warning, not a hard rule).
+
+**4. SC Vehicle Availability** — reconciled against a 7-column template (SC Code, Vehicle
+Type, Capacity (Shipments), Distance Limit (Kms), Vehicle Count, Touch Point Limit, Zone
+Feasibility). This tab was already far more built than the others (add-form + inline-edit
+table with all 7 fields, including Zone Feasibility as Local/Non-Local/Both — already an exact
+match), but two real bugs surfaced:
+  - **Shared-handler bug, found across three tabs at once**: SC Master's "Upload CSV", this
+    tab's "Upload CSV", and RLH Plan Ingestion's "Ingest CSV" buttons were ALL wired to the
+    exact same `uploadFile` handler (`ingestRlhPlanFile()`). SC Master's and this tab's upload
+    buttons have therefore always silently run the wrong pipeline, every time, since before
+    this session. Each now has its own dedicated handler.
+  - **Architectural gap**: this tab's per-SC cards were built by mapping over `d.scVehAvail`,
+    a seed array that's always empty in this real-data build (no seed data exists here at
+    all) — meaning NO SC, old or newly-added via SC Master, ever got a card to add vehicles
+    to, independent of any CSV work. Fixed by deriving the card list from the real merged SC
+    list (`addedScs` + `data.scs`, honoring `scRemoved`) instead, with any base rows already
+    in `d.scVehAvail` (e.g. future Supabase-loaded data) merged in by SC code where present.
+    Also fixed `scByCode()` the same way — it only ever checked `data.scs`, never `addedScs`,
+    so a manually-added SC's sort-capacity/node-count never displayed on its own card header.
+  Removed the "Within Limit" column per explicit user instruction (computed indicator, not a
+  template field) — header cell, row cell, grid-column count, and the now-dead `vmLabel`/
+  `vmBg`/`vmFg` computation all removed (a near-identical block exists in Design Creation's
+  own separate vehicle-configuration step — confirmed that's an unrelated feature and left
+  untouched). Built a real bulk CSV pipeline (`parseAvailCsv`/`validateAvailRows`/
+  `buildAvailRows`/`uploadAvailFile`) using the SC Vehicle Availability sheet as its own
+  template. Vehicle Type is hard-validated against Vehicle Master (the template's own stated
+  rule). SC Code is ALSO hard-validated against SC Master here — a deliberate difference from
+  the Node Changes precedent (there, an unresolved LMSC was left as a future enhancement)
+  because this tab's cards are now derived strictly from real SCs, so an unresolvable code
+  would mean the row silently attaches nowhere and vanishes rather than just being
+  unvalidated. Capacity/Distance Limit/Touch Point Limit default from the matched Vehicle
+  Type's Vehicle Master values when left blank (confirmed with user); Vehicle Count defaults
+  to 1; Zone Feasibility defaults to "Both". Upload is full-override ("latest upload replaces
+  all prior records," matching existing UI copy) — clears `availAdded`/`availEdits`/
+  `availRemoved` and rebuilds fresh, same pattern as Node Changes. Fixed the stale 4-column
+  template download to the real 7 columns.
+SQL: `13_sc_vehicle_availability.sql` (table + planner-only RLS). Unlike `node_changes.lmsc_code`
+(deliberately free-text, since SC Master didn't exist as a table yet at that point), this table
+gets REAL foreign keys now that both `sc_master` and `vehicle_master` exist: `sc_code` → CASCADE
+on SC deletion (availability is meaningless without its SC), `vehicle_type` → RESTRICT on
+Vehicle Master deletion (won't silently orphan availability data). Run order matters:
+`11_vehicle_master.sql` and `12_sc_master.sql` must both run before this one.
+
+**Standing pattern across all four SQL files**: every master is planner-only across
+select/insert/update/delete — no ops_lead access at all, per explicit user instruction
+partway through this round (corrected `node_changes`'s initially-too-open select policy
+accordingly, and applied planner-only from the start to the other three).
+
+**Not built this round, explicitly out of scope or deferred**:
+- No app code wired to any of the four new/updated Supabase tables yet — schema-only, as
+  agreed. All four masters remain session-state-only in the running app for now.
+- No atomic replace-on-upload (Node Changes, SC Vehicle Availability) — currently a plain
+  delete-then-insert from the client, not a single transaction. Flagged as an available
+  enhancement (a `replace_x(rows jsonb)` Postgres function, mirroring `acknowledge_plan`/
+  `finalise_plan`) in both relevant SQL files' notes.
+- No audit history on Node Changes or SC Vehicle Availability's override-on-upload — each
+  upload fully replaces the last with nothing kept. Flagged in both SQL files' notes.
+- SC Code is not cross-checked against SC Master in Node Changes' validator (explicit user
+  decision) — but IS cross-checked in SC Vehicle Availability's validator (different call,
+  reasoned above). Worth remembering these two intentionally differ.
