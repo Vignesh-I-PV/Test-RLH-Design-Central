@@ -502,3 +502,137 @@ Vehicle Types are `7FT Trailer, 8FT Trailer, 10FT Trailer` — **both cross-chec
 Master / Vehicle Master respectively**, so if either master doesn't yet have these exact
 codes/types entered, ingestion will still correctly fail with a "not found" error (a separate,
 expected gate, not a bug) rather than silently succeeding.
+
+### 2026-07-24 (later same day) — Ingested plans now integrate into Design Review as real plan runs
+User reported ingested files landing in Design Review as a flat, inert list — no zone filters,
+no click-through, no metrics, no Push button. Traced the cause: Design Review's entire left-rail/
+metrics-card/Push-Finalise machinery only ever considers an SC if it has ≥1 completed `d.runs`
+entry (`completedSCs = d.scs.filter(s => completedRunsFor(s.code).length >= 1)`); ingested plans
+were bolted on separately as a passive, non-interactive log below. Confirmed with the user this
+UAT build has no real DS-optimiser backend — ingestion **is** the plan source here, standing in
+for it — so the fix is to make an ingested plan satisfy the exact same shape a completed run
+already uses, rather than build a parallel UI.
+
+**What changed**:
+- **`computeIngestedRunMetrics(ingested)`** — new shared method, extracted from logic that
+  previously only ran inside `doPush()` at push time. Runs `computeHypotheticalPlan` against the
+  ingested plan's raw rows and returns real routes/vehicles/distance/cps/cost/coverage/util,
+  plus `flags` (reusing `computeHypotheticalPlan`'s own `errors`/`warnings`, already shaped
+  `{t, sev}` — no mapping needed). `doPush()` now calls this shared method instead of duplicating
+  the computation inline — same behaviour, single source of truth.
+- **`reviewVals()`** — `completedRunsFor(code)` now also synthesizes a "virtual run" object per
+  ingested SC (via a per-render-memoized `ingestedRunFor`), shaped exactly like a real `d.runs`
+  entry (`id: 'ING-'+code`, `status:'Completed'`, `hw: null`, real metrics from
+  `computeIngestedRunMetrics`, `isIngested: true`). Every downstream piece of this screen —
+  `completedSCs`, `listSCs` (zone filter + search), `reviewList` (left rail), `planCards` (metrics
+  grid + Push/Finalise) — needed ZERO changes; they already treat "the SC's completed runs" as
+  the source of truth regardless of where a run object came from.
+- **Fixed a real latent bug** found along the way: `hwLabelOf()`'s fallthrough silently mislabeled
+  any non-0/0.5/1 value (including `null`) as "HW 1" instead of blank. Fixed so `hw: null` (used
+  by every ingested virtual run) correctly renders as `—`, satisfying "show HW/RDR as blank/
+  dashes" with no special-casing needed in the render layer — RDR and the CPS-vs-reference chip
+  already only activate `if (hw > 0)`, so both correctly go blank/inactive automatically too.
+- **Push / Finalise Directly / Download CSV all work with zero backend changes** — verified
+  `doPush()` already prioritizes `ingestedRlhPlans[code]` over any run lookup when present, and
+  `openPush`/`openFinDirect` already handle a null run ID gracefully.
+- Uploader/date (`uploadedBy`/`uploadedAt`) are now stamped directly onto each ingested plan
+  object at ingest time (`ingestRlhPlanFile`), so the virtual run's "Triggered by/at" fields are
+  self-contained rather than requiring a lookup against the separate ingestion log.
+- **Removed the old passive "Ingested Plans" block from Design Review** (JSX + the
+  `reviewIngestedPlans`/`hasReviewIngested` vals it used) — per explicit user instruction, that
+  list now only exists under Design Inputs → RLH Route Plan (untouched, still a simple upload
+  log there, which is the right place for it).
+
+**Explicitly deferred, not silently skipped** — two of the plan card's icon buttons
+(`onMap`/`onDetail`, "Open on map" / "Open full plan detail") both look up their run by ID against
+`d.runs` in code paths not touched this pass; wiring them for a synthesized ingested run is real,
+separate work. Both are hidden (`hasMap`/`hasDetail: !r.isIngested`) on an ingested plan's card
+for now rather than shipped half-working. Push, Finalise Directly, and Download CSV are fully
+functional. Worth picking up as the next piece once this lands cleanly.
+
+### 2026-07-24 (later same day) — "Open full plan detail" wired for ingested plans, real data throughout
+User confirmed: (1) plan detail + map are both wanted next; (2) the detail view should simply
+present the ingested plan through the *same* standard UI a regular run's detail view already
+uses — not a bespoke ingested-specific layout; (3) map work comes after detail is solid, and
+should render genuinely real geometry, not approximated.
+
+Traced the existing detail view (`reviewDetail`, opened via the card's "Open full plan detail"
+icon): for a regular run it fabricates a full route/DC breakdown via a seeded RNG
+(`RR()`) from just the run's *aggregate* metrics, because a regular Network-Map run genuinely has
+no real per-route/per-DC data to draw from — only a simulated summary. An ingested plan is the
+opposite: it already has 100% real per-route and per-DC data (`routeCode`, `veh`, real `dcs[]`
+with real `lat`/`lng`/`vol`/`tpOrder`, real `rtDist`) sitting in `ingestedRlhPlans[code].rows`
+from the moment of ingestion. So "simply present it in the standard UI" meant: keep the exact
+same `reviewDetail` shape/fields/layout, but populate it from the real ingested data instead of
+running the RNG fabrication.
+
+**What changed**:
+- `detailRun` resolution now also checks the ingested virtual run for the currently-selected SC
+  (`curIngestedRun`), not just `d.runs` — previously an ingested plan's synthesized id (`'ING-'+
+  code`) was never found, so the detail view silently opened empty.
+- The route/DC-row construction is now branched: `detailRun.isIngested` → build `dRouteRows`/
+  `dcRows` directly from `ingestedRunFor()`'s `ingestedComputedRows` (the real per-route data,
+  already enriched with volume/cps/util by `computeIngestedRunMetrics`); otherwise, the original
+  RNG fabrication runs unchanged for a real (non-ingested) run. Out Cutoff / In Cutoff / per-row
+  TAT show `—` for an ingested plan's DC rows — no real source for these three in the RLH
+  ingestion template (same documented gap as the earlier Mode 2 build), not fabricated filler.
+- Added `vehByType` (real per-vehicle-type route counts) to the ingested virtual run, so the
+  "Vehicles used" section — previously always empty for an ingested plan, since that field
+  didn't exist on the synthesized run object at all — now shows real data too.
+- Fixed a second null-guard gap: the "Avg TAT" metric tile would have rendered the literal string
+  "nullh" for an ingested plan (`avgTat: null` + `'h'`); now shows `—`.
+- "Open full plan detail" is now enabled for ingested cards (`hasDetail: true` unconditionally);
+  "Open on map" remains disabled (`hasMap: !r.isIngested`) — that's the next piece, per the user's
+  own sequencing (detail first, map after).
+
+**Real-data gap surfaced, worth flagging before the map work starts**: SC Master has no
+Latitude/Longitude columns in its real template (confirmed when that master was built) — every
+SC's `lat`/`lng` is hard-coded `0, 0` regardless of source (manual entry, CSV, or Supabase). DC-
+level coordinates ARE genuinely real (straight from the ingested file), but each route's
+*origin* point (`oLat`/`oLng`, stored per route in `buildIngestedRlhPlans` as `sc.lat`/`sc.lng`)
+inherits that same `0, 0` placeholder. A "very real" map will correctly plot every DC's real
+position, but routes will appear to originate from `(0, 0)` rather than the actual Sort Centre
+location, unless SC Master gains real coordinate fields first. Flagging now, before map work
+starts, rather than discovering it mid-build.
+
+### 2026-07-24 (later same day) — SC Master gains real coordinates, closing the gap flagged above
+User supplied a revised SC Master template adding exactly two mandatory fields — SC Latitude
+(-90 to 90) and SC Longitude (-180 to 180) — inserted right after SC City,State; SC Vehicle
+Availability's template is unchanged. This closes the gap flagged at the end of the previous
+entry (every SC's coordinates were hard-coded 0,0, so route origins on the eventual map would
+plot at the middle of the ocean regardless of how real the DC-level data was).
+
+**What changed**: Add/Edit SC form gained SC Latitude/Longitude as hard-required fields (same
+rigor as the email fields — missing or out-of-range blocks save with a toast, not a soft
+warning, since bad coordinates directly corrupt the map). Wired through every layer that touches
+an SC record: `submitAddSc()` validates and stores real values instead of the hardcoded 0,0;
+`openScEdit()` restores them on reopen; the SC Master CSV pipeline
+(`parseScMasterCsv`/`validateScMasterRows`/`buildScMasterRows`) parses, validates, and stores the
+same two columns; `scToDbRow()`/`loadMastersFromSupabase()` map them to/from new
+`sc_latitude`/`sc_longitude` Supabase columns; the template download includes them in the right
+position. The SC Master list now shows real coordinates as a small sub-line under City/State.
+
+**A precision bug avoided**: `buildScMasterRows()`'s existing `num()` helper truncates via
+`parseInt` (fine for docks/capacities, which are always whole numbers) — using it for lat/lng
+would have silently destroyed decimal precision (12.9716 → 12). Used `Number()` directly for
+these two fields instead.
+
+**The "not set" placeholder problem, handled consistently**: every SC created before this
+migration has (0,0) sitting in the data (now NULL in Supabase, 0 in the app's normalized read).
+Since (0,0) is technically a legal coordinate but is never a real Sort Centre location, both the
+list display and the edit-form prefill treat an exact (0,0) pair as "never set" (showing `—` /
+a blank form) rather than a real value — consistent with the "no fabricated data" pattern used
+throughout this session, and avoids the edit form silently showing "0, 0" as if it were real.
+
+**Zero code changes needed** in two places that will benefit automatically now that SC Master
+carries real coordinates: `buildIngestedRlhPlans()` already reads `sc.lat`/`sc.lng` directly as
+each route's origin point, and Design Review's plan-detail view already reads `dSC.lat`/`dSC.lng`
+for its "SC coordinates" display — both already correct, they were just fed a placeholder before.
+
+SQL: originally delivered as a separate ALTER (`15_sc_master_add_coordinates.sql`, nullable
+columns, to avoid breaking already-saved rows). **Superseded same day** — user opted to delete
+the existing `sc_master` table/policies/query and re-run a fresh, consolidated script instead of
+layering an ALTER on top. `12_sc_master.sql` now includes `sc_latitude`/`sc_longitude` directly
+in the `CREATE TABLE`, as `NOT NULL` (matching the template's "Mandatory" tag exactly, safe now
+since it's a fresh table with no pre-existing rows to violate the constraint). The separate
+ALTER file was deleted; only `12_sc_master.sql` needs to be re-run for this table going forward.
