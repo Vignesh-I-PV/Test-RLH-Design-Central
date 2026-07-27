@@ -659,3 +659,99 @@ and `00:00`) before the user could hit it on their next attempt.
 Also regenerated a corrected version of the user's actual submitted file (merging the
 CSV-split "SC City"/"State" columns back into one properly-quoted "SC City,State" column) so
 their 4 already-filled-in SCs (HBS, PYS, D5LS, SBLS) don't need to be re-entered by hand.
+
+### 2026-07-27 — Three real bugs found from actual browser console errors (pushed plan disappearing)
+User reported a plan pushed from Design Review not appearing in Ops Alignment, with zone
+chips/"Clear filter" seeming not to work either. Rather than guess, asked for browser console
+output from an actual push attempt — this turned up three distinct, confirmed root causes, none
+of them a zone-filtering bug (that logic was already traced and found correct; both symptoms
+turned out to be downstream of the same missing plan).
+
+1. **`loadScReviewers()` and `loadPlansFromSupabase()` both used PostgREST's embedded-relationship
+   syntax** (`.select('reviewer_id, profiles(id, display_name, email)')`) to join reviewer rows to
+   `profiles` in one query. Console showed both failing with 400s; the `sc_reviewers` one included
+   an explicit PostgREST hint: *"Could not find a relationship between 'sc_reviewers' and
+   'profiles'... Perhaps you meant 'plan_reviewers' instead."* PostgREST can only embed a related
+   table this way if it recognizes an actual foreign key for that exact relationship — one doesn't
+   exist (or isn't discoverable) for `sc_reviewers` → `profiles`, and evidently not reliably for
+   `plan_reviewers` → `profiles` either, since that query 400'd too, even on a plain page refresh
+   with no push involved. Fixed both to a two-step manual fetch instead: get the reviewer-tag rows
+   first (`reviewer_id` only), then a separate `profiles` query `.in('id', [...])`, merged
+   client-side. This removes the dependency on that foreign key being discoverable by PostgREST at
+   all — a schema fix was possible too, but the code fix is more robust regardless of how the
+   underlying tables were actually set up, since I don't have visibility into that schema.
+
+2. **A genuine race condition in `doPush()`**: `pushPlanToSupabase(plan, reviewerIds)` (inserts
+   into `plans`, async, not awaited) and `saveSnapshot(plan.id, ...)` (inserts into
+   `plan_snapshots`, which has a foreign key requiring `plans.id` to already exist) were fired
+   back-to-back in the same tick, with no sequencing between them. Console confirmed exactly this:
+   *"insert or update on table 'plan_snapshots' violates foreign key constraint
+   'plan_snapshots_plan_id_fkey'... Key is not present in table 'plans'."* — the snapshot write
+   was reaching Supabase before the plan row it referenced had actually committed. Fixed by making
+   `pushPlanToSupabase()` return its promise chain, and sequencing the snapshot save inside that
+   chain's `.then()`, only once the plans insert is confirmed to have succeeded.
+
+3. **A related, separate gap surfaced while fixing #2, not fixed**: Finalise Directly never calls
+   `pushPlanToSupabase()` at all (only a normal push does) — meaning a Finalise-Direct plan has
+   *no* remote `plans` row, ever, in the current build. The old code still unconditionally tried
+   to save a snapshot for it regardless, which would always hit the same FK violation. Guarded
+   that snapshot-save attempt out for the Finalise-Direct path rather than let it keep failing, but
+   did **not** build real Supabase persistence for Finalise Directly — that's a genuinely separate,
+   larger piece of work (would need its own `plans` insert with `status: 'finalized'`, reviewer
+   tagging, etc.) flagged here for a future pass, not attempted as part of this bug-fix.
+
+All three were confirmed directly from console error text, not inferred — the user's push to
+console output was what made the actual root causes traceable at all, versus the prior turn's
+best-effort hypothesis from code-reading alone.
+
+**Follow-up same day**: re-verified the fix is intact (diffed the working file against the last
+version actually handed to the user — the only difference was 3 new lines, described next).
+Confirmed `loadPlansFromSupabase()` only ever logged `plansRes.error`, silently swallowing a
+failure in the other 3 parallel queries (`plan_reviewers`/`plan_row_feedback`/
+`plan_reviewer_status`) — added `console.error` logging for all three, so a future failure in
+any of them surfaces instead of quietly producing empty reviewer names/feedback/status. If the
+user is still seeing the exact errors from their screenshots after this handoff, that points to
+testing against a build older than the previous handoff, not a new/different bug — flagged as
+the first thing to rule out before investigating further.
+
+### 2026-07-27 (later same day) — Four more bugs, all confirmed via screenshot before fixing
+1. **"Vehicle type · count" showed no counts** — `vehInput` (Design Review's ingested-plan card)
+   was built from a bare `Set` of unique vehicle names, with no count data at all, despite the
+   label explicitly promising "· count". Fixed by deriving it from `vehByType` (already computed
+   in the same function for the "Vehicles used" section) — now renders e.g. "8FT Trailer ×18 ·
+   7FT Trailer ×6 · 10FT Trailer ×5" instead of just the bare names.
+
+2. **">90% utilised" warning fired with zero routes actually over 90%** (screenshot: 83% avg
+   utilisation, 9 routes flagged as over-utilised). Root cause: the card's over/under-utilised
+   route count (`_over`/`_under`) was computed via a seeded RNG simulation — the comment literally
+   said "replicate the detail-view RNG" — completely disconnected from the plan's real per-route
+   data, for ingested plans same as real ones. This is the same class of fabrication bug fixed for
+   Route View earlier in this project, just missed in this one spot. Fixed: for an ingested plan
+   (`r.isIngested`), count directly from the real per-route util values already available via
+   `r.ingestedComputedRows` (same source Route View already uses) — RNG simulation stays
+   unchanged for a real (non-ingested) run, which still has no genuine per-route source.
+
+3. **Empty filter results collapsed the entire screen** on the Planner's Ops Alignment view —
+   `alignIsL1`/`alignIsL2` (gating the master rail and detail pane) were both tied to
+   `hasPlansInList`, so a filter/zone combination matching zero plans hid the ENTIRE rail
+   (including the filter strip and zone chips needed to actually clear the filter), leaving only
+   a full-width "No plans in this view" message and a lone "Clear filter" button. Traced the fix
+   from two places already built correctly for reference: Design Review's rail (chips/search
+   always visible, only the list body swaps for an inline placeholder) and the Ops Lead's own
+   Ops Alignment view (`opsIsL1 = !noneAssigned`, with a separate `oSel.filterEmpty` detail-pane
+   placeholder — comment there literally says "the rail on the left stays visible"). Only the
+   Planner side had the bug. Fixed by making `alignIsL1`/`alignIsL2` unconditionally `true`,
+   moving the "no plans match" message inline into the rail's list body (mirroring Design
+   Review), and adding a small "no plan" / "no plans match" placeholder inside the detail pane
+   itself (for `!aSel.exists`) rather than a screen-replacing block.
+
+4. **The app silently reset to Design Inputs (or Ops Alignment, for ops_lead) after switching
+   browser tabs and back** — root cause: `supabase.auth.onAuthStateChange` fires on every token
+   refresh, not just sign-in, and Supabase's client automatically refreshes the session when a
+   tab regains focus. `loadAuthProfile()` was called on every one of those events and
+   unconditionally reset `view` to the role's default tab every time — so switching away and back
+   silently bounced the user off whatever screen they were on. Fixed by only setting the initial
+   `view` on the first successful profile load of the session (`isFirstLoad = !this.state.authProfile`);
+   subsequent re-triggers still refresh `authProfile`/`persona` and refetch data (harmless,
+   idempotent) but leave `view` — and by extension whatever screen the user is currently on —
+   untouched.
