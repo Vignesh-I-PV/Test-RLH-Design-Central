@@ -497,7 +497,7 @@ function View(B, self) {
 <div style={css(`display:grid; grid-template-columns:90px 130px 160px 90px 80px 90px 90px 70px 70px 60px 80px 72px 72px 140px 80px; align-items:center; border-top:1px solid #EEF1F6;`)} onMouseEnter={(e) => hoverOn(e, `background:#FAFBFD;`)} onMouseLeave={(e) => hoverOff(e, `display:grid; grid-template-columns:90px 130px 160px 90px 80px 90px 90px 70px 70px 60px 80px 72px 72px 140px 80px; align-items:center; border-top:1px solid #EEF1F6;`, `background:#FAFBFD;`)}>
 <div style={css(`padding:10px 10px; font-size:12px; font-weight:700; color:#003F98; white-space:nowrap;`)}>{s.code}</div>
 <div style={css(`padding:10px 10px; font-size:12px; color:#14171F; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{s.name}</div>
-<div style={css(`padding:10px 10px; font-size:11.5px; color:#5A5E66; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{s.cityState}</div>
+<div style={css(`padding:10px 10px; overflow:hidden;`)}><div style={css(`font-size:11.5px; color:#5A5E66; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{s.cityState}</div><div style={css(`font-size:10px; color:#8E96A3; margin-top:1px; font-variant-numeric:tabular-nums;`)}>{s.coords}</div></div>
 <div style={css(`padding:10px 10px;`)}><span style={css(`display:inline-flex; padding:2px 7px; border-radius:999px; font-size:10.5px; font-weight:600; background:#EAEEFB; color:#2F4FC6; white-space:nowrap;`)}>{s.scType}</span></div>
 <div style={css(`padding:10px 10px;`)}><span style={css(`display:inline-flex; padding:2px 7px; border-radius:999px; font-size:10.5px; font-weight:600; background:#F2F5FA; color:#5A5E66; white-space:nowrap;`)}>{s.zone}</span></div>
 <div style={css(`padding:10px 10px; font-size:12px; color:#14171F; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;`)}>{s.volCap}</div>
@@ -1738,9 +1738,9 @@ function View(B, self) {
 <div style={css(`font-size:10.5px; color:#8E96A3; margin-top:3px;`)}>Triggered {c.triggeredAt} · {c.triggeredBy}</div>
 </div>
 <div style={css(`display:flex; gap:6px; flex-shrink:0;`)}>
-<button onClick={c.onMap} aria-label={"Open this run on the map"} title={"View routes on map"} style={css(`display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)} onMouseLeave={(e) => hoverOff(e, `display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button>
+{(c.hasMap) ? (<><button onClick={c.onMap} aria-label={"Open this run on the map"} title={"View routes on map"} style={css(`display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)} onMouseLeave={(e) => hoverOff(e, `display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></>) : null}
 <button onClick={c.onDownloadCsv} aria-label={"Download this plan as CSV"} title={"Download plan summary CSV"} style={css(`display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)} onMouseLeave={(e) => hoverOff(e, `display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button>
-<button onClick={c.onDetail} aria-label={"Open full plan detail"} title={"Open full plan detail"} style={css(`display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)} onMouseLeave={(e) => hoverOff(e, `display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7M15 3h6v6M10 14L21 3"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button>
+{(c.hasDetail) ? (<><button onClick={c.onDetail} aria-label={"Open full plan detail"} title={"Open full plan detail"} style={css(`display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)} onMouseLeave={(e) => hoverOff(e, `display:flex; align-items:center; justify-content:center; width:28px; height:28px; border:1px solid #E6EBF2; border-radius:7px; background:#fff; cursor:pointer; color:#5A5E66;`, `border-color:#003F98; color:#003F98; background:#F3F7FE;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7M15 3h6v6M10 14L21 3"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button></>) : null}
 </div>
 </div>
 {/* MIDDLE: compact inputs line + output metrics grid */}
@@ -1767,24 +1767,6 @@ function View(B, self) {
 <button onClick={c.onFinaliseDirect} aria-label={"Finalise this run directly without Ops alignment"} style={css(`display:inline-flex; align-items:center; justify-content:center; height:34px; padding:0 13px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer; white-space:nowrap;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#C77B00; color:#C77B00;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; justify-content:center; height:34px; padding:0 13px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer; white-space:nowrap;`, `border-color:#C77B00; color:#C77B00;`)}>Finalise directly</button>
 </div>
 </div>
-</div>
-</div>
-</React.Fragment>))}
-</div>
-</>) : null}
-{/* Ingested plans section (RLH Plan Ingestion → Design Review wiring) */}
-{(hasReviewIngested) ? (<>
-<div style={css(`margin-top:22px;`)}>
-<div style={css(`font-size:12px; font-weight:700; color:#5A5E66; letter-spacing:0.05em; margin-bottom:10px;`)}>INGESTED PLANS</div>
-{(reviewIngestedPlans || []).map((ip, __i61) => (<React.Fragment key={__i61}>
-<div style={css(`display:flex; align-items:center; gap:14px; padding:13px 16px; background:#fff; border:1px solid #E6EBF2; border-radius:8px; margin-bottom:8px;`)} onMouseEnter={(e) => hoverOn(e, `background:#FAFBFD;`)} onMouseLeave={(e) => hoverOff(e, `display:flex; align-items:center; gap:14px; padding:13px 16px; background:#fff; border:1px solid #E6EBF2; border-radius:8px; margin-bottom:8px;`, `background:#FAFBFD;`)}>
-<div style={css(`flex:1; min-width:0;`)}>
-<div style={css(`display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:3px;`)}>
-<span style={css(`font-size:13px; font-weight:600; color:#14171F;`)}>{ip.name}</span>
-<span style={css(`padding:2px 8px; border-radius:999px; font-size:10px; font-weight:700; background:#EAF3FB; color:#1E6FB8;`)}>Ingested</span>
-<span style={css(`padding:2px 8px; border-radius:999px; font-size:10px; font-weight:600; background:#E7F4EC; color:#128A3E;`)}>Validated</span>
-</div>
-<div style={css(`font-size:11px; color:#8E96A3;`)}>{ip.runId} · SC {ip.scCode} · {ip.rows} rows · {ip.by} · {ip.date}</div>
 </div>
 </div>
 </React.Fragment>))}
@@ -4153,6 +4135,8 @@ class NDCApp extends React.Component {
       txt('code', 'SC Code', true, 'e.g. BLRS'),
       txt('name', 'SC Name', false, 'e.g. Bengaluru'),
       txt('city', 'SC City, State', false, 'e.g. Bengaluru, KA'),
+      txt('lat', 'SC Latitude', true, 'e.g. 12.9716'),
+      txt('lng', 'SC Longitude', true, 'e.g. 77.5946'),
       sel('type', 'SC Type', true, opt(['LMSC', 'FMSC', 'Hybrid'])),
       sel('zone', 'Zone', true, opt(['North', 'South', 'East', 'West'])),
       txt('volCap', 'Volume Capacity', true, 'shipments / day'),
@@ -4195,6 +4179,7 @@ class NDCApp extends React.Component {
       localTp: sc.localTp != null ? String(sc.localTp) : '',
       nonLocalTp: sc.nonLocalTp != null ? String(sc.nonLocalTp) : '',
       open: sc.open || '06:00', close: sc.close || '22:00',
+      lat: (sc.lat || sc.lng) ? String(sc.lat) : '', lng: (sc.lat || sc.lng) ? String(sc.lng) : '',
     };
     SC_POC_FIELDS.forEach(([k]) => { form[k] = pocsSrc[k] || ''; });
     this.setState({ addScOpen: true, addScEditCode: code, addScForm: form, pocOpenRow: null, addScReviewerIds: [] });
@@ -4235,6 +4220,12 @@ class NDCApp extends React.Component {
       const v = (f[k] || '').trim();
       if (v && !NDC_isValidEmail(v)) { this.showToast('SC ' + label + ' must be a valid email address: "' + v + '"', '#C77B00'); return; }
     }
+    // SC Latitude/Longitude — hard block, per template (Mandatory, Number, explicit range).
+    // Real coordinates matter here beyond form-filling correctness: they're the route origin
+    // point for every plan ingested against this SC, and feed the map view directly.
+    const latVal = String(f.lat == null ? '' : f.lat).trim(), lngVal = String(f.lng == null ? '' : f.lng).trim();
+    if (!latVal || isNaN(Number(latVal)) || Number(latVal) < -90 || Number(latVal) > 90) { this.showToast('SC Latitude must be a number between -90 and 90: "' + latVal + '"', '#C77B00'); return; }
+    if (!lngVal || isNaN(Number(lngVal)) || Number(lngVal) < -180 || Number(lngVal) > 180) { this.showToast('SC Longitude must be a number between -180 and 180: "' + lngVal + '"', '#C77B00'); return; }
     // Capture all 8 POC/contact fields, keyed by field name (not a filtered flat array) -- see
     // SC_POC_FIELDS. This is what makes reopening the edit form show each name back in the exact
     // field it was entered under, regardless of which other fields were left blank.
@@ -4254,7 +4245,7 @@ class NDCApp extends React.Component {
       open: f.open || '', close: f.close || '',
       nlhDocks: num(f.nlhDocks), rlhDocks: num(f.rlhDocks),
     };
-    const sc = Object.assign({ code: code, name: (f.name || '').trim() || code, cityCode: code.replace(/[^A-Z]/g, '').slice(0, 3) || code, zone: f.zone || 'South', dcCount: 0, volume: num(f.volCap), sortCap: num(f.sortCap), volCap: num(f.volCap), docks: num(f.nlhDocks) + num(f.rlhDocks), lat: 0, lng: 0, hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0, pocs: pocs }, realFields);
+    const sc = Object.assign({ code: code, name: (f.name || '').trim() || code, cityCode: code.replace(/[^A-Z]/g, '').slice(0, 3) || code, zone: f.zone || 'South', dcCount: 0, volume: num(f.volCap), sortCap: num(f.sortCap), volCap: num(f.volCap), docks: num(f.nlhDocks) + num(f.rlhDocks), lat: Number(latVal), lng: Number(lngVal), hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0, pocs: pocs }, realFields);
     const isEdit = !!st.addScEditCode;
     this.setState({ savingSc: true });
     this.saveScMasterRow(sc).then(({ error }) => {
@@ -4274,6 +4265,7 @@ class NDCApp extends React.Component {
     const pocs = sc.pocs || {};
     return {
       sc_code: sc.code, sc_name: sc.name || null, city_state: sc.city || null,
+      sc_latitude: sc.lat, sc_longitude: sc.lng,
       sc_type: sc.type, zone: sc.zone,
       volume_capacity: sc.volCap, sort_capacity: sc.sortCap,
       nlh_docks: sc.nlhDocks, rlh_docks: sc.rlhDocks,
@@ -4502,6 +4494,44 @@ class NDCApp extends React.Component {
     return plans;
   }
 
+  // Shared by doPush() and Design Review's ingested-plan card (reviewVals) -- single source of
+  // truth for turning a raw ingested plan (routes + DCs, no metrics yet) into the same real
+  // routes/vehicles/distance/cps/cost/coverage/util numbers computeHypotheticalPlan already
+  // produces for a pushed plan. Previously this only ever ran at push time; now it can run at
+  // Design Review render time too, so a not-yet-pushed ingested plan shows real metrics, not
+  // just a passive log entry.
+  computeIngestedRunMetrics(ingested) {
+    const d = this.state.data;
+    const hyp = this.computeHypotheticalPlan({ rows: ingested.rows }, {});
+    const vehRecordFor = (name) => (d.VEH || []).find(v => v.name === name) || {};
+    const rows = ingested.rows.map((row) => {
+      const hypRoute = hyp.routes.find(rt => rt.routeCode === row.routeCode) || {};
+      const vehRecord = vehRecordFor(row.veh);
+      const util = vehRecord.cap ? Math.min(0.98, +((hypRoute.volume || 0) / vehRecord.cap).toFixed(2)) : 0;
+      return Object.assign({}, row, {
+        tp: row.dcs.length, vehTp: vehRecord.tp || 7,
+        volume: hypRoute.volume || 0, cps: hypRoute.cps || 0, util,
+        // No Breakdown TAT / Out Cutoff column exists in the real RLH Plan Ingestion template —
+        // there's no real data source for these yet (flagged as an open gap, not fabricated).
+        breakdownTat: null, outCutoff: null,
+        ops: 'Pending', planner: null, fb: null,
+      });
+    });
+    const avgUtil = rows.length ? +(rows.reduce((a, r) => a + r.util, 0) / rows.length).toFixed(2) : 0;
+    const metrics = {
+      routes: hyp.routes.length, vehicles: hyp.routes.length,
+      distance: Math.round(hyp.routes.reduce((a, r) => a + r.distance, 0)),
+      cps: hyp.scCPS, cost: Math.round(hyp.scCost),
+      coverage: 1, // every DC in the ingested file is genuinely served -- nothing is "skipped" the way an optimizer run might
+      util: avgUtil,
+      avgTat: null, // same gap as row-level breakdownTat -- no real TAT data in the ingested file yet
+    };
+    // hyp.warnings/hyp.errors are already shaped {t, sev, ...} -- exactly what the plan-card flags
+    // display expects, no mapping needed.
+    const flags = (hyp.errors || []).concat(hyp.warnings || []);
+    return { rows, metrics, flags, dcCount: ingested.rowCount };
+  }
+
   // ===== SC Master bulk CSV upload — real pipeline, replacing the previously-broken "Upload CSV"
   // button (it silently called ingestRlhPlanFile — the wrong feature entirely). Upsert-by-SC-Code:
   // a code already present (in data.scs or addedScs) is treated as an update, routed through the
@@ -4512,7 +4542,7 @@ class NDCApp extends React.Component {
     const table = NDC_parseCsv(text);
     if (!table.length) return { fileError: 'File is empty.' };
     const header = table[0].map(h => (h || '').trim());
-    const EXPECTED = ['SC Code', 'SC Name', 'SC City,State', 'SC Type', 'Zone', 'Volume Capacity', 'Sort Capacity', 'NLH Docks', 'RLH Docks', 'Local TP Limit', 'Non-Local TP Limit', 'SC Opening Time', 'SC Closing Time', 'SC Ops ZH', 'SC-LH Ops ZH', 'SC Ops CH', 'SC-LH Ops CH', 'SC Ops AM-1', 'SC-LH Ops AM-1', 'SC Ops AM-2', 'SC-LH Ops AM-2'];
+    const EXPECTED = ['SC Code', 'SC Name', 'SC City,State', 'SC Latitude', 'SC Longitude', 'SC Type', 'Zone', 'Volume Capacity', 'Sort Capacity', 'NLH Docks', 'RLH Docks', 'Local TP Limit', 'Non-Local TP Limit', 'SC Opening Time', 'SC Closing Time', 'SC Ops ZH', 'SC-LH Ops ZH', 'SC Ops CH', 'SC-LH Ops CH', 'SC Ops AM-1', 'SC-LH Ops AM-1', 'SC Ops AM-2', 'SC-LH Ops AM-2'];
     const missing = EXPECTED.filter(h => header.indexOf(h) < 0);
     if (missing.length) return { fileError: 'Missing column(s): ' + missing.join(', ') };
     const idx = {}; EXPECTED.forEach(h => { idx[h] = header.indexOf(h); });
@@ -4522,7 +4552,8 @@ class NDCApp extends React.Component {
     const rows = table.slice(1).filter(r => r.some(c => (c || '').trim() !== '')).map((r, i) => ({
       _rowNo: i + 2,
       code: (r[idx['SC Code']] || '').trim().toUpperCase(), name: (r[idx['SC Name']] || '').trim(),
-      city: (r[idx['SC City,State']] || '').trim(), type: (r[idx['SC Type']] || '').trim(), zone: (r[idx['Zone']] || '').trim(),
+      city: (r[idx['SC City,State']] || '').trim(), lat: numClean(r[idx['SC Latitude']]), lng: numClean(r[idx['SC Longitude']]),
+      type: (r[idx['SC Type']] || '').trim(), zone: (r[idx['Zone']] || '').trim(),
       volCap: numClean(r[idx['Volume Capacity']]), sortCap: numClean(r[idx['Sort Capacity']]),
       nlhDocks: numClean(r[idx['NLH Docks']]), rlhDocks: numClean(r[idx['RLH Docks']]),
       localTp: numClean(r[idx['Local TP Limit']]), nonLocalTp: numClean(r[idx['Non-Local TP Limit']]),
@@ -4546,6 +4577,8 @@ class NDCApp extends React.Component {
       if (!r.code) errors.push({ row: r._rowNo, msg: 'SC Code is blank' });
       else if (!/^[A-Za-z0-9]{3,6}$/.test(r.code)) errors.push({ row: r._rowNo, msg: 'SC Code must be alphanumeric, 3-6 characters: "' + r.code + '"' });
       else { if (seen[r.code]) errors.push({ row: r._rowNo, msg: 'SC Code "' + r.code + '" appears more than once in this file' }); seen[r.code] = true; }
+      if (!isNum(r.lat) || Number(r.lat) < -90 || Number(r.lat) > 90) errors.push({ row: r._rowNo, msg: 'SC Latitude must be a number between -90 and 90: ' + r.lat });
+      if (!isNum(r.lng) || Number(r.lng) < -180 || Number(r.lng) > 180) errors.push({ row: r._rowNo, msg: 'SC Longitude must be a number between -180 and 180: ' + r.lng });
       const typeNorm = TYPES[r.type.toLowerCase()];
       if (!r.type) errors.push({ row: r._rowNo, msg: 'SC Type is blank' });
       else if (!typeNorm) errors.push({ row: r._rowNo, msg: 'SC Type must be one of FMSC / LMSC / Hybrid: "' + r.type + '"' });
@@ -4590,7 +4623,7 @@ class NDCApp extends React.Component {
       nlhDocks: num(r.nlhDocks), rlhDocks: num(r.rlhDocks), docks: num(r.nlhDocks) + num(r.rlhDocks),
       localTp: r.localTp !== '' ? num(r.localTp) : 0, nonLocalTp: r.nonLocalTp !== '' ? num(r.nonLocalTp) : 0,
       open: r.open || '', close: r.close || '',
-      lat: 0, lng: 0, hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0,
+      lat: Number(r.lat), lng: Number(r.lng), hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0,
       pocs: { opsZh: r.opsZh, lhOpsZh: r.lhOpsZh, opsCh: r.opsCh, lhOpsCh: r.lhOpsCh, opsAm1: r.opsAm1, lhOpsAm1: r.lhOpsAm1, opsAm2: r.opsAm2, lhOpsAm2: r.lhOpsAm2 },
     }));
   }
@@ -4806,6 +4839,9 @@ class NDCApp extends React.Component {
         const now = new Date();
         const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
         const date = String(now.getDate()).padStart(2, '0') + ' ' + months[now.getMonth()] + ' · ' + String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+        // Stamp uploader/date directly onto each plan -- Design Review's ingested-plan card
+        // reads these directly (triggeredAt/triggeredBy) rather than looking them up separately.
+        scCodes.forEach(sc => { plans[sc].uploadedBy = 'You (Planner)'; plans[sc].uploadedAt = date; });
         this.setState({ ingestUploadSaving: true });
         this.saveIngestedRlhPlanDrafts(plans, f.name).then(({ error }) => {
           this.setState({ ingestUploadSaving: false });
@@ -4994,7 +5030,7 @@ class NDCApp extends React.Component {
         nlhDocks: row.nlh_docks, rlhDocks: row.rlh_docks, docks: (row.nlh_docks || 0) + (row.rlh_docks || 0),
         localTp: row.local_tp_limit, nonLocalTp: row.non_local_tp_limit,
         open: row.opening_time ? String(row.opening_time).slice(0, 5) : '', close: row.closing_time ? String(row.closing_time).slice(0, 5) : '',
-        lat: 0, lng: 0, hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0,
+        lat: row.sc_latitude != null ? row.sc_latitude : 0, lng: row.sc_longitude != null ? row.sc_longitude : 0, hasRef: false, farDist: 0, zeroVolDc: 0, missVolDc: 0,
         pocs: { opsZh: row.ops_zh, lhOpsZh: row.lh_ops_zh, opsCh: row.ops_ch, lhOpsCh: row.lh_ops_ch, opsAm1: row.ops_am1 || '', lhOpsAm1: row.lh_ops_am1 || '', opsAm2: row.ops_am2 || '', lhOpsAm2: row.lh_ops_am2 || '' },
         _dbId: row.id,
       }));
@@ -5585,7 +5621,7 @@ class NDCApp extends React.Component {
       const closeTime = s.close || '—';
       const codeLC = s.code.toLowerCase().replace(/[^a-z0-9]/g, '');
       const pocOpenRect = st.pocOpenRect || { top: 0, left: 0 };
-      return { code: s.code, name: s.name, zone: s.zone, cityState: s.city ? s.city : (s.name + ' / ' + (ZSTATE[s.zone] || s.zone)), scType: s.type || '—', sortCap: fmtInt(s.sortCap), volCap: fmtInt(s.volCap), docks: s.docks, nlhDocks: nlhDocks, rlhDocks: rlhDocks, localTp: localTp, nonLocalTp: nonLocalTp, openTime: openTime, closeTime: closeTime, dcCount: s.dcCount,
+      return { code: s.code, name: s.name, zone: s.zone, cityState: s.city ? s.city : (s.name + ' / ' + (ZSTATE[s.zone] || s.zone)), coords: (s.lat || s.lng) ? (Number(s.lat).toFixed(4) + ', ' + Number(s.lng).toFixed(4)) : '—', scType: s.type || '—', sortCap: fmtInt(s.sortCap), volCap: fmtInt(s.volCap), docks: s.docks, nlhDocks: nlhDocks, rlhDocks: rlhDocks, localTp: localTp, nonLocalTp: nonLocalTp, openTime: openTime, closeTime: closeTime, dcCount: s.dcCount,
         pocCount: pocEntries.length, pocSummary: pocEntries.length ? (pocEntries.length + ' lead' + (pocEntries.length === 1 ? '' : 's')) : 'None on file',
         pocList: pocEntries.map(p => ({ name: p.name, role: p.role, email: p.name.toLowerCase().replace(/[^a-z\s]/g, '').trim().replace(/\s+/g, '.') + '@valmo.in' })),
         pocOpen: pocOpenRow === s.code, pocOpenRect: pocOpenRect,
@@ -5871,7 +5907,7 @@ class NDCApp extends React.Component {
       addVehBtnBg: (addVehValid && !st.savingVeh) ? '#003F98' : '#E6EBF2', addVehBtnFg: (addVehValid && !st.savingVeh) ? '#fff' : '#8E96A3', addVehBtnCursor: (addVehValid && !st.savingVeh) ? 'pointer' : 'not-allowed',
       closeAddVeh: () => this.setState({ addVehOpen: false, addVehForm: {}, addVehEditName: null }),
       submitAddVeh: () => this.submitAddVeh(),      availTemplate: () => this.downloadTemplate('SC Vehicle Availability', [{ k: 'SC Code' }, { k: 'Vehicle Type' }, { k: 'Capacity (Shipments)' }, { k: 'Distance Limit (Kms)' }, { k: 'Vehicle Count' }, { k: 'Touch Point Limit' }, { k: 'Zone Feasibility' }]), availUploadSaving: !!st.availUploadSaving,
-      scMasterTemplate: () => this.downloadTemplate('Sort Centre Master', [{ k: 'SC Code' }, { k: 'SC Name' }, { k: 'SC City,State' }, { k: 'SC Type' }, { k: 'Zone' }, { k: 'Volume Capacity' }, { k: 'Sort Capacity' }, { k: 'NLH Docks' }, { k: 'RLH Docks' }, { k: 'Local TP Limit' }, { k: 'Non-Local TP Limit' }, { k: 'SC Opening Time' }, { k: 'SC Closing Time' }, { k: 'SC Ops ZH' }, { k: 'SC-LH Ops ZH' }, { k: 'SC Ops CH' }, { k: 'SC-LH Ops CH' }, { k: 'SC Ops AM-1' }, { k: 'SC-LH Ops AM-1' }, { k: 'SC Ops AM-2' }, { k: 'SC-LH Ops AM-2' }]), scUploadSaving: !!st.scUploadSaving,
+      scMasterTemplate: () => this.downloadTemplate('Sort Centre Master', [{ k: 'SC Code' }, { k: 'SC Name' }, { k: 'SC City,State' }, { k: 'SC Latitude' }, { k: 'SC Longitude' }, { k: 'SC Type' }, { k: 'Zone' }, { k: 'Volume Capacity' }, { k: 'Sort Capacity' }, { k: 'NLH Docks' }, { k: 'RLH Docks' }, { k: 'Local TP Limit' }, { k: 'Non-Local TP Limit' }, { k: 'SC Opening Time' }, { k: 'SC Closing Time' }, { k: 'SC Ops ZH' }, { k: 'SC-LH Ops ZH' }, { k: 'SC Ops CH' }, { k: 'SC-LH Ops CH' }, { k: 'SC Ops AM-1' }, { k: 'SC-LH Ops AM-1' }, { k: 'SC Ops AM-2' }, { k: 'SC-LH Ops AM-2' }]), scUploadSaving: !!st.scUploadSaving,
       changesTemplate: () => this.downloadTemplate('Node Additions Closures Migrations', [{ k: 'LMSC Code' }, { k: 'LMDC Code' }, { k: 'Node Flag' }, { k: 'LMDC Latitude' }, { k: 'LMDC Longitude' }]),
       nodeChangeUploadedBy: st.nodeChangeBy || 'Shashvat Jain', nodeChangeUploadedDate: st.nodeChangeDate || '10 Jul · 11:24', uploadNodeChanges: () => this.uploadNodeChanges(), nodeUploadSaving: !!st.nodeUploadSaving,
       ingestTemplate: () => this.downloadTemplate('RLH Plan Ingestion', [{ k: 'Zone' }, { k: 'LMSC' }, { k: 'LMDC' }, { k: 'DC latitude' }, { k: 'DC longitude' }, { k: 'Volume' }, { k: 'Route Code' }, { k: 'Touch Point' }, { k: 'Vehicle Type' }, { k: 'Breakdown Distance' }, { k: 'Round Trip Distance' }, { k: 'Run ID' }]), ingestUploadSaving: !!st.ingestUploadSaving,
@@ -6571,33 +6607,8 @@ class NDCApp extends React.Component {
     // volume/cps/util via computeHypotheticalPlan (single source of truth), then attach the
     // workflow fields (ops/planner/fb) every row needs, matching the existing row shape exactly.
     const ingested = (st.ingestedRlhPlans || {})[code];
-    let ingestedRows = null, ingestedMetrics = null;
-    if (ingested && sc) {
-      const hyp = this.computeHypotheticalPlan({ rows: ingested.rows }, {});
-      const vehRecordFor = (name) => (d.VEH || []).find(v => v.name === name) || {};
-      ingestedRows = ingested.rows.map((row) => {
-        const hypRoute = hyp.routes.find(rt => rt.routeCode === row.routeCode) || {};
-        const vehRecord = vehRecordFor(row.veh);
-        const util = vehRecord.cap ? Math.min(0.98, +((hypRoute.volume || 0) / vehRecord.cap).toFixed(2)) : 0;
-        return Object.assign({}, row, {
-          tp: row.dcs.length, vehTp: vehRecord.tp || 7,
-          volume: hypRoute.volume || 0, cps: hypRoute.cps || 0, util,
-          // No Breakdown TAT / Out Cutoff column exists in the real RLH Plan Ingestion template —
-          // there's no real data source for these yet (flagged as an open gap, not fabricated).
-          breakdownTat: null, outCutoff: null,
-          ops: 'Pending', planner: null, fb: null,
-        });
-      });
-      const avgUtil = ingestedRows.length ? +(ingestedRows.reduce((a, r) => a + r.util, 0) / ingestedRows.length).toFixed(2) : 0;
-      ingestedMetrics = {
-        routes: hyp.routes.length, vehicles: hyp.routes.length,
-        distance: Math.round(hyp.routes.reduce((a, r) => a + r.distance, 0)),
-        cps: hyp.scCPS, cost: Math.round(hyp.scCost),
-        coverage: 1, // every DC in the ingested file is genuinely served -- nothing is "skipped" the way an optimizer run might
-        util: avgUtil,
-        avgTat: null, // same gap as row-level breakdownTat -- no real TAT data in the ingested file yet
-      };
-    }
+    const computed = (ingested && sc) ? this.computeIngestedRunMetrics(ingested) : null;
+    const ingestedRows = computed ? computed.rows : null, ingestedMetrics = computed ? computed.metrics : null;
     if (plan && ingested && sc) {
       // Existing plan for this SC, and a fresh validated ingestion is available for it — the
       // ingested file always wins over whatever was there before (re-ingestion supersedes a prior
@@ -8941,11 +8952,48 @@ class NDCApp extends React.Component {
     const money = (n) => '\u20b9' + (n / 100000).toFixed(1) + 'L';
     const pct = (n) => Math.round(n * 100) + '%';
     const HWTAG = { 0: 'Re-optimise', 0.5: 'Balanced', 1: 'Preserve routes' };
-    const hwLabelOf = (hw) => hw === 0 ? 'HW 0' : hw === 0.5 ? 'HW 0.5' : 'HW 1';
+    const hwLabelOf = (hw) => hw === 0 ? 'HW 0' : hw === 0.5 ? 'HW 0.5' : hw === 1 ? 'HW 1' : '—';
+    // Ingested plans ARE the plan runs in this build (no real DS-optimizer backend exists here --
+    // ingestion stands in for it). A virtual run object is synthesized per ingested SC, shaped
+    // exactly like a real d.runs entry, so every existing piece of this screen (left rail, zone
+    // filter, search, metrics card, Push/Finalise) picks it up with no further changes. hw stays
+    // null -- hwLabelOf/HWTAG already render that as "—" (fixed above), satisfying "show HW/RDR as
+    // blank/dashes" without any special-casing in the render layer itself.
+    const ingestedRunCache = {};
+    const ingestedRunFor = (code) => {
+      if (Object.prototype.hasOwnProperty.call(ingestedRunCache, code)) return ingestedRunCache[code];
+      const ingested = (st.ingestedRlhPlans || {})[code];
+      if (!ingested) { ingestedRunCache[code] = null; return null; }
+      const computed = this.computeIngestedRunMetrics(ingested);
+      const volume = computed.rows.reduce((a, r) => a + (r.volume || 0), 0);
+      const vehInput = Array.from(new Set(ingested.rows.map(r => r.veh)));
+      // Vehicles used — grouped from the real per-route vehicle assignment, for the "Vehicles
+      // used" section on the detail view (mirrors detailRun.vehByType's {name, n} shape).
+      const vehCounts = {}; computed.rows.forEach(r => { vehCounts[r.veh] = (vehCounts[r.veh] || 0) + 1; });
+      const vehByType = Object.keys(vehCounts).map(name => ({ name, n: vehCounts[name] }));
+      const run = {
+        id: 'ING-' + code, scCode: code, status: 'Completed', runNo: 1, hw: null,
+        runId: ingested.fileBaseName, triggeredAt: ingested.uploadedAt || '—', triggeredBy: ingested.uploadedBy || '—',
+        dcCount: computed.dcCount, volume, vehInput, vehByType,
+        coverage: computed.metrics.coverage, util: computed.metrics.util, cps: computed.metrics.cps,
+        routes: computed.metrics.routes, vehicles: computed.metrics.vehicles, distance: computed.metrics.distance, cost: computed.metrics.cost, avgTat: null,
+        flags: computed.flags, isIngested: true,
+        // Kept on the run object so the detail-view builder can construct a REAL route/DC
+        // breakdown from actual ingested data, instead of the RNG-fabricated one used for a
+        // regular (non-ingested) run, which has no real per-route/per-DC source to draw from.
+        ingestedComputedRows: computed.rows,
+      };
+      ingestedRunCache[code] = run;
+      return run;
+    };
     // §9 R1 — organise by RUN, not HW. An SC is reviewable once it has ≥1 completed run;
     // the detail pane lists ALL of that SC's runs in the cycle as separate plan cards (HW is one
     // parameter shown per card). completedRunsFor returns the SC's completed runs in trigger order.
-    const completedRunsFor = (code) => d.runs.filter(r => r.scCode === code && r.status === 'Completed').sort((a, b) => (a.runNo || 0) - (b.runNo || 0));
+    const completedRunsFor = (code) => {
+      const real = d.runs.filter(r => r.scCode === code && r.status === 'Completed');
+      const ing = ingestedRunFor(code);
+      return (ing ? real.concat([ing]) : real).sort((a, b) => (a.runNo || 0) - (b.runNo || 0));
+    };
     const completedSCs = d.scs.filter(s => completedRunsFor(s.code).length >= 1);
     const q = (st.reviewSearch || '').toLowerCase();
     const zf = st.reviewZone || 'All';
@@ -9011,7 +9059,7 @@ class NDCApp extends React.Component {
       const hasUtilChip = (_over + _under) > 0;
       const utilChipLabel = hasUtilChip ? (_over > 0 && _under > 0 ? _over + ' over + ' + _under + ' under-util route' + ((_over + _under) > 1 ? 's' : '') : _over > 0 ? _over + ' route' + (_over > 1 ? 's' : '') + ' over-utilised (>90%)' : _under + ' route' + (_under > 1 ? 's' : '') + ' under-utilised (<40%)') : '';
       return { id: r.id, runId: r.runId, runNo: r.runNo, triggeredAt: r.triggeredAt, triggeredBy: r.triggeredBy || '',
-        hwLabel: hwLabelOf(r.hw), hwTag: HWTAG[r.hw],
+        hwLabel: hwLabelOf(r.hw), hwTag: HWTAG[r.hw] || '—',
         pushed, pushedTag: pushed ? ((flErr + flWarn) > 0 ? 'Accepted with warnings' : 'In alignment') : '',
         pushedTagBg: (flErr + flWarn) > 0 ? '#FBF1DF' : '#E7F0F8', pushedTagFg: (flErr + flWarn) > 0 ? '#C77B00' : '#1E6FB8',
         nodes: fmtInt(r.dcCount), volume: fmtInt(r.volume), vehInput: (r.vehInput && r.vehInput.length ? r.vehInput.join(' · ') : '—'),
@@ -9024,14 +9072,15 @@ class NDCApp extends React.Component {
         cpsRefOn, cpsDeltaLabel, cpsDeltaColor, cpsDeltaTooltip,
         flagDot, flagLabel, flagBg, flagFg,
         onDownloadCsv: () => { const rows = [['Run ID', r.runId], ['Sort Centre', r.scCode], ['Historical Weight', r.hw], ['Coverage', pct(r.coverage)], ['CPS', r.cps.toFixed(2)], ['Utilisation', pct(r.util)], ['Routes', r.routes], ['Vehicles', r.vehicles], ['Distance (km)', r.distance], ['Total cost', r.cost]]; this.downloadText(r.runId + '-summary.csv', 'Metric,Value\n' + rows.map(x => x.join(',')).join('\n')); this.showToast('Plan summary downloaded · ' + r.runId, '#128A3E'); },
-        onMap: () => openRunMap(r), onDetail: () => openRunDetail(r), onPush: () => this.openPush(r.scCode, r.id), onFinaliseDirect: () => this.openFinDirect(r.scCode, r.id) };
+        onMap: () => openRunMap(r), onDetail: () => openRunDetail(r), hasMap: !r.isIngested, hasDetail: true, onPush: () => this.openPush(r.scCode, r.id), onFinaliseDirect: () => this.openFinDirect(r.scCode, r.id) };
     });
 
     // §9 R4 — full-screen plan detail opened by the detail icon. Backed by reviewDetailRunId; shows
     // the run's full metric set + a deterministic per-route breakdown (same synthesis the Map uses).
     const rdv = st.reviewDetailView || 'route';
     const rdt = st.reviewDetailTab || 'details';
-    const detailRun = st.reviewDetailRunId ? d.runs.find(r => r.id === st.reviewDetailRunId) : null;
+    const curIngestedRun = ingestedRunFor(curCode);
+    const detailRun = st.reviewDetailRunId ? (d.runs.find(r => r.id === st.reviewDetailRunId) || (curIngestedRun && curIngestedRun.id === st.reviewDetailRunId ? curIngestedRun : null)) : null;
     let reviewDetail = { open: false, metrics: [], vehArr: [], flags: [], routeRows: [], isRouteView: true, isDcView: false, dcRows: [], hasDcRows: false, sections: [], secDetails: true, secRoute: false };
     if (detailRun) {
       const dSC = d.scs.find(s => s.code === detailRun.scCode) || curSC;
@@ -9048,68 +9097,98 @@ class NDCApp extends React.Component {
         { label: 'Vehicles', value: String(detailRun.vehicles), sub: 'total deployed', hasDelta: false, valueColor: '#14171F' },
         { label: 'Distance', value: fmtInt(detailRun.distance), sub: 'km total', hasDelta: false, valueColor: '#14171F' },
         { label: 'Total cost', value: money(detailRun.cost), sub: 'RLH / cycle', hasDelta: false, valueColor: '#14171F' },
-        { label: 'Avg TAT', value: detailRun.avgTat + 'h', sub: 'avg route duration', hasDelta: false, valueColor: '#14171F' },
+        { label: 'Avg TAT', value: detailRun.avgTat != null ? (detailRun.avgTat + 'h') : '—', sub: 'avg route duration', hasDelta: false, valueColor: '#14171F' },
       ];
+      const dRouteRows = [];
+      const dcRows = [];
+      const dVEH = d.VEH || [];
       const dVbt = (detailRun.vehByType || []);
       const dVbtTotal = dVbt.reduce((a, v) => a + v.n, 0) || 1;
       const dVehArr = dVbt.map(v => ({ veh: v.name, n: v.n, pctW: Math.round(v.n / dVbtTotal * 100) + '%' }));
       const dFlags = (detailRun.flags || []).map(f => ({ t: f.t, sevLabel: f.sev === 'danger' ? 'Error' : 'Warning', sevFg: f.sev === 'danger' ? '#D14B4B' : '#C77B00', sevBg: f.sev === 'danger' ? '#FBEAEA' : '#FBF1DF' }));
-      let rs = (detailRun.id).split('').reduce((a, ch) => a + ch.charCodeAt(0), 0) * 7 + 3;
-      const RR = () => { rs = (rs * 1103515245 + 12345) & 0x7fffffff; return rs / 0x7fffffff; };
-      const cc = (dSC && dSC.cityCode) || detailRun.scCode.slice(0, 3);
-      const vpick = dVbt.filter(v => v.n > 0);
-      const VFREQ = ['Daily', 'Daily', 'Alt-day', '6×/wk'];
-      const dRouteRows = [];
-      const baseLat = (dSC && dSC.lat) || 20.59, baseLng = (dSC && dSC.lng) || 78.96;
-      const dVEH = d.VEH || [];
-      for (let i = 0; i < detailRun.routes; i++) {
-        const vt = vpick.length ? vpick[i % vpick.length] : { name: 'Bolero / 8ft' };
-        const vehTp = vt.name.indexOf('ACE') >= 0 ? 4 : 7;
-        const tp = Math.max(2, Math.min(vehTp + (RR() < 0.14 ? 1 : 0), Math.round(detailRun.avgTP + (RR() - 0.5))));
-        const dist = Math.round(detailRun.distance / detailRun.routes * (0.7 + RR() * 0.6));
-        const util = +Math.max(0.3, Math.min(0.98, detailRun.util * (0.8 + RR() * 0.4))).toFixed(2);
-        const over = util > 0.9, under = util < 0.4;
-        const rowVol = Math.round(detailRun.volume / detailRun.routes * (0.6 + RR() * 0.8));
-        const vehRecord = dVEH.find(v => v.name === vt.name) || {};
-        const capVal = vehRecord.cap || null;
-        const utilFlagLabel = over ? 'Over-util' : under ? 'Under-util' : '';
-        const hasUtilFlag = over || under;
-        dRouteRows.push({ lmdc: cc + '-' + (220 + i * 7), segment: cc + '-R' + String(i + 1).padStart(2, '0'), veh: vt.name.split(/[\/·]/)[0].trim(), count: 1, freq: VFREQ[i % VFREQ.length],
-          dist: fmtInt(dist), tat: +(detailRun.avgTat * (0.7 + RR() * 0.4)).toFixed(1) + 'h', cps: '₹' + (detailRun.cps * (0.9 + RR() * 0.2)).toFixed(2), tps: tp,
-          util: Math.round(util * 100) + '%', utilColor: over ? '#D14B4B' : under ? '#C77B00' : '#14171F',
-          hasUtilFlag, utilFlagLabel,
-          vol: fmtInt(rowVol), cap: capVal ? fmtInt(capVal) : '—',
-          latLng: (baseLat + (RR() - 0.5) * 0.5).toFixed(4) + ', ' + (baseLng + (RR() - 0.5) * 0.5).toFixed(4) });
-      }
-      // §P3.2 — DC × Route detail view: one row per LMDC, seeded from route data
-      const dcRows = [];
-      const DCOUT_V = ['22:30','23:00','23:30','00:15','01:00'];
-      const DCIN_V  = ['06:00','07:00','07:30','08:00','09:00'];
-      const DCZN_V  = ['Local','Non-Local'];
-      for (let _di = 0; _di < dRouteRows.length && dcRows.length < 20; _di++) {
-        const _drt = dRouteRows[_di];
-        const _ndc = Math.max(2, Math.min(4, _drt.tps));
-        for (let _dj = 0; _dj < _ndc && dcRows.length < 20; _dj++) {
-          dcRows.push({
-            lmdc: cc + '-DC-' + String(201 + _di * 5 + _dj),
-            designVol: fmtInt(Math.max(40, Math.round((detailRun.volume / (dRouteRows.length * _ndc)) * (0.6 + RR() * 0.8)))),
-            lat: (baseLat + (RR() - 0.5) * 0.5).toFixed(4), lng: (baseLng + (RR() - 0.5) * 0.5).toFixed(4),
-            routeCode: _drt.segment,
-            tp: _drt.tps,
-            zone: DCZN_V[Math.round(RR()) % 2],
-            outCutoff: DCOUT_V[Math.floor(RR() * DCOUT_V.length)],
-            tat: _drt.tat,
-            inCutoff: DCIN_V[Math.floor(RR() * DCIN_V.length)],
-            vehType: _drt.veh,
-            rtDist: _drt.dist,
-            // Groups this route's rows into one visually-boxed block (outside border around
-            // the whole route, like the source plan sheet does) rather than a plain flat list.
-            isFirstInGroup: _dj === 0,
-            isLastInGroup: _dj === _ndc - 1,
+      if (detailRun.isIngested) {
+        // REAL ingested data — routes/DCs come straight from the uploaded file via
+        // computeIngestedRunMetrics (routeCode, veh, real dcs[] with real lat/lng/volume/tpOrder,
+        // real rtDist), not fabricated. Out Cutoff / In Cutoff / per-row TAT have no real source
+        // in the RLH ingestion template yet (same documented gap as elsewhere in this app) — '—'.
+        const cRows = detailRun.ingestedComputedRows || [];
+        cRows.forEach((row) => {
+          const vehRecord = dVEH.find(v => v.name === row.veh) || {};
+          const capVal = vehRecord.cap || null;
+          const over = row.util > 0.9, under = row.util < 0.4;
+          const utilFlagLabel = over ? 'Over-util' : under ? 'Under-util' : '';
+          dRouteRows.push({
+            segment: row.routeCode, tps: row.dcs.length, vol: fmtInt(Math.round(row.volume || 0)), dist: fmtInt(Math.round(row.rtDist || 0)),
+            veh: row.veh, util: Math.round((row.util || 0) * 100) + '%', utilColor: over ? '#D14B4B' : under ? '#C77B00' : '#14171F',
+            hasUtilFlag: over || under, utilFlagLabel, cap: capVal ? fmtInt(capVal) : '—',
           });
+          row.dcs.forEach((dc, j) => {
+            dcRows.push({
+              lmdc: dc.code, designVol: fmtInt(Math.round(dc.vol || 0)), lat: Number(dc.lat).toFixed(4), lng: Number(dc.lng).toFixed(4),
+              routeCode: row.routeCode, tp: dc.tpOrder, zone: row.zone || '—',
+              outCutoff: '—', tat: '—', inCutoff: '—',
+              vehType: row.veh, rtDist: fmtInt(Math.round(row.rtDist || 0)),
+              isFirstInGroup: j === 0, isLastInGroup: j === row.dcs.length - 1,
+            });
+          });
+        });
+      } else {
+        // §P3.2 (unchanged) — a real Network-Map run has no genuine per-route/per-DC source, only
+        // an aggregate simulated metrics summary, so this deterministic RNG synthesis stands in.
+        let rs = (detailRun.id).split('').reduce((a, ch) => a + ch.charCodeAt(0), 0) * 7 + 3;
+        const RR = () => { rs = (rs * 1103515245 + 12345) & 0x7fffffff; return rs / 0x7fffffff; };
+        const cc = (dSC && dSC.cityCode) || detailRun.scCode.slice(0, 3);
+        const vpick = dVbt.filter(v => v.n > 0);
+        const VFREQ = ['Daily', 'Daily', 'Alt-day', '6×/wk'];
+        const baseLat = (dSC && dSC.lat) || 20.59, baseLng = (dSC && dSC.lng) || 78.96;
+        for (let i = 0; i < detailRun.routes; i++) {
+          const vt = vpick.length ? vpick[i % vpick.length] : { name: 'Bolero / 8ft' };
+          const vehTp = vt.name.indexOf('ACE') >= 0 ? 4 : 7;
+          const tp = Math.max(2, Math.min(vehTp + (RR() < 0.14 ? 1 : 0), Math.round(detailRun.avgTP + (RR() - 0.5))));
+          const dist = Math.round(detailRun.distance / detailRun.routes * (0.7 + RR() * 0.6));
+          const util = +Math.max(0.3, Math.min(0.98, detailRun.util * (0.8 + RR() * 0.4))).toFixed(2);
+          const over = util > 0.9, under = util < 0.4;
+          const rowVol = Math.round(detailRun.volume / detailRun.routes * (0.6 + RR() * 0.8));
+          const vehRecord = dVEH.find(v => v.name === vt.name) || {};
+          const capVal = vehRecord.cap || null;
+          const utilFlagLabel = over ? 'Over-util' : under ? 'Under-util' : '';
+          const hasUtilFlag = over || under;
+          dRouteRows.push({ lmdc: cc + '-' + (220 + i * 7), segment: cc + '-R' + String(i + 1).padStart(2, '0'), veh: vt.name.split(/[\/·]/)[0].trim(), count: 1, freq: VFREQ[i % VFREQ.length],
+            dist: fmtInt(dist), tat: +(detailRun.avgTat * (0.7 + RR() * 0.4)).toFixed(1) + 'h', cps: '₹' + (detailRun.cps * (0.9 + RR() * 0.2)).toFixed(2), tps: tp,
+            util: Math.round(util * 100) + '%', utilColor: over ? '#D14B4B' : under ? '#C77B00' : '#14171F',
+            hasUtilFlag, utilFlagLabel,
+            vol: fmtInt(rowVol), cap: capVal ? fmtInt(capVal) : '—',
+            latLng: (baseLat + (RR() - 0.5) * 0.5).toFixed(4) + ', ' + (baseLng + (RR() - 0.5) * 0.5).toFixed(4) });
         }
+        // §P3.2 — DC × Route detail view: one row per LMDC, seeded from route data
+        const DCOUT_V = ['22:30','23:00','23:30','00:15','01:00'];
+        const DCIN_V  = ['06:00','07:00','07:30','08:00','09:00'];
+        const DCZN_V  = ['Local','Non-Local'];
+        for (let _di = 0; _di < dRouteRows.length && dcRows.length < 20; _di++) {
+          const _drt = dRouteRows[_di];
+          const _ndc = Math.max(2, Math.min(4, _drt.tps));
+          for (let _dj = 0; _dj < _ndc && dcRows.length < 20; _dj++) {
+            dcRows.push({
+              lmdc: cc + '-DC-' + String(201 + _di * 5 + _dj),
+              designVol: fmtInt(Math.max(40, Math.round((detailRun.volume / (dRouteRows.length * _ndc)) * (0.6 + RR() * 0.8)))),
+              lat: (baseLat + (RR() - 0.5) * 0.5).toFixed(4), lng: (baseLng + (RR() - 0.5) * 0.5).toFixed(4),
+              routeCode: _drt.segment,
+              tp: _drt.tps,
+              zone: DCZN_V[Math.round(RR()) % 2],
+              outCutoff: DCOUT_V[Math.floor(RR() * DCOUT_V.length)],
+              tat: _drt.tat,
+              inCutoff: DCIN_V[Math.floor(RR() * DCIN_V.length)],
+              vehType: _drt.veh,
+              rtDist: _drt.dist,
+              // Groups this route's rows into one visually-boxed block (outside border around
+              // the whole route, like the source plan sheet does) rather than a plain flat list.
+              isFirstInGroup: _dj === 0,
+              isLastInGroup: _dj === _ndc - 1,
+            });
+          }
+        }
+        if (dcRows.length) dcRows[dcRows.length - 1].isLastInGroup = true;
       }
-      if (dcRows.length) dcRows[dcRows.length - 1].isLastInGroup = true;
       reviewDetail = { open: true, runId: detailRun.runId, hwLabel: hwLabelOf(detailRun.hw), hwTag: HWTAG[detailRun.hw], triggeredAt: detailRun.triggeredAt, triggeredBy: detailRun.triggeredBy || '',
         code: detailRun.scCode, name: detailRun.scName, zone: dSC ? dSC.zone : detailRun.zone, dcCount: detailRun.dcCount,
         nodes: fmtInt(detailRun.dcCount), volume: fmtInt(detailRun.volume), vehInput: (detailRun.vehInput && detailRun.vehInput.length ? detailRun.vehInput.join(' · ') : '—'),
@@ -9163,8 +9242,6 @@ class NDCApp extends React.Component {
       curCode, curName: curSC ? curSC.name : '', curZone: curSC ? curSC.zone : '', curDcCount: curSC ? curSC.dcCount : 0,
       planCards, runCountLabel: scRuns.length + ' run' + (scRuns.length === 1 ? '' : 's') + ' generated this cycle', hasPlanCards: planCards.length > 0,
       reviewDetail,
-      reviewIngestedPlans: (st.ingestedPlans || []).map(p => ({ name: p.name, rows: p.rows.toLocaleString('en-IN'), by: p.by, date: p.date, runId: p.runId, scCode: p.scCode })),
-      hasReviewIngested: (st.ingestedPlans || []).length > 0,
       reviewPushed: !!st.pushedSCs[curCode],
       pushOpen: st.pushOpen, pushSCname: pushSC ? (pushSC.code + ' \u00b7 ' + pushSC.name) : '', reviewersList, pushAddOptions, pushAddSelect: st.pushAddSelect || '',
       onPushAddSelect: (e) => this.addPushReviewerById(e.target.value),
