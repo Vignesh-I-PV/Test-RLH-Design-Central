@@ -3854,42 +3854,38 @@ const NDC_RUN_MINUTES = 30; // ~30 min per solve (used for the batch ETA estimat
 // seeded plans' occasional 17ft/MCV row) falls back to a capacity-scaled estimate off the nearest
 // known rate in NDC_costPerKmFor() below — a clearly-flagged placeholder, not a real number. Swap
 // in real rates here the moment product has them; nothing else needs to change.
+// Null-safe CPS/cost formatter -- needed everywhere a route or plan's cost/CPS is displayed with
+// a currency prefix, now that removing the cost-per-km fallback (2026-07-27) means these can
+// genuinely be null (no rate configured for that vehicle type) rather than always a number.
+const NDC_fmtCps = (v) => (v == null ? '—' : '\u20b9' + Number(v).toFixed(2));
+// Real cost-per-km rate card (confirmed with user 2026-07-27), keyed by the exact Vehicle Master
+// type names (VEH_TYPE_OPTIONS) -- replaces the old 3-entry table of legacy fabricated vehicle
+// names that no real route could ever match.
 const NDC_COST_PER_KM = {
-  'TATA ACE / 7ft': 12,
-  'Bolero / 8ft': 14,
-  'TATA 407 / 10ft': 18,
+  '7FT Trailer': 12,
+  '8FT Trailer': 14,
+  '10FT Trailer': 18,
+  '14FT Trailer': 19,
+  '17FT Trailer': 20,
+  '20FT Trailer': 21,
+  '22FT Trailer': 23,
+  '24FT Trailer': 25,
+  '32FT Trailer': 29,
+  '42FT Trailer': 32,
 };
-function NDC_costPerKmFor(vehName, vehCapacity) {
-  if (NDC_COST_PER_KM[vehName] != null) return NDC_COST_PER_KM[vehName];
-  // Placeholder fallback for any vehicle type without a real rate: scale the 407's Rs18/km by
-  // capacity relative to the 407's ~3500-shipment capacity. Flagged, not a real figure.
-  const baseCap = 3500, baseRate = NDC_COST_PER_KM['TATA 407 / 10ft'];
-  const cap = vehCapacity || baseCap;
-  return +(baseRate * (cap / baseCap)).toFixed(2);
-}
-// NDC_haversineKm — straight-line distance between two lat/lng points, in km. Used only as the
-// SYSTEM-CALCULATED reference for: (a) the always-computed return leg (last DC -> SC), and
-// (b) validating a user-given leg distance against reality (the >25% variance warning). It is
-// NOT used to compute the "official" route distance when the user has supplied a leg value --
-// user-given legs always win for the official number.
-function NDC_haversineKm(lat1, lng1, lat2, lng2) {
-  const R = 6371;
-  const toRad = (d) => (d * Math.PI) / 180;
-  const dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
-  return +(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 55).toFixed(1);
-  // ×55 -- the seeded lat/lng deltas across this app's fake SC/DC network are sub-degree (city-
-  // scale clusters), so raw haversine on them returns single-digit km; a flat road-distance
-  // multiplier keeps recomputed legs in the same 60-360km range the rest of the seed data uses,
-  // without needing a real road-network router. Replace this with a real distance service call
-  // when one exists -- this is a stand-in, not a claim about real-world road distance.
+// Returns the configured rate, or null if this vehicle type has no real rate configured -- no
+// estimated/scaled fallback (removed 2026-07-27 per explicit decision). Callers must handle null
+// by treating cost/CPS as unavailable for that route, not by guessing a number.
+function NDC_costPerKmFor(vehName) {
+  return NDC_COST_PER_KM[vehName] != null ? NDC_COST_PER_KM[vehName] : null;
 }
 // NDC_realHaversineKm — genuine straight-line distance between two REAL lat/lng points, in km,
 // with a flat 25% buffer to approximate real road distance (e.g. 50km straight-line -> 62.5km).
-// Deliberately separate from NDC_haversineKm above: that function's ×55 multiplier only makes
-// sense for this app's fabricated, sub-degree, city-scale jittered coordinates. Real ingested
-// coordinates (RLH Plan Ingestion) span real-world distances and must never go through ×55 --
-// this is the function for those. 2026-07-23.
+// The old legacy ×55-multiplier haversine (for fabricated seed coordinates) was removed 2026-07-27
+// as confirmed dead code: it was only ever reached for a DC with isReal:false, and nothing in this
+// real-data build ever produces one (the only DC source is real ingestion, which always sets
+// isReal:true). If a future non-ingested/Network-Map plan path is ever built, that removed
+// function's ×55 calibration would need to be reintroduced deliberately, not silently restored.
 function NDC_realHaversineKm(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const toRad = (d) => (d * Math.PI) / 180;
@@ -4526,10 +4522,12 @@ class NDCApp extends React.Component {
     const rows = ingested.rows.map((row) => {
       const hypRoute = hyp.routes.find(rt => rt.routeCode === row.routeCode) || {};
       const vehRecord = vehRecordFor(row.veh);
-      const util = vehRecord.cap ? Math.min(0.98, +((hypRoute.volume || 0) / vehRecord.cap).toFixed(2)) : 0;
+      // Utilisation cap removed 2026-07-27 per explicit decision -- a route genuinely over capacity
+      // should show its real ratio (e.g. 112%), not be artificially clamped at 98%.
+      const util = vehRecord.cap ? +((hypRoute.volume || 0) / vehRecord.cap).toFixed(2) : 0;
       return Object.assign({}, row, {
         tp: row.dcs.length, vehTp: vehRecord.tp || 7,
-        volume: hypRoute.volume || 0, cps: hypRoute.cps || 0, util,
+        volume: hypRoute.volume || 0, cps: hypRoute.cps, util,
         // No Breakdown TAT / Out Cutoff column exists in the real RLH Plan Ingestion template —
         // there's no real data source for these yet (flagged as an open gap, not fabricated).
         breakdownTat: null, outCutoff: null,
@@ -4540,8 +4538,15 @@ class NDCApp extends React.Component {
     const metrics = {
       routes: hyp.routes.length, vehicles: hyp.routes.length,
       distance: Math.round(hyp.routes.reduce((a, r) => a + r.distance, 0)),
-      cps: hyp.scCPS, cost: Math.round(hyp.scCost),
-      coverage: 1, // every DC in the ingested file is genuinely served -- nothing is "skipped" the way an optimizer run might
+      cps: hyp.scCPS, cost: hyp.scCost != null ? Math.round(hyp.scCost) : null,
+      // Coverage formula (confirmed 2026-07-27): nodes in the generated plan / nodes given under
+      // Design Inputs. For an INGESTED plan specifically, this defaults to 100% -- the ingested
+      // file IS both the input and the output, so by definition it covers everything in it (no
+      // separate "input node count" exists to compare against). The ratio-based formula only
+      // applies once a real generated-plan path (Network-Map/DS-optimiser) exists to compare
+      // against a genuine node-input count -- not built, since that path doesn't exist yet in
+      // this real-data build (d.runs is always empty).
+      coverage: 1,
       util: avgUtil,
       avgTat: null, // same gap as row-level breakdownTat -- no real TAT data in the ingested file yet
     };
@@ -6833,7 +6838,8 @@ class NDCApp extends React.Component {
       plan.rows = hyp.routes.map((rt) => {
         const prior = priorByCode[rt.routeCode]; // same code as before -> carry forward fields the engine doesn't model (TAT/cutoff)
         const vehRecord = (d.VEH || []).find(v => v.name === rt.vehName) || {};
-        const util = vehRecord.cap ? Math.min(0.98, +(rt.volume / vehRecord.cap).toFixed(2)) : (prior ? prior.util : 0.7);
+        // Utilisation cap removed 2026-07-27 -- a genuinely over-capacity route shows its real ratio.
+        const util = vehRecord.cap ? +(rt.volume / vehRecord.cap).toFixed(2) : (prior ? prior.util : 0.7);
         return {
           routeCode: rt.routeCode, veh: rt.vehName, vehTp: vehRecord.tp || (prior ? prior.vehTp : 7),
           tp: rt.dcCodes.length, dcs: rt.dcRecords, rtDist: Math.round(rt.distance), returnLeg: rt.returnLeg,
@@ -6848,7 +6854,7 @@ class NDCApp extends React.Component {
       plan.metrics = Object.assign({}, plan.metrics, {
         routes: hyp.routes.length, vehicles: hyp.routes.length,
         distance: Math.round(hyp.routes.reduce((a, r) => a + r.distance, 0)),
-        cps: hyp.scCPS, cost: Math.round(hyp.scCost), util: avgUtil, avgTat: avgTat,
+        cps: hyp.scCPS, cost: hyp.scCost != null ? Math.round(hyp.scCost) : null, util: avgUtil, avgTat: avgTat,
         // coverage is left as-is: reordering regroups the same DCs, it doesn't change which/how many are served.
       });
       // clear this plan's in-progress/decision scratch state -- it's now committed into rows themselves
@@ -7039,11 +7045,9 @@ class NDCApp extends React.Component {
       // Legs: SC -> dcs[0] -> dcs[1] -> ... -> dcs[n-1] -> SC (return leg always calculated)
       let prevLat = scLat, prevLng = scLng, distance = 0;
       dcs.forEach((dc) => {
-        // Real ingested coordinates must never go through NDC_haversineKm's ×55 fudge factor
-        // (calibrated only for this app's fabricated, sub-degree seed coordinates) -- use the real
-        // formula (straight-line x1.25) for any DC that came from real ingestion.
-        const haversineFn = dc.isReal ? NDC_realHaversineKm : NDC_haversineKm;
-        const calcLeg = haversineFn(prevLat, prevLng, dc.lat, dc.lng);
+        // Legacy ×55-multiplier haversine (for fabricated coordinates) removed 2026-07-27 as dead
+        // code -- always use the real formula now (every DC in this real-data build is real).
+        const calcLeg = NDC_realHaversineKm(prevLat, prevLng, dc.lat, dc.lng);
         const leg = dc.userDistance != null ? dc.userDistance : calcLeg;
         dc.resolvedLeg = +leg.toFixed(2); // real value used in the sum -- ground truth, override, or calculated
         // Variance check only applies to a genuine Ops-feedback-entered distance. An ingested
@@ -7068,8 +7072,7 @@ class NDCApp extends React.Component {
       // real formula if that last DC is itself real.
       const lastDc = dcs[n - 1];
       const realReturnLeg = (lastDc && !lastDc.hasOverride && lastDc.originalRouteCode === code) ? returnLegByOrigRoute[lastDc.originalRouteCode] : null;
-      const returnHaversineFn = (lastDc && lastDc.isReal) ? NDC_realHaversineKm : NDC_haversineKm;
-      const returnLeg = realReturnLeg != null ? realReturnLeg : returnHaversineFn(prevLat, prevLng, scLat, scLng);
+      const returnLeg = realReturnLeg != null ? realReturnLeg : NDC_realHaversineKm(prevLat, prevLng, scLat, scLng);
       distance += returnLeg;
 
       // Distance vs vehicle limit warning
@@ -7078,15 +7081,22 @@ class NDCApp extends React.Component {
       }
 
       const volume = dcs.reduce((a, x) => a + x.vol, 0);
-      const costPerKm = NDC_costPerKmFor(vehName, vehRecord.cap);
-      const cost = distance * costPerKm;
-      const cps = volume > 0 ? cost / volume : 0;
-      return { routeCode: code, isNewRoute, vehName, dcCodes: dcs.map(x => x.code), dcRecords: dcs, tpOrder: dcs.map(x => x.tp), distance: +distance.toFixed(1), returnLeg: +returnLeg.toFixed(1), volume, costPerKm, cost: +cost.toFixed(2), cps: +cps.toFixed(2) };
+      const costPerKm = NDC_costPerKmFor(vehName);
+      if (costPerKm == null) {
+        warnings.push({ t: 'No cost-per-km rate configured for vehicle type "' + vehName + '" — cost/CPS unavailable for route ' + code + '.', sev: 'warning', routeCode: code });
+      }
+      const cost = costPerKm != null ? distance * costPerKm : null;
+      const cps = (cost != null && volume > 0) ? cost / volume : null;
+      return { routeCode: code, isNewRoute, vehName, dcCodes: dcs.map(x => x.code), dcRecords: dcs, tpOrder: dcs.map(x => x.tp), distance: +distance.toFixed(1), returnLeg: +returnLeg.toFixed(1), volume, costPerKm, cost: cost != null ? +cost.toFixed(2) : null, cps: cps != null ? +cps.toFixed(2) : null };
     });
 
     const scVolume = routes.reduce((a, r) => a + r.volume, 0);
-    const scCost = routes.reduce((a, r) => a + r.cost, 0);
-    const scCPS = scVolume > 0 ? +(scCost / scVolume).toFixed(2) : 0;
+    // If ANY route's cost is unavailable (no rate configured for its vehicle type), the plan-level
+    // total is also unavailable rather than silently summing only the known routes -- a partial
+    // sum would understate the real total cost without any indication it's incomplete.
+    const hasUnresolvedCost = routes.some(r => r.cost == null);
+    const scCost = hasUnresolvedCost ? null : routes.reduce((a, r) => a + r.cost, 0);
+    const scCPS = (scCost != null && scVolume > 0) ? +(scCost / scVolume).toFixed(2) : null;
 
     // Recompute the ORIGINAL structure through the exact same formula (no feedback applied) so the
     // before/after comparison is apples-to-apples, rather than mixing this formula with the old
@@ -7118,7 +7128,7 @@ class NDCApp extends React.Component {
     return (hyp.routes || []).map((rt) => {
       const prior = priorByCode[rt.routeCode] || null;
       const vehRecord = (d.VEH || []).find(v => v.name === rt.vehName) || {};
-      const util = vehRecord.cap ? Math.min(0.98, +(rt.volume / vehRecord.cap).toFixed(2)) : (prior ? prior.util : 0.7);
+      const util = vehRecord.cap ? +(rt.volume / vehRecord.cap).toFixed(2) : (prior ? prior.util : 0.7);
       const over = util > 0.9, under = util < 0.4;
       const tat = (prior && prior.breakdownTat != null) ? (prior.breakdownTat + 'h') : (+(rt.distance / 42).toFixed(1) + 'h');
       // 2026-07-14 — Route View only ever shows 2 of the 5 change flags (Vehicle Change, New Route /
@@ -7132,7 +7142,7 @@ class NDCApp extends React.Component {
       ].filter(Boolean);
       return {
         lmdc: rt.dcCodes.length ? rt.dcCodes[rt.dcCodes.length - 1] : '—', segment: rt.routeCode, veh: rt.vehName.split(/[\/·]/)[0].trim(),
-        count: 1, freq: 'Daily', dist: fmtInt(Math.round(rt.distance)), tat, cps: '₹' + Number(rt.cps).toFixed(2), tps: rt.dcCodes.length,
+        count: 1, freq: 'Daily', dist: fmtInt(Math.round(rt.distance)), tat, cps: NDC_fmtCps(rt.cps), tps: rt.dcCodes.length,
         util: Math.round(util * 100) + '%', utilColor: over ? '#D14B4B' : under ? '#C77B00' : '#14171F',
         hasUtilFlag: over || under, utilFlagLabel: over ? 'Over-util' : under ? 'Under-util' : '',
         vol: fmtInt(rt.volume), cap: vehRecord.cap ? fmtInt(vehRecord.cap) : '—',
@@ -7442,9 +7452,9 @@ class NDCApp extends React.Component {
         return { idx, routeCode: r.routeCode, veh: r.veh, tp: r.tp, ops: (ps !== 'Pushed' ? r.ops : 'Pending'), opsChip: (ps === 'Pushed' || r.ops === 'Pending') ? '—' : r.ops, opsBg: op.bg, opsFg: op.fg, needsAttn, hasFb: !!effFb, noFb: !effFb, fbText: effFb ? effFb.remark : '', cells, dcChips, hasDcChips: dcChips.length > 0,
           proposedBy: propBy, hasProposed: !!propBy, proposedLabel: propBy ? ('Proposed by ' + propBy) : '',
           autoApproved: autoApprovable, autoApprovedLabel: 'Auto-approved · ' + (cpsDeltaPct >= 0 ? '+' : '') + cpsDeltaPct.toFixed(1) + '% CPS',
-          dcCount: r.dcs.length, rtDist: r.rtDist + ' km', cps: '₹' + Number(r.cps).toFixed(2), tat: r.breakdownTat != null ? (r.breakdownTat + 'h') : '—',
+          dcCount: r.dcs.length, rtDist: r.rtDist + ' km', cps: NDC_fmtCps(r.cps), tat: r.breakdownTat != null ? (r.breakdownTat + 'h') : '—',
           vol: aVolVal, util: aUtilVal, cap: aCapVal, routeMeta: 'Vol ' + aVolVal + ' · Util ' + aUtilVal + ' · Cap ' + aCapVal,
-          mlVehTxt: r.veh, mlTpTxt: '' + r.tp, mlDcsTxt: '' + r.dcs.length, mlDistTxt: r.rtDist + ' km', mlCpsTxt: '₹' + Number(r.cps).toFixed(2), mlVolTxt: '' + aVolVal, mlUtilTxt: '' + aUtilVal,
+          mlVehTxt: r.veh, mlTpTxt: '' + r.tp, mlDcsTxt: '' + r.dcs.length, mlDistTxt: r.rtDist + ' km', mlCpsTxt: NDC_fmtCps(r.cps), mlVolTxt: '' + aVolVal, mlUtilTxt: '' + aUtilVal,
           mlVehBg: mlVehChg ? '#FBF1DF' : 'transparent', mlVehFg: mlVehChg ? '#9A5E00' : '#5A5E66', mlVehWt: mlVehChg ? '700' : '400',
           mlTpBg: mlTpChg ? '#FBF1DF' : 'transparent', mlTpFg: mlTpChg ? '#9A5E00' : '#5A5E66', mlTpWt: mlTpChg ? '700' : '400',
           mlDistBg: mlDistChg ? '#FBF1DF' : 'transparent', mlDistFg: mlDistChg ? '#9A5E00' : '#5A5E66', mlDistWt: mlDistChg ? '700' : '400',
@@ -7647,7 +7657,7 @@ class NDCApp extends React.Component {
         // deciding then happens in the (now-frozen) Acknowledged state, same as before Finalise.
         canDecide: ps === 'Acknowledged', decideLocked: ps !== 'Acknowledged', needsAckToDecide: ps === 'In Alignment',
         showActionBar: ps === 'In Alignment' || ps === 'Acknowledged',
-        metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: '\u20b9' + plan.metrics.cps.toFixed(2) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat != null ? (plan.metrics.avgTat + 'h') : '—' }],
+        metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: NDC_fmtCps(plan.metrics.cps) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat != null ? (plan.metrics.avgTat + 'h') : '—' }],
         rows: rows, rowCount: rows.length, flaggedCount: flaggedRows.length, alignedCount: autoAligned, hasFlagged: flaggedRows.length > 0, noFlagged: flaggedRows.length === 0, hasAligned: autoAligned > 0, routeList: routeList, selRoute: selRoute, hasSelRoute: !!selRoute, routeCards: flaggedRows, reviewHeadline: flaggedRows.length + ' route' + (flaggedRows.length === 1 ? '' : 's') + ' need a decision', alignedNote: autoAligned + ' of ' + rows.length + ' routes already aligned — no action needed', decidedCount, acceptedCount: rows.filter(r => r.decision === 'Accept').length, rejectedCount: rows.filter(r => r.decision === 'Reject').length, allDecided,
         routeViewRows: aRouteViewRows, dcViewRows: aDcViewRows, dcGroupHeaders: aDcGroupHeaders,
         // 2026-07-10 — detailed per-field review popup, opened by clicking a route with changes.
@@ -7709,7 +7719,7 @@ class NDCApp extends React.Component {
             { metric: 'Routes',         original: String(m.routes),        proposed: String(newRoutes),   delta: dSign(newRoutes - m.routes),             deltaColor: dColor(newRoutes - m.routes) },
             { metric: 'Vehicles',       original: String(m.vehicles),      proposed: String(newRoutes),   delta: dSign(newRoutes - m.vehicles),           deltaColor: dColor(newRoutes - m.vehicles) },
             { metric: 'Total Distance', original: dFmt(m.distance),        proposed: dFmt(+newDistance.toFixed(0)), delta: dSign(+(newDistance - m.distance).toFixed(0), 0).replace(/(\d)(?=(\d{3})+$)/g, '$1,') + ' km', deltaColor: dColor(newDistance - m.distance) },
-            { metric: 'SC CPS',         original: '₹' + planHyp.originalScCPS.toFixed(2), proposed: '₹' + pC.toFixed(2), delta: dSign(+(pC - planHyp.originalScCPS).toFixed(2), 2), deltaColor: dColor(pC - planHyp.originalScCPS) },
+            { metric: 'SC CPS',         original: NDC_fmtCps(planHyp.originalScCPS), proposed: NDC_fmtCps(pC), delta: (planHyp.originalScCPS != null && pC != null) ? dSign(+(pC - planHyp.originalScCPS).toFixed(2), 2) : '—', deltaColor: (planHyp.originalScCPS != null && pC != null) ? dColor(pC - planHyp.originalScCPS) : '#8E96A3' },
           ];
           const planSimMapOpen = !!st.planSimMapOpen;
           const planSC = d.scs.find(s => s.code === plan.scCode);
@@ -7746,7 +7756,7 @@ class NDCApp extends React.Component {
             return [
               mkCard('Total Routes', m.routes, newRoutes, v => String(v)),
               mkCard('Total Distance (km)', m.distance, +newDistance.toFixed(0), v => v.toLocaleString('en-IN')),
-              mkCard('SC CPS (₹)', +planCpsOriginal.toFixed(2), +pC.toFixed(2), v => '₹' + v.toFixed(2)),
+              mkCard('SC CPS (₹)', planCpsOriginal != null ? +planCpsOriginal.toFixed(2) : null, pC != null ? +pC.toFixed(2) : null, v => NDC_fmtCps(v)),
             ];
           })();
           // Vehicle mix comparison (2026-07-16, per product decision on Plan Inputs) — original tally
@@ -7780,7 +7790,7 @@ class NDCApp extends React.Component {
               vehChanged, vehUnchanged: !vehChanged,
               countDisp: String(r.dcs ? r.dcs.length : r.tp || 1),
               distDisp: r.rtDist + ' km',
-              origCps: '₹' + Number(r.cps).toFixed(2),
+              origCps: NDC_fmtCps(r.cps),
               dcMoveCount, hasDcMoves: dcMoveCount > 0,
               note,
               isChanged, isNoChange: !isChanged,
@@ -7897,7 +7907,7 @@ class NDCApp extends React.Component {
         const moved = !orig || orig.routeCode !== rt.routeCode || orig.tp !== tp;
         return { code, tp, moved, fromLabel: orig ? (orig.routeCode + ' · TP' + orig.tp) : 'New DC' };
       });
-      return { routeCode: rt.routeCode, veh: rt.vehName, tpN: rt.dcCodes.length, dist: fmtInt(Math.round(rt.distance)), vol: fmtInt(rt.volume), cps: '₹' + rt.cps.toFixed(2), cap: vehRecord.cap ? fmtInt(vehRecord.cap) : '—', isNew: rt.isNewRoute,
+      return { routeCode: rt.routeCode, veh: rt.vehName, tpN: rt.dcCodes.length, dist: fmtInt(Math.round(rt.distance)), vol: fmtInt(rt.volume), cps: NDC_fmtCps(rt.cps), cap: vehRecord.cap ? fmtInt(vehRecord.cap) : '—', isNew: rt.isNewRoute,
         dcOrder, hasReorder: dcOrder.some(x => x.moved) };
     }) : [];
     // 2026-07-15 (ported) — full-screen Finalise preview (replaces the old modal): Plan Details here
@@ -7963,7 +7973,7 @@ class NDCApp extends React.Component {
       finPreviewRows, finPreviewWarnings: finPreviewHyp ? finPreviewHyp.warnings.map(w => w.t) : [], finOrigRoutes, finNewRoutes, finOrigDistance: fmtInt(finOrigDistance), finNewDistance: fmtInt(finNewDistance),
       finRoutesDelta: finDelta(finOrigRoutes, finNewRoutes, 0), finRoutesDeltaColor: finDeltaColor(finOrigRoutes, finNewRoutes),
       finDistDelta: finDelta(finOrigDistance, finNewDistance, 0), finDistDeltaColor: finDeltaColor(finOrigDistance, finNewDistance),
-      finOrigCpsF: '\u20b9' + finOrigCps.toFixed(2), finNewCpsF: '\u20b9' + finNewCps.toFixed(2),
+      finOrigCpsF: NDC_fmtCps(finOrigCps), finNewCpsF: NDC_fmtCps(finNewCps),
       finCpsDelta: finDelta(finOrigCps, finNewCps, 2), finCpsDeltaColor: finDeltaColor(finOrigCps, finNewCps),
       // Accept-all-flagged modal bindings
       acceptAllPlanOpen: st.acceptAllPlanOpen,
@@ -8043,7 +8053,18 @@ class NDCApp extends React.Component {
   // Per-DC (node-scoped) feedback: lat/lng, touch-point, Route Code (existing route, or Split this
   // route -> a new code + a required vehicle pick for it), and Distance (breakdown leg into this DC).
   toggleNcDc(dcCode, seed) { const m = Object.assign({}, this.state.ncDcCells || {}); if (m[dcCode]) { delete m[dcCode]; } else { m[dcCode] = Object.assign({ lat: '', lng: '', tp: '', distance: '', routeCode: '' }, seed || {}); } this.setState({ ncDcCells: m }); }
-  setNcDc(dcCode, field, val) { const m = Object.assign({}, this.state.ncDcCells || {}); m[dcCode] = Object.assign({ lat: '', lng: '', tp: '', distance: '', routeCode: '' }, m[dcCode] || {}); m[dcCode][field] = val; this.setState({ ncDcCells: m }); }
+  setNcDc(dcCode, field, val) {
+    const m = Object.assign({}, this.state.ncDcCells || {});
+    m[dcCode] = Object.assign({ lat: '', lng: '', tp: '', distance: '', routeCode: '' }, m[dcCode] || {});
+    m[dcCode][field] = val;
+    this.setState({ ncDcCells: m });
+    // Touch Point entry: hardcoded >7 warning, same threshold and pattern already used at every
+    // other TP-entry point in this app (Vehicle Master TP Limit, SC Master Local/Non-Local TP
+    // Limit) -- this was the one remaining place a TP value could be typed with no immediate check.
+    if (field === 'tp' && val !== '' && !isNaN(Number(val)) && Number(val) > 7) {
+      this.showToast('Touch Point ' + val + ' for ' + dcCode + ' exceeds the recommended max of 7', '#C77B00');
+    }
+  }
   // 2026-07-09 — Route Code dropdown: pick an existing route in the plan (move this DC there), or
   // pick "Split this route" (__SPLIT__ sentinel) to peel this DC off into a brand-new route. The
   // split target code is computed ONCE per open feedback session (all DCs that choose split within
@@ -8266,7 +8287,7 @@ class NDCApp extends React.Component {
         const _tpTouched = Object.keys(_tpOrd).length > 0;
         const _tpValid = _tpNums.every(x => Number.isInteger(x) && x >= 1 && x <= _tpN) && (new Set(_tpNums)).size === _tpN;
         const _tpMsg = _tpValid ? ('Valid 1–' + _tpN + ' order') : ('Fix the highlighted stops — each needs a unique number 1–' + _tpN);
-        return { idx, routeCode: r.routeCode, veh: r.veh, tp: r.tp, dcs: r.dcs.length, rtDist: r.rtDist + ' km', cps: '₹' + Number(r.cps).toFixed(2), decision: dv, decChip: (dv === 'Pending' ? '—' : dv), opsBg: opStyle.bg, opsFg: opStyle.fg, aligned: dv === 'Aligned', notAligned: dv !== 'Aligned', needsChange: dv === 'Needs Change', submitted, editable: !planLocked, alignBg: dv === 'Aligned' ? '#128A3E' : '#fff', alignFg: dv === 'Aligned' ? '#fff' : '#128A3E', ncBg: dv === 'Needs Change' ? '#C77B00' : '#fff', ncFg: dv === 'Needs Change' ? '#fff' : '#C77B00',
+        return { idx, routeCode: r.routeCode, veh: r.veh, tp: r.tp, dcs: r.dcs.length, rtDist: r.rtDist + ' km', cps: NDC_fmtCps(r.cps), decision: dv, decChip: (dv === 'Pending' ? '—' : dv), opsBg: opStyle.bg, opsFg: opStyle.fg, aligned: dv === 'Aligned', notAligned: dv !== 'Aligned', needsChange: dv === 'Needs Change', submitted, editable: !planLocked, alignBg: dv === 'Aligned' ? '#128A3E' : '#fff', alignFg: dv === 'Aligned' ? '#fff' : '#128A3E', ncBg: dv === 'Needs Change' ? '#C77B00' : '#fff', ncFg: dv === 'Needs Change' ? '#fff' : '#C77B00',
           proposedBy: propBy, hasProposed: !!propBy, proposedLabel: propBy ? ('Change proposed by ' + propBy) : '', proposedRemark: propRemark,
           vol: oVolVal, util: oUtilVal, cap: oCapVal, routeMeta: 'Vol ' + oVolVal + ' · Util ' + oUtilVal + ' · Cap ' + oCapVal,
           onAlign: () => this.opsDecide(plan.id, idx, 'Aligned'), onNeeds: () => this.openNc(plan.id, idx),
@@ -8359,7 +8380,7 @@ class NDCApp extends React.Component {
         rows, alignedN, ncN, pendN, rowCount: rows.length, allReviewed: pendN === 0, reviewLabel: (rows.length - pendN) + ' / ' + rows.length + ' reviewed',
         hasProp: oProp > 0 && !submitted, propN: oProp, propSummary: (propByNames.join(' & ') || 'A co-reviewer') + ' proposed ' + oProp + ' change' + (oProp === 1 ? '' : 's') + ' on this plan', coReviewerLabel, hasCoReviewers: coReviewerLabel.length > 0,
         submittedRecord: submitted ? ('Submitted by ' + subBySel + (subAtSel ? ' · ' + subAtSel : '')) : '',
-        metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: '\u20b9' + plan.metrics.cps.toFixed(2) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat != null ? (plan.metrics.avgTat + 'h') : '—' }],
+        metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: NDC_fmtCps(plan.metrics.cps) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat != null ? (plan.metrics.avgTat + 'h') : '—' }],
         mixArr, routeViewRows: oRouteViewRows, dcViewRows: oDcViewRows, dcGroupHeaders: oDcGroupHeaders, secDetails: sec === 'details', secRoute: sec === 'route',
         sections: SECS.map(s => ({ label: s[1], active: sec === s[0], color: sec === s[0] ? '#003F98' : '#5A5E66', weight: sec === s[0] ? '700' : '600', onClick: () => this.setState({ opsSection: s[0] }) })),
         onAcceptAll: () => { if (pendN > 0) this.setState({ alignAllOpen: true, alignAllPlanId: plan.id }); }, acceptAllDisabled: pendN === 0, onReset: () => this.resetOps(plan.id), onMapView: () => this.openStandaloneMap(plan.scCode, 'Ops Alignment · Ops Lead'),
@@ -8517,7 +8538,7 @@ class NDCApp extends React.Component {
         { metric: 'Routes',         original: String(m.routes),            proposed: String(opsHyp.routes.length), delta: deltaSign2(opsHyp.routes.length - m.routes), deltaColor: deltaColor2(opsHyp.routes.length - m.routes) },
         { metric: 'Vehicles',       original: String(m.vehicles),          proposed: String(newVehicles),          delta: deltaSign2(dVehicles2),             deltaColor: deltaColor2(dVehicles2) },
         { metric: 'Total Distance', original: fmtDist2(m.distance),        proposed: fmtDist2(newDistance),        delta: deltaSign2(dDist2, 0).replace(/(\d)(?=(\d{3})+$)/g, '$1,') + ' km', deltaColor: deltaColor2(dDist2) },
-        { metric: 'SC CPS',         original: '₹' + opsHyp.originalScCPS.toFixed(2), proposed: '₹' + opsHyp.scCPS.toFixed(2), delta: deltaSign2(dCps2, 2), deltaColor: deltaColor2(dCps2) },
+        { metric: 'SC CPS',         original: NDC_fmtCps(opsHyp.originalScCPS), proposed: NDC_fmtCps(opsHyp.scCPS), delta: (opsHyp.originalScCPS != null && opsHyp.scCPS != null) ? deltaSign2(dCps2, 2) : '—', deltaColor: (opsHyp.originalScCPS != null && opsHyp.scCPS != null) ? deltaColor2(dCps2) : '#8E96A3' },
       ];
     }
     // Headwind callout — real CPS delta, SC-level, as a signed % for negotiation framing.
@@ -8588,7 +8609,7 @@ class NDCApp extends React.Component {
         return [
           mkCard('Total Routes', m2.routes, opsHyp.routes.length, v => String(v)),
           mkCard('Total Distance (km)', m2.distance, +newDistance2.toFixed(0), v => v.toLocaleString('en-IN')),
-          mkCard('SC CPS (₹)', +opsHyp.originalScCPS.toFixed(2), +opsHyp.scCPS.toFixed(2), v => '₹' + v.toFixed(2)),
+          mkCard('SC CPS (₹)', opsHyp.originalScCPS != null ? +opsHyp.originalScCPS.toFixed(2) : null, opsHyp.scCPS != null ? +opsHyp.scCPS.toFixed(2) : null, v => NDC_fmtCps(v)),
         ];
       })();
       // Vehicle mix comparison (2026-07-16) — mirrors the Planner side: original tally from
@@ -8619,7 +8640,7 @@ class NDCApp extends React.Component {
         const osCapVal = osVehRecord.cap ? fmtInt(osVehRecord.cap) : '—';
         const osVolVal = r.volume != null ? fmtInt(r.volume) : '—';
         const osUtilVal = r.util != null ? Math.round(r.util * 100) + '%' : '—';
-        return { routeCode: r.routeCode, origVeh, propVeh, vehChanged, vehUnchanged: !vehChanged, countDisp: String(r.dcs ? r.dcs.length : r.tp || 1), distDisp: r.rtDist + ' km', origCps: '₹' + Number(r.cps).toFixed(2), dcMoveCount, hasDcMoves: dcMoveCount > 0, note, isChanged, isNoChange: !isChanged, rowBg: isChanged ? '#FFFBF2' : '#fff', vol: osVolVal, util: osUtilVal, cap: osCapVal };
+        return { routeCode: r.routeCode, origVeh, propVeh, vehChanged, vehUnchanged: !vehChanged, countDisp: String(r.dcs ? r.dcs.length : r.tp || 1), distDisp: r.rtDist + ' km', origCps: NDC_fmtCps(r.cps), dcMoveCount, hasDcMoves: dcMoveCount > 0, note, isChanged, isNoChange: !isChanged, rowBg: isChanged ? '#FFFBF2' : '#fff', vol: osVolVal, util: osUtilVal, cap: osCapVal };
       }) : [];
       // Section 3: filter state
       const opsSmOrigSearch = st.opsSmOrigSearch || '';
@@ -8989,7 +9010,7 @@ class NDCApp extends React.Component {
         zone: p.zone,
         routes: p.metrics.routes,
         vehicles: p.metrics.vehicles,
-        cps: '₹' + p.metrics.cps.toFixed(2),
+        cps: NDC_fmtCps(p.metrics.cps),
         coverage: Math.round(p.metrics.coverage * 100) + '%',
         distance: p.metrics.distance.toLocaleString('en-IN') + ' km',
         finalDate: p.sentDate,
@@ -9129,7 +9150,7 @@ class NDCApp extends React.Component {
         pushedTagBg: (flErr + flWarn) > 0 ? '#FBF1DF' : '#E7F0F8', pushedTagFg: (flErr + flWarn) > 0 ? '#C77B00' : '#1E6FB8',
         nodes: fmtInt(r.dcCount), volume: fmtInt(r.volume), vehInput: (r.vehInput && r.vehInput.length ? r.vehInput.join(' · ') : '—'),
         scCoords: curSC ? (Number(curSC.lat).toFixed(4) + ', ' + Number(curSC.lng).toFixed(4)) : '—',
-        coverage: pct(r.coverage), util: pct(r.util), cps: '₹' + r.cps.toFixed(2), routes: String(r.routes), vehicles: String(r.vehicles), distance: fmtInt(r.distance) + ' km',
+        coverage: pct(r.coverage), util: pct(r.util), cps: NDC_fmtCps(r.cps), routes: String(r.routes), vehicles: String(r.vehicles), distance: fmtInt(r.distance) + ' km',
         coverageColor, coverageGap, coverageGapText,
         utilColor: r.util > 0.9 ? '#D14B4B' : r.util < 0.4 ? '#C77B00' : '#14171F',
         hasUtilChip, utilChipLabel,
@@ -9156,7 +9177,7 @@ class NDCApp extends React.Component {
       const detailCpsDeltaColor = detailCpsDeltaPct > 0 ? '#C77B00' : detailCpsDeltaPct < 0 ? '#128A3E' : '#8E96A3';
       const dMetrics = [
         { label: 'Coverage', value: pct(detailRun.coverage), sub: 'DCs served', hasDelta: false, valueColor: detailRun.coverage < 1 ? '#D14B4B' : '#14171F' },
-        { label: 'CPS', value: '₹' + detailRun.cps.toFixed(2), sub: 'cost / shipment', hasDelta: detailCpsRefOn, delta: detailCpsDeltaLabel, deltaColor: detailCpsDeltaColor, valueColor: '#14171F' },
+        { label: 'CPS', value: NDC_fmtCps(detailRun.cps), sub: 'cost / shipment', hasDelta: detailCpsRefOn, delta: detailCpsDeltaLabel, deltaColor: detailCpsDeltaColor, valueColor: '#14171F' },
         { label: 'Utilisation', value: pct(detailRun.util), sub: 'avg lane', hasDelta: false, valueColor: '#14171F' },
         { label: 'Routes', value: String(detailRun.routes), sub: 'total', hasDelta: false, valueColor: '#14171F' },
         { label: 'Vehicles', value: String(detailRun.vehicles), sub: 'total deployed', hasDelta: false, valueColor: '#14171F' },
