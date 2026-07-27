@@ -4337,7 +4337,17 @@ class NDCApp extends React.Component {
   downloadVolumeFile(f) { const code = f.type.indexOf('LMDC') >= 0 ? 'LMDC' : f.type.indexOf('LMSC') >= 0 ? 'LMSC' : f.type.indexOf('FMSC') >= 0 ? 'FMSC' : 'FM Hub'; const head = code + ' Code,Planned Volume\n'; const rows = []; for (let i = 1; i <= Math.min(8, f.rows); i++) { rows.push(code.replace(/[^A-Z]/g, '').slice(0, 4) + '-' + (100 + i) + ',' + Math.round((f.vol || 600000) / Math.max(1, f.rows) * (0.7 + (i % 5) * 0.12))); } const slug = f.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); this.downloadText((slug || 'volume_file') + '.csv', head + rows.join('\n') + '\n'); this.showToast('Downloaded ' + f.name + ' · uploaded by ' + (f.by || 'team'), '#128A3E'); }
   // AutoDML is a read-only input view (no download / no analytical views — full views live on Metabase/Superset).
   // C7 — each volume card downloads a template with ITS OWN columns, not the SC-master CSV.
-  downloadTemplate(name, cols) { const headers = (cols || []).map(c => c.k); const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''); this.downloadText((slug || 'template') + '_template.csv', headers.join(',') + '\n'); this.showToast(name + ' template downloaded · ' + headers.length + ' columns', '#128A3E'); }
+  downloadTemplate(name, cols) {
+    const headers = (cols || []).map(c => c.k);
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    // CSV-escape any header that itself contains a comma, quote, or newline -- "SC City,State"
+    // is the one column name in this app with an embedded comma, and joining headers with `,`
+    // unquoted turned it into two separate columns on re-upload ("SC City" + "State"), breaking
+    // the file for every user who downloaded, filled in, and re-uploaded the SC Master template.
+    const csvEscape = (v) => /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+    this.downloadText((slug || 'template') + '_template.csv', headers.map(csvEscape).join(',') + '\n');
+    this.showToast(name + ' template downloaded · ' + headers.length + ' columns', '#128A3E');
+  }
   // Simulated CSV validation for volume uploads (no real backend to validate against
   // yet -- see context.md "Open items"). Deterministic per file (same name+size always
   // gives the same result) so a demo can be repeated reliably, with two escape hatches
@@ -4571,7 +4581,7 @@ class NDCApp extends React.Component {
     const isNum = (v) => v !== '' && v != null && !isNaN(Number(v));
     const TYPES = { fmsc: 'FMSC', lmsc: 'LMSC', hybrid: 'Hybrid' };
     const ZONES = ['North', 'South', 'East', 'West'];
-    const timeOk = (v) => !v || /^\d{2}:\d{2}$/.test(v);
+    const timeOk = (v) => !v || /^\d{1,2}:\d{2}$/.test(v);
     const seen = {};
     rows.forEach(r => {
       if (!r.code) errors.push({ row: r._rowNo, msg: 'SC Code is blank' });
