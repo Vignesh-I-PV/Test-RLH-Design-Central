@@ -636,3 +636,26 @@ layering an ALTER on top. `12_sc_master.sql` now includes `sc_latitude`/`sc_long
 in the `CREATE TABLE`, as `NOT NULL` (matching the template's "Mandatory" tag exactly, safe now
 since it's a fresh table with no pre-existing rows to violate the constraint). The separate
 ALTER file was deleted; only `12_sc_master.sql` needs to be re-run for this table going forward.
+
+### 2026-07-27 — Two real bugs found from an actual failed SC Master upload
+User hit "Missing column(s): SC City,State" uploading a filled-in SC Master template. Root cause
+traced to the app's own template generator, `downloadTemplate()`: it joined column headers with
+`,` with **no CSV escaping at all**. Since "SC City,State" is itself a column *name* containing a
+comma, the generated file's header row was ambiguous/unquoted
+(`...,SC Name,SC City,State,SC Latitude,...`), so any CSV parser — the user's spreadsheet
+software, or this app's own `NDC_parseCsv` on re-upload — read it as two separate columns
+("SC City" and "State"), not one. This is a systemic bug: **every** user downloading the SC
+Master template and re-uploading it would hit this, not user error. Fixed `downloadTemplate()`
+to properly CSV-escape (quote + double-up embedded quotes) any header containing a comma, quote,
+or newline — a general fix, not SC-City-State-specific, protecting against any future column
+name with the same issue.
+
+**Second bug caught proactively while inspecting the user's real (broken) file**: the real data
+used "0:00" (single-digit hour) for SC Opening/Closing Time, which `validateScMasterRows`'
+`timeOk` regex (`/^\d{2}:\d{2}$/`, strictly 2-digit hour) would have rejected as a *second* error
+immediately after the header issue was fixed. Relaxed to `/^\d{1,2}:\d{2}$/` (accepts both `0:00`
+and `00:00`) before the user could hit it on their next attempt.
+
+Also regenerated a corrected version of the user's actual submitted file (merging the
+CSV-split "SC City"/"State" columns back into one properly-quoted "SC City,State" column) so
+their 4 already-filled-in SCs (HBS, PYS, D5LS, SBLS) don't need to be re-entered by hand.
