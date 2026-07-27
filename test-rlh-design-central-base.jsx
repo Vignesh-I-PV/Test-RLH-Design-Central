@@ -1945,15 +1945,8 @@ function View(B, self) {
 {/* ===== OPS ALIGNMENT · PLANNER ===== */}
 {(isAlignPlanner) ? (<>
 <div style={css(`display:flex; flex-direction:row; height:100%; min-height:0;`)}>
-{/* ===== EMPTY STATE (no plans in the active filter) — full width ===== */}
-{(aSel.empty) ? (<>
-<div style={css(`flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:80px 40px; text-align:center;`)}>
-<div style={css(`width:54px; height:54px; border-radius:8px; background:#F2F5FA; display:flex; align-items:center; justify-content:center;`)}><svg width={"26"} height={"26"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#5A5E66"} strokeWidth={"1.5"}><path d={"M3 12.5l3.3 3.3L12.5 9M11 16l1.4 1.4L21 9"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
-<div><div style={css(`font-size:15px; font-weight:700; color:#14171F; margin-bottom:5px;`)}>No plans in this view</div><div style={css(`font-size:12.5px; color:#5A5E66; max-width:360px; line-height:1.6;`)}>No plans match the current filter. Clear it to see all plans in this cycle, or push runs from Design Review to start the alignment loop.</div></div>
-<button onClick={alignClearFilter} style={css(`height:36px; padding:0 16px; border:1px solid #003F98; background:#fff; color:#003F98; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)}>Clear filter</button>
-</div>
-</>) : null}
-{/* ===== MASTER RAIL: SC / plan list (persistent, like Design Review) ===== */}
+{/* ===== MASTER RAIL: SC / plan list (persistent, like Design Review) — always rendered now, even
+     when the active filter has zero matches, so the filter strip/zone chips/search stay usable. ===== */}
 {(alignIsL1) ? (<>
 <aside style={css(`width:300px; flex-shrink:0; border-right:1px solid #E6EBF2; background:#fff; display:flex; flex-direction:column; min-height:0;`)}>
 {/* filter segment (moved off the top tab-strip into the rail) */}
@@ -1974,12 +1967,27 @@ function View(B, self) {
 <div style={css(`display:flex; align-items:center; gap:6px; flex-wrap:wrap;`)}><span style={css(`padding:2px 8px; border-radius:999px; font-size:9.5px; font-weight:700; background:${p.statusBg}; color:${p.statusFg};`)}>{p.statusLabel}</span><span style={css(`font-size:10px; color:${p.hasGap ? '#C77B00' : '#8E96A3'}; font-weight:${p.hasGap ? '700' : '400'};`)}>{p.zone} · {p.submittedLabel}{(p.hasGap) ? ' ⚠' : ''}</span></div>
 </button>
 </React.Fragment>))}
+{(aSel.empty) ? (<>
+<div style={css(`display:flex; flex-direction:column; align-items:center; gap:10px; padding:40px 16px; text-align:center;`)}>
+<svg width={"28"} height={"28"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#C3C9D4"} strokeWidth={"1.6"}><path d={"M3 12.5l3.3 3.3L12.5 9M11 16l1.4 1.4L21 9"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>
+<div style={css(`font-size:12px; color:#5A5E66; line-height:1.5;`)}>No plans match the current filter.</div>
+<button onClick={alignClearFilter} style={css(`height:32px; padding:0 14px; border:1px solid #003F98; background:#fff; color:#003F98; font-family:inherit; font-size:12px; font-weight:600; border-radius:8px; cursor:pointer;`)}>Clear filter</button>
+</div>
+</>) : null}
 </div>
 </aside>
 </>) : null}
 {/* ===== DETAIL PANE (selected plan; persistent rail replaces the L1 drill) ===== */}
 {(alignIsL2) ? (<>
 <main style={css(`flex:1; display:flex; flex-direction:column; min-width:0; overflow:hidden;`)}>
+{(!aSel.exists) ? (<>
+<div style={css(`flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:60px 40px; text-align:center;`)}>
+<div style={css(`width:48px; height:48px; border-radius:8px; background:#F2F5FA; display:flex; align-items:center; justify-content:center;`)}><svg width={"22"} height={"22"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#5A5E66"} strokeWidth={"1.5"}><path d={"M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
+<div style={css(`font-size:14px; font-weight:700; color:#14171F;`)}>{aSel.empty ? 'No plans match the current filter' : 'Select a plan'}</div>
+<div style={css(`font-size:12px; color:#5A5E66; max-width:320px; line-height:1.6;`)}>{aSel.empty ? 'Clear the filter to see all plans in this cycle, or push runs from Design Review to start the alignment loop.' : 'Pick a plan from the list on the left to view its details.'}</div>
+</div>
+</>) : null}
+{(aSel.exists) ? (<>
 <div style={css(`flex:1; overflow-y:auto; min-height:0;`)}>
 {/* ===== L3: PLAN CARD (compact summary; "view detail" opens L4 below) ===== */}
 {/* Exactly one card today since each SC has one active plan — written as a stack so a future
@@ -2300,6 +2308,7 @@ function View(B, self) {
 </div>
 </>) : null}
 </div>
+</>) : null}
 </main>
 </>) : null}
 </div>
@@ -5001,13 +5010,19 @@ class NDCApp extends React.Component {
     supabase.from('profiles').select('role, display_name, email').eq('id', userId).single()
       .then(({ data, error }) => {
         if (error) { console.error('Failed to load profile', error); return; }
-        this.setState({
+        const isFirstLoad = !this.state.authProfile;
+        this.setState(st => ({
           authProfile: data,
           // Map the DB role onto this app's existing persona values ('planner' | 'ops') — no
           // manual toggle anymore, this is fixed by whoever set the role in Table Editor.
           persona: data && data.role === 'ops_lead' ? 'ops' : 'planner',
-          view: data && data.role === 'ops_lead' ? 'align' : 'inputs',
-        });
+          // Only jump to the default tab on the FIRST load of this session. onAuthStateChange
+          // fires again on every token refresh -- Supabase's client does this automatically,
+          // including when the browser tab regains focus after switching away -- and setting
+          // `view` unconditionally on every one of those silently bounced the user back to
+          // Design Inputs (or Ops Alignment) regardless of what screen they were actually on.
+          view: isFirstLoad ? (data && data.role === 'ops_lead' ? 'align' : 'inputs') : st.view,
+        }));
         this.loadOpsLeadDirectory();
         if (data && data.role !== 'ops_lead') { this.loadMastersFromSupabase(); this.loadIngestedRlhPlanDrafts(); }
         this.loadPlansFromSupabase();
@@ -5129,8 +5144,15 @@ class NDCApp extends React.Component {
   // pre-populate the Push modal's chips.
   loadScReviewers(scCode) {
     if (!supabase) return Promise.resolve([]);
-    return supabase.from('sc_reviewers').select('reviewer_id, profiles(id, display_name, email)').eq('sc_code', scCode)
-      .then(({ data, error }) => { if (error) { console.error('Failed to load SC reviewers', error); return []; } return (data || []).map(r => r.profiles).filter(Boolean); });
+    return supabase.from('sc_reviewers').select('reviewer_id').eq('sc_code', scCode).then(({ data, error }) => {
+      if (error) { console.error('Failed to load SC reviewers', error); return []; }
+      const ids = (data || []).map(r => r.reviewer_id);
+      if (!ids.length) return [];
+      return supabase.from('profiles').select('id, display_name, email').in('id', ids).then(({ data: profs, error: e2 }) => {
+        if (e2) { console.error('Failed to load reviewer profiles', e2); return []; }
+        return profs || [];
+      });
+    });
   }
 
   // Diffs the given reviewer id list against what's currently stored for this SC and applies just
@@ -5159,39 +5181,49 @@ class NDCApp extends React.Component {
     if (!supabase || !this.state.authUser) return;
     Promise.all([
       supabase.from('plans').select('*'),
-      supabase.from('plan_reviewers').select('plan_id, reviewer_id, profiles(id, display_name, email)'),
+      supabase.from('plan_reviewers').select('plan_id, reviewer_id'),
       supabase.from('plan_row_feedback').select('*'),
       supabase.from('plan_reviewer_status').select('*'),
     ]).then(([plansRes, reviewersRes, feedbackRes, statusRes]) => {
       if (plansRes.error) { console.error('Failed to load plans', plansRes.error); return; }
-      const reviewersByPlan = {}, feedbackByPlan = {}, statusByPlan = {};
-      (reviewersRes.data || []).forEach(r => { (reviewersByPlan[r.plan_id] = reviewersByPlan[r.plan_id] || []).push(r); });
-      (feedbackRes.data || []).forEach(f => { (feedbackByPlan[f.plan_id] = feedbackByPlan[f.plan_id] || []).push(f); });
-      (statusRes.data || []).forEach(s => { (statusByPlan[s.plan_id] = statusByPlan[s.plan_id] || []).push(s); });
-      const STATUS_MAP = { ingested: 'Pushed', pending: 'Pushed', acknowledged: 'Acknowledged', finalized: 'Finalised' };
-      const plans = (plansRes.data || []).map(row => {
-        const planObj = Object.assign({}, row.data, { id: row.id, remote: true });
-        const revRows = reviewersByPlan[row.id] || [];
-        const fbRows = feedbackByPlan[row.id] || [];
-        const statusRows = statusByPlan[row.id] || [];
-        planObj.reviewerNames = revRows.map(r => r.profiles && (r.profiles.display_name || r.profiles.email)).filter(Boolean);
-        planObj.reviewerIds = revRows.map(r => r.reviewer_id);
-        planObj.submittedReviewers = statusRows.filter(s => s.submitted).map(s => {
-          const match = revRows.find(r => r.reviewer_id === s.reviewer_id);
-          return (match && match.profiles && (match.profiles.display_name || match.profiles.email)) || s.reviewer_id;
+      if (reviewersRes.error) console.error('Failed to load plan_reviewers', reviewersRes.error);
+      if (feedbackRes.error) console.error('Failed to load plan_row_feedback', feedbackRes.error);
+      if (statusRes.error) console.error('Failed to load plan_reviewer_status', statusRes.error);
+      const reviewerRows = reviewersRes.data || [];
+      const reviewerIdsUnique = Array.from(new Set(reviewerRows.map(r => r.reviewer_id)));
+      const fetchProfiles = reviewerIdsUnique.length ? supabase.from('profiles').select('id, display_name, email').in('id', reviewerIdsUnique) : Promise.resolve({ data: [] });
+      fetchProfiles.then(({ data: profiles, error: profErr }) => {
+        if (profErr) console.error('Failed to load reviewer profiles', profErr);
+        const profileById = {}; (profiles || []).forEach(p => { profileById[p.id] = p; });
+        const reviewersByPlan = {}, feedbackByPlan = {}, statusByPlan = {};
+        reviewerRows.forEach(r => { (reviewersByPlan[r.plan_id] = reviewersByPlan[r.plan_id] || []).push(Object.assign({}, r, { profiles: profileById[r.reviewer_id] || null })); });
+        (feedbackRes.data || []).forEach(f => { (feedbackByPlan[f.plan_id] = feedbackByPlan[f.plan_id] || []).push(f); });
+        (statusRes.data || []).forEach(s => { (statusByPlan[s.plan_id] = statusByPlan[s.plan_id] || []).push(s); });
+        const STATUS_MAP = { ingested: 'Pushed', pending: 'Pushed', acknowledged: 'Acknowledged', finalized: 'Finalised' };
+        const plans = (plansRes.data || []).map(row => {
+          const planObj = Object.assign({}, row.data, { id: row.id, remote: true });
+          const revRows = reviewersByPlan[row.id] || [];
+          const fbRows = feedbackByPlan[row.id] || [];
+          const statusRows = statusByPlan[row.id] || [];
+          planObj.reviewerNames = revRows.map(r => r.profiles && (r.profiles.display_name || r.profiles.email)).filter(Boolean);
+          planObj.reviewerIds = revRows.map(r => r.reviewer_id);
+          planObj.submittedReviewers = statusRows.filter(s => s.submitted).map(s => {
+            const match = revRows.find(r => r.reviewer_id === s.reviewer_id);
+            return (match && match.profiles && (match.profiles.display_name || match.profiles.email)) || s.reviewer_id;
+          });
+          // overlay each row's LATEST feedback (row_id = routeCode, latest-write-wins already enforced
+          // by plan_row_feedback being a single row per (plan_id, row_id)) onto the planner-owned base rows.
+          const fbByRoute = {}; fbRows.forEach(f => { fbByRoute[f.row_id] = f; });
+          planObj.rows = (planObj.rows || []).map(r => {
+            const fb = fbByRoute[r.routeCode];
+            if (!fb) return r;
+            return Object.assign({}, r, { ops: 'Needs Change', fb: fb.feedback });
+          });
+          planObj.status = (row.status === 'pending' && (planObj.submittedReviewers || []).length > 0) ? 'In Alignment' : (STATUS_MAP[row.status] || 'Pushed');
+          return planObj;
         });
-        // overlay each row's LATEST feedback (row_id = routeCode, latest-write-wins already enforced
-        // by plan_row_feedback being a single row per (plan_id, row_id)) onto the planner-owned base rows.
-        const fbByRoute = {}; fbRows.forEach(f => { fbByRoute[f.row_id] = f; });
-        planObj.rows = (planObj.rows || []).map(r => {
-          const fb = fbByRoute[r.routeCode];
-          if (!fb) return r;
-          return Object.assign({}, r, { ops: 'Needs Change', fb: fb.feedback });
-        });
-        planObj.status = (row.status === 'pending' && (planObj.submittedReviewers || []).length > 0) ? 'In Alignment' : (STATUS_MAP[row.status] || 'Pushed');
-        return planObj;
+        this.setState(s => ({ data: Object.assign({}, s.data, { plans }) }));
       });
-      this.setState(s => ({ data: Object.assign({}, s.data, { plans }) }));
     });
   }
 
@@ -5201,19 +5233,19 @@ class NDCApp extends React.Component {
   // already-pushed plan to reset it back to 'pending' isn't wired yet (status can only change via
   // the acknowledge/finalise/unfreeze functions), flagged as a follow-up if that's ever needed.
   pushPlanToSupabase(plan, reviewerIds) {
-    if (!supabase || !this.state.authUser) return;
+    if (!supabase || !this.state.authUser) return Promise.resolve({ success: false });
     const uid = this.state.authUser.id;
     const dataBlob = Object.assign({}, plan);
     delete dataBlob.id; delete dataBlob.status; delete dataBlob.remote;
     delete dataBlob.reviewerNames; delete dataBlob.reviewerIds; delete dataBlob.submittedReviewers;
-    supabase.from('plans').insert({ id: plan.id, created_by: uid, status: 'pending', data: dataBlob }).then(({ error }) => {
-      if (error) { this.showToast('Could not push to Supabase — ' + error.message, '#D14B4B'); return; }
+    return supabase.from('plans').insert({ id: plan.id, created_by: uid, status: 'pending', data: dataBlob }).then(({ error }) => {
+      if (error) { this.showToast('Could not push to Supabase — ' + error.message, '#D14B4B'); return { success: false }; }
       const rows = (reviewerIds || []).map(rid => ({ plan_id: plan.id, reviewer_id: rid }));
-      const done = () => this.loadPlansFromSupabase();
-      if (!rows.length) { done(); return; }
-      supabase.from('plan_reviewers').insert(rows).then(({ error: e2 }) => {
+      const done = () => { this.loadPlansFromSupabase(); return { success: true }; };
+      if (!rows.length) return done();
+      return supabase.from('plan_reviewers').insert(rows).then(({ error: e2 }) => {
         if (e2) this.showToast('Plan pushed, but could not tag all reviewers — ' + e2.message, '#C77B00');
-        done();
+        return done();
       });
     });
   }
@@ -6681,14 +6713,22 @@ class NDCApp extends React.Component {
     // Reset the filter to All so the just-pushed/finalised plan is guaranteed visible in the list.
     this.setState({ data: Object.assign({}, d, { plans }), alignStatus, pushedSCs: pushed, pushOpen: false, finDirectOpen: false, pushRunId: null, view: 'align', opsPlanId: plan ? plan.id : st.opsPlanId, alignPlanId: null, alignFilter: 'Pending Feedback', alignPage: 0 });
     // Persist a genuinely new (not-yet-remote), normal (non-Finalise-Direct) push to Supabase.
-    if (plan && wasNewPlan && !finaliseDirect) this.pushPlanToSupabase(plan, reviewerIds);
-    if (ingested) this.deleteIngestedRlhPlanDraft(code);
-    // File-naming convention: stage-1 snapshot ({name}) on every new push. Finalise Directly skips
-    // straight to stage-3 ({name}_FINALISED) since there's no Ops feedback stage to pass through.
-    if (plan && wasNewPlan && plan.fileBaseName) {
-      this.saveSnapshot(plan.id, 'ingested', plan.fileBaseName, plan);
-      if (finaliseDirect) this.saveSnapshot(plan.id, 'finalised', plan.fileBaseName + '_FINALISED', plan);
+    if (plan && wasNewPlan && !finaliseDirect) {
+      this.pushPlanToSupabase(plan, reviewerIds).then(({ success }) => {
+        // Snapshot save sequenced AFTER the plans insert actually resolves -- previously fired in
+        // parallel, letting the snapshot's FK-dependent insert reach Supabase before the plans row
+        // existed (confirmed via console: plan_snapshots_plan_id_fkey violation, "Key is not
+        // present in table 'plans'").
+        if (success && plan.fileBaseName) this.saveSnapshot(plan.id, 'ingested', plan.fileBaseName, plan);
+      });
+    } else if (finaliseDirect && plan && wasNewPlan) {
+      // Finalise Directly has no Supabase persistence path at all yet (pushPlanToSupabase is only
+      // ever called for a normal push, above) -- so there's no remote `plans` row to attach a
+      // snapshot to here. Skipping rather than attempting a save that would always violate the
+      // same FK constraint. Flagged as a separate, pre-existing gap: a Finalise-Direct plan isn't
+      // persisted to Supabase at all currently, not something fixed in this pass.
     }
+    if (ingested) this.deleteIngestedRlhPlanDraft(code);
     const runTxt = ingested ? ingested.fileBaseName : (run ? (run.runId || run.id) : code);
     const hwOrIngestedTxt = ingested ? 'Ingested plan' : hwTxt;
     if (finaliseDirect) this.showToast('Finalised ' + runTxt + ' directly \u2014 skipped Ops alignment, ready for RFQ handoff', '#128A3E');
@@ -7885,9 +7925,14 @@ class NDCApp extends React.Component {
     const finDeltaColor = (a, b) => b < a ? '#128A3E' : b > a ? '#D14B4B' : '#5A5E66';
     const ackPending = ackPlan ? ackPlan.rows.filter((r, i) => r.ops === 'Needs Change' && !((st.alignDecisions[ackPlan.id] && st.alignDecisions[ackPlan.id][i]) || r.planner)).length : 0;
 
-    // Master-detail: rail (list) and detail pane both render whenever the filter has plans.
-    const alignIsL1 = hasPlansInList;
-    const alignIsL2 = hasPlansInList;
+    // Master-detail: rail (list) and detail pane both render unconditionally now, matching Design
+    // Review's pattern -- previously both were gated by hasPlansInList, so an empty filter result
+    // collapsed the ENTIRE screen (including the filter strip/zone chips needed to actually clear
+    // the filter) into one full-width "no plans" message. Now the rail always shows (with an
+    // inline placeholder in its list body when empty, like Design Review already did), and the
+    // detail pane shows its own small "no plan" placeholder instead of the plan card.
+    const alignIsL1 = true;
+    const alignIsL2 = true;
     // Pagination for L1 plan list (~12 per page).
     const ALIGN_PER_PAGE = 12;
     const alignPage = typeof st.alignPage === 'number' ? st.alignPage : 0;
@@ -8976,11 +9021,12 @@ class NDCApp extends React.Component {
       if (!ingested) { ingestedRunCache[code] = null; return null; }
       const computed = this.computeIngestedRunMetrics(ingested);
       const volume = computed.rows.reduce((a, r) => a + (r.volume || 0), 0);
-      const vehInput = Array.from(new Set(ingested.rows.map(r => r.veh)));
-      // Vehicles used — grouped from the real per-route vehicle assignment, for the "Vehicles
-      // used" section on the detail view (mirrors detailRun.vehByType's {name, n} shape).
+      // Vehicles used — grouped from the real per-route vehicle assignment. Reused for both the
+      // "Vehicle type · count" summary line (vehInput, e.g. "8FT Trailer ×18") and the "Vehicles
+      // used" section on the detail view (vehByType, {name, n} shape).
       const vehCounts = {}; computed.rows.forEach(r => { vehCounts[r.veh] = (vehCounts[r.veh] || 0) + 1; });
       const vehByType = Object.keys(vehCounts).map(name => ({ name, n: vehCounts[name] }));
+      const vehInput = vehByType.map(v => v.name + ' \u00d7' + v.n);
       const run = {
         id: 'ING-' + code, scCode: code, status: 'Completed', runNo: 1, hw: null,
         runId: ingested.fileBaseName, triggeredAt: ingested.uploadedAt || '—', triggeredBy: ingested.uploadedBy || '—',
@@ -9061,11 +9107,20 @@ class NDCApp extends React.Component {
       const coverageColor = r.coverage < 1 ? '#D14B4B' : '#14171F';
       const coverageGap = r.coverage < 1;
       const coverageGapText = coverageGap ? 'Coverage gap — ' + Math.round((1 - r.coverage) * r.dcCount) + ' nodes skipped' : '';
-      // §P3.4 — route utilisation chip: replicate the detail-view RNG to count over/under-util routes
-      let _us = r.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) * 31 + 7;
-      const _uRNG = () => { _us = (_us * 1103515245 + 12345) & 0x7fffffff; return _us / 0x7fffffff; };
+      // §P3.4 — route utilisation chip. For an ingested plan, count directly from its REAL
+      // per-route util values (same source as Route View) -- previously this ran the RNG
+      // simulation unconditionally, so a card could show "N routes over-utilised" that had
+      // nothing to do with the plan's actual data (confirmed: 83% avg util, 0 real routes over
+      // 90%, but the RNG fabricated 9). RNG simulation stays for a real run with no genuine
+      // per-route source to draw from.
       let _over = 0, _under = 0;
-      for (let _i = 0; _i < r.routes; _i++) { const _u = Math.max(0.3, Math.min(0.98, r.util * (0.8 + _uRNG() * 0.4))); if (_u > 0.9) _over++; else if (_u < 0.4) _under++; }
+      if (r.isIngested) {
+        (r.ingestedComputedRows || []).forEach(cr => { if (cr.util > 0.9) _over++; else if (cr.util < 0.4) _under++; });
+      } else {
+        let _us = r.id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) * 31 + 7;
+        const _uRNG = () => { _us = (_us * 1103515245 + 12345) & 0x7fffffff; return _us / 0x7fffffff; };
+        for (let _i = 0; _i < r.routes; _i++) { const _u = Math.max(0.3, Math.min(0.98, r.util * (0.8 + _uRNG() * 0.4))); if (_u > 0.9) _over++; else if (_u < 0.4) _under++; }
+      }
       const hasUtilChip = (_over + _under) > 0;
       const utilChipLabel = hasUtilChip ? (_over > 0 && _under > 0 ? _over + ' over + ' + _under + ' under-util route' + ((_over + _under) > 1 ? 's' : '') : _over > 0 ? _over + ' route' + (_over > 1 ? 's' : '') + ' over-utilised (>90%)' : _under + ' route' + (_under > 1 ? 's' : '') + ' under-utilised (<40%)') : '';
       return { id: r.id, runId: r.runId, runNo: r.runNo, triggeredAt: r.triggeredAt, triggeredBy: r.triggeredBy || '',
