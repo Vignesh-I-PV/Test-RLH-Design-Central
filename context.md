@@ -755,3 +755,72 @@ the first thing to rule out before investigating further.
    subsequent re-triggers still refresh `authProfile`/`persona` and refetch data (harmless,
    idempotent) but leave `view` — and by extension whatever screen the user is currently on —
    untouched.
+
+### 2026-07-27 (later same day) — Metric calculation review: 6 changes from user's line-item feedback
+User reviewed the full metric-formula table (Given/Assumed for 20 items) and gave line-by-line
+feedback. Six items required real changes:
+
+1. **(#1) Removed `NDC_haversineKm`** (the legacy ×55-multiplier distance function) entirely.
+   Confirmed dead first: it was only ever reached when a DC's `isReal` flag was `false`, and
+   nothing in this real-data build ever produces one — the only DC source is real ingestion,
+   which always sets `isReal:true`. The two call sites (leg distance, return leg) now always use
+   `NDC_realHaversineKm` directly; the dead `isReal`-branching ternary was removed at both.
+
+2. **(#8) Removed the cost-per-km fallback formula entirely** (the capacity-scaled estimate for
+   any vehicle type not in the real rate table). `NDC_costPerKmFor` now returns `null` for an
+   unmatched vehicle type instead of guessing a number; callers must treat cost/CPS as
+   unavailable, not approximate it. A route with no configured rate now also raises a visible
+   warning ("No cost-per-km rate configured for vehicle type ... — cost/CPS unavailable for
+   route ...") instead of silently estimating.
+   **Ripple effect, more than initially scoped**: this makes route- and plan-level cost/CPS
+   genuinely `null`-able for the first time, which touched far more display surfaces than the
+   two originally fixed for the earlier over-utilisation bug — Design Review's card and full
+   detail view, both Ops Alignment views (planner and ops-lead), the Ops Feedback Validate/
+   Simulate/Finalise before-after comparison cards, and the Finalise confirmation screen (~15
+   distinct spots). Added a shared `NDC_fmtCps(v)` helper (`v == null ? '—' : '₹'+v.toFixed(2)`)
+   and applied it everywhere a real (not RNG-fabricated) cost/CPS value is displayed, so a
+   missing rate shows a clear dash instead of the literal string "₹null" or a silently-wrong
+   "₹0.00". Plan-level total cost/CPS is `null` if ANY route lacks a rate, rather than silently
+   summing only the known routes (which would understate the true total with no indication it's
+   incomplete). (#7, the actual rate table itself, is intentionally untouched — user will supply
+   real per-vehicle-type rates in a follow-up.)
+3. **(#10) Removed the 98% utilisation cap** in all three places it existed (the real ingested-
+   plan calc, the Finalise-commit recompute, and the real Route View pivot builder) — a route
+   genuinely over capacity now shows its real ratio (e.g. 112%), not an artificially clamped
+   98%. Left the cap in place in the two RNG-fabrication-only spots (over/under-util card chip
+   simulation, non-ingested Route View synthesis) since those are unreachable in this real-data
+   build and out of scope for this pass.
+4. **(#13) Coverage** — confirmed the existing ingested-plan default (hardcoded 100%) already
+   matches the user's spec exactly ("For ingested plans by default 100%"). No code change;
+   documented the real ratio-based formula (nodes in generated plan / nodes in Design Inputs) in
+   a comment at the point of the hardcoded value, for whenever a genuine generated-plan path
+   exists to compare against — not built now, since that path doesn't exist in this build.
+5. **(#17) Touch Point >7 warning, hardcoded at every entry point.** Vehicle Master's and SC
+   Master's TP Limit fields already had this from earlier work; the one remaining gap was the
+   Ops Feedback DC-level Touch Point override field (`setNcDc`), which had no validation at all.
+   Added the same immediate warning there.
+
+**Not yet actioned**: #7 (real cost-per-km rates) — user will provide these to configure next.
+
+### 2026-07-27 (later same day) — #7 closed: real cost-per-km rate card configured
+User supplied real per-vehicle-type rates for all 10 Vehicle Master types. `NDC_COST_PER_KM`
+replaced (was the stale 3-entry table of legacy fabricated vehicle names — `TATA ACE / 7ft`,
+`Bolero / 8ft`, `TATA 407 / 10ft` — that no real route could ever match):
+
+| Vehicle Type | Rs/km |
+|---|---|
+| 7FT Trailer | 12 |
+| 8FT Trailer | 14 |
+| 10FT Trailer | 18 |
+| 14FT Trailer | 19 |
+| 17FT Trailer | 20 |
+| 20FT Trailer | 21 |
+| 22FT Trailer | 23 |
+| 24FT Trailer | 25 |
+| 32FT Trailer | 29 |
+| 42FT Trailer | 32 |
+
+Keys verified to match `VEH_TYPE_OPTIONS` exactly (all 10, same order) — every real vehicle
+type now resolves to a real rate, so cost/CPS should compute normally rather than showing the
+"no rate configured" warning added when the fallback was removed. All 6 metric-review items
+from the previous pass are now closed.
