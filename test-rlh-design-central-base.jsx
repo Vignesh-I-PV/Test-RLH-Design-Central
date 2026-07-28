@@ -3861,6 +3861,17 @@ const NDC_fmtCps = (v) => (v == null ? '—' : '\u20b9' + Number(v).toFixed(2));
 // Real cost-per-km rate card (confirmed with user 2026-07-27), keyed by the exact Vehicle Master
 // type names (VEH_TYPE_OPTIONS) -- replaces the old 3-entry table of legacy fabricated vehicle
 // names that no real route could ever match.
+// Natural sort for route codes like "SBLS-1", "SBLS-2", ... "SBLS-10", "SBLS-11" -- a plain
+// alphabetical compare (localeCompare) puts "SBLS-10"/"SBLS-11" before "SBLS-2", since string
+// comparison looks at characters, not numeric value. Splits into (prefix, trailing number) and
+// compares the number numerically when both sides share the same prefix.
+function NDC_routeCodeCompare(a, b) {
+  const parse = (s) => { const m = String(s).match(/^(.*?)(\d+)$/); return m ? { pre: m[1], num: parseInt(m[2], 10) } : { pre: String(s), num: null }; };
+  const pa = parse(a), pb = parse(b);
+  if (pa.pre !== pb.pre) return pa.pre.localeCompare(pb.pre);
+  if (pa.num != null && pb.num != null) return pa.num - pb.num;
+  return String(a).localeCompare(String(b));
+}
 const NDC_COST_PER_KM = {
   '7FT Trailer': 12,
   '8FT Trailer': 14,
@@ -4489,7 +4500,7 @@ class NDCApp extends React.Component {
       const scRows = byLmsc[lmsc];
       const runId = scRows[0].runId;
       const byRoute = {}; scRows.forEach(r => { (byRoute[r.routeCode] = byRoute[r.routeCode] || []).push(r); });
-      const planRows = Object.keys(byRoute).sort((a, b) => a.localeCompare(b)).map(routeCode => {
+      const planRows = Object.keys(byRoute).sort(NDC_routeCodeCompare).map(routeCode => {
         const rr = byRoute[routeCode].slice().sort((a, b) => Number(a.tp) - Number(b.tp));
         const rtd = Number(rr[0].roundTripDist);
         let prevBd = 0;
@@ -5030,6 +5041,7 @@ class NDCApp extends React.Component {
         }));
         this.loadOpsLeadDirectory();
         if (data && data.role !== 'ops_lead') { this.loadMastersFromSupabase(); this.loadIngestedRlhPlanDrafts(); }
+        else { this.loadVehicleMasterForOps(); }
         this.loadPlansFromSupabase();
       });
   }
@@ -5040,6 +5052,19 @@ class NDCApp extends React.Component {
   // vehEdits/addedScs/addedVehTypes overlays, scRows/vehMaster/scVehAvailRows builders) is left
   // completely unchanged -- it already treats data.scs/data.VEH/etc. as "the base list", regardless
   // of whether that base came from buildSeed() or Supabase.
+  // ops_lead needs read access to real Vehicle Master data for their own feedback UI (the
+  // vehicle-type-change flag, and the split-route vehicle picker) -- SC Master/Node Changes/
+  // Availability correctly stay planner-only, but Vehicle Master specifically is needed here too.
+  // Found 2026-07-27: the split-route vehicle dropdown was showing zero options for an ops_lead
+  // because Vehicle Master was never loaded at all for that role.
+  loadVehicleMasterForOps() {
+    if (!supabase) return;
+    supabase.from('vehicle_master').select('*').then(({ data, error }) => {
+      if (error) { console.error('Failed to load Vehicle Master (ops_lead)', error); return; }
+      const VEH = (data || []).map(row => ({ name: row.vehicle_type, cap: row.capacity, dist: row.distance_limit, tp: row.touch_point_limit, feas: row.lh_feasibility || [], _dbId: row.id }));
+      this.setState(st => ({ data: Object.assign({}, st.data, { VEH }) }));
+    });
+  }
   loadMastersFromSupabase() {
     if (!supabase) return;
     Promise.all([
@@ -7009,7 +7034,7 @@ class NDCApp extends React.Component {
     flatDcs.forEach((dc) => {
       (groupsMap[dc.effectiveRouteCode] = groupsMap[dc.effectiveRouteCode] || []).push(dc);
     });
-    const routeCodes = Object.keys(groupsMap).sort((a, b) => a.localeCompare(b)); // "sorted route wise"
+    const routeCodes = Object.keys(groupsMap).sort(NDC_routeCodeCompare); // "sorted route wise" -- numerically, not alphabetically
 
     const routes = routeCodes.map((code) => {
       // 2026-07-10 — auto-reorder touch points rather than erroring on a "broken" sequence: a DC's
@@ -7675,9 +7700,15 @@ class NDCApp extends React.Component {
         }) : null,
         closeAlignReview: () => this.setState({ alignReviewRouteIdx: null }),
         undecidedFlaggedCount: flaggedRows.filter(r => !r.decision).length,
-        canAck: ps === 'In Alignment' && (!!st.opsSubmitted[plan.id] || !!plan.feedbackReceived), canFinalise: ps === 'Acknowledged' && allDecided && validatedClean, finBlocked: ps === 'Acknowledged' && !(allDecided && validatedClean),
+        // ps === 'In Alignment' is already the authoritative, cross-session-safe signal that real
+        // feedback exists (loadPlansFromSupabase only sets this status when submittedReviewers,
+        // reconstructed from the real plan_reviewer_status table, is non-empty) -- the old extra
+        // check on opsSubmitted/feedbackReceived was local-only state that never persists or
+        // reconstructs across a different login, so it silently hid this button for the Planner
+        // whenever the Ops Lead submitted from a separate session (the normal, real-world case).
+        canAck: ps === 'In Alignment', canFinalise: ps === 'Acknowledged' && allDecided && validatedClean, finBlocked: ps === 'Acknowledged' && !(allDecided && validatedClean),
         finBtnBg: (ps === 'Acknowledged' && allDecided && validatedClean) ? '#128A3E' : '#E6EBF2', finBtnFg: (ps === 'Acknowledged' && allDecided && validatedClean) ? '#fff' : '#5A5E66', finCursor: (ps === 'Acknowledged' && allDecided && validatedClean) ? 'pointer' : 'not-allowed',
-        onAck: () => { if (!st.opsSubmitted[plan.id] && !plan.feedbackReceived) { this.showToast('At least one reviewer must submit feedback before you can acknowledge', '#C77B00'); return; } this.setState({ ackOpen: true, ackPlanId: plan.id }); }, onFin: () => { if (ps === 'Acknowledged' && allDecided) this.setState({ finOpen: true, finPlanId: plan.id, finPreviewSection: 'details' }); },
+        onAck: () => { if (ps !== 'In Alignment') { this.showToast('At least one reviewer must submit feedback before you can acknowledge', '#C77B00'); return; } this.setState({ ackOpen: true, ackPlanId: plan.id }); }, onFin: () => { if (ps === 'Acknowledged' && allDecided) this.setState({ finOpen: true, finPlanId: plan.id, finPreviewSection: 'details' }); },
         onUnfreeze: () => { if (ps === 'Acknowledged') this.setState({ unfreezeOpen: true, unfreezePlanId: plan.id }); },
         progressLabel: decidedCount + ' of ' + flaggedRows.length + ' flagged rows decided · ' + autoAligned + ' auto-aligned',
         onAcceptAllFlagged: () => { const undecN = flaggedRows.filter(r => !r.rowFullyDecided).length; if (undecN === 0) { this.showToast('No undecided flagged changes remaining', '#5A5E66'); return; } this.setState({ acceptAllPlanOpen: true, acceptAllPlanId: plan.id }); },
@@ -8479,6 +8510,17 @@ class NDCApp extends React.Component {
       hyp.errors.filter(e => relevantCode(e.t)).forEach(e => ncWarn.push({ lead: 'Error', text: e.t, fail: true, bg: '#FAFBFD', accentBd: '3px solid #D14B4B', fg: '#D14B4B', textFg: '#5A5E66' }));
       hyp.warnings.filter(w => relevantCode(w.t)).forEach(w => ncWarn.push({ lead: 'Warning', text: w.t, fail: false, bg: '#FBF1DF', accentBd: '0', fg: '#C77B00', textFg: '#C77B00' }));
       if (!ncSplitVehiclePicked) ncWarn.push({ lead: 'Error', text: 'Pick a vehicle type for the new split route before submitting.', fail: true, bg: '#FAFBFD', accentBd: '3px solid #D14B4B', fg: '#D14B4B', textFg: '#5A5E66' });
+      // Touch Point mandatory whenever a DC moves route (split into a new route, or moved to a
+      // different existing route) -- a DC arriving on another route with no stated position is
+      // ambiguous about where it slots in, unlike a DC that just stays on its current route.
+      Object.keys(ncDcMap).forEach((code) => {
+        const v = ncDcMap[code];
+        const isSplit = !!v.routeCode && v.routeCode === st.ncSplitCode;
+        const isMove = !!v.routeCode && !isSplit && v.routeCode !== ncRowObj.routeCode;
+        if ((isSplit || isMove) && (v.tp === '' || v.tp == null)) {
+          ncWarn.push({ lead: 'Error', text: 'Touch Point is required for ' + code + ' when ' + (isSplit ? 'splitting into a new route.' : 'moving to a different route.'), fail: true, bg: '#FAFBFD', accentBd: '3px solid #D14B4B', fg: '#D14B4B', textFg: '#5A5E66' });
+        }
+      });
     }
     const ncHasFail = ncWarn.some(w => w.fail);
     const ncRemarkFilled = !!(st.ncRemark || '').trim();  // §4 — remark is mandatory before an Ops-Lead can flag a change
