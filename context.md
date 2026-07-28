@@ -1021,3 +1021,79 @@ the route-summary table, `isMapPerSC` — no longer applied):
 Generated tab, SC-wise Ingested Data list, inline map on selection, skip file ingestion) are
 all in. Untested live, same caveat as the standalone map build — no browser access this
 session.
+
+### 2026-07-28 (later same day) — Dropdown filters overlapping the map, found from live testing
+Confirmed via screenshot: opening the Routes/Vehicle dropdown on either map screen (standalone
+and the new inline Network Map) rendered it partially underneath the Leaflet map canvas.
+Root cause: the dropdowns were set to `z-index: 30`, but Leaflet's own internal panes go up to
+~700 (tile/overlay/marker/tooltip/popup panes) and its built-in controls (zoom buttons) use
+`z-index: 1000` — so the dropdown was competing with layers stacked well above it. Bumped all 4
+occurrences (2 in the standalone map, 2 in the new inline Network Map) to `z-index: 2000`,
+comfortably above anything Leaflet renders internally.
+
+### 2026-07-28 (later same day) — Real crash found and fixed: Design Review broke entirely
+User reported Design Review "completely breaks" on click, plus Network Map showing no ingested
+plans, and asked whether the latter was just "haven't re-ingested since deploy." Confirmed via
+browser console: `ReferenceError: goCreate is not defined`, thrown inside `View` (the shared
+render function all screens' JSX live in).
+
+**Root cause**: this app's render architecture merges every screen's `*Vals()` output into one
+shared object before evaluating the JSX — so an identifier used by one screen but only ever
+*defined* by a different screen's vals function works by coincidence, until that other
+function changes. `goCreate` (a simple "navigate to Design Creation" helper) was previously
+supplied only by `mapVals()`, but Design Review's own, unrelated "no runs ready to review yet"
+empty state (`noCurSC`) also referenced `goCreate` directly. When `mapVals()` was fully rewritten
+for the real map view a few rounds ago, `goCreate` was correctly dropped from Network Map's own
+new JSX (which no longer needed it) — but this silently broke Design Review's empty state,
+which never stopped needing it. The crash only shows up when Design Review has zero SCs to
+display (`noCurSC` true), which is why it wasn't caught immediately after the Network Map
+rebuild — it depends on empty ingestion state, not just the code change alone.
+
+**On the user's own question — confirmed correct**: Network Map showing no ingested plans is
+not a bug. It's connected to the same root cause, though: the same empty-`ingestedRlhPlans`
+state that makes Network Map's Ingested Data tab correctly show nothing is what makes Design
+Review's `noCurSC` empty-state path fire and crash. Once `goCreate` is fixed, an empty
+ingestion state will show a normal empty-state message instead of crashing, and re-ingesting a
+plan will make both screens populate normally again.
+
+**Fix**: moved `goCreate: () => this.go('creation')` out of `mapVals()` into the global
+`renderVals()`, alongside other screen-independent nav helpers like `comingSoonSearch` — so it's
+always available regardless of which specific screen's own vals function runs, preventing this
+exact class of bug (a shared identifier defined in only one screen's vals) from recurring the
+same way again. Swept every other field the old `mapVals()` used to return (`mapW`/`mapH`/
+`scX`/`scY`/`arcLabels`/`dcLabels`/`legend`/`mapRows`/`routeTotal`/`mapPlanCards`/`hasPlanSel`/
+`clearMapPlan`/`isMapPerSC`/`arrowHeads`/`showNodeCard`/`nodeCard`/`clearHovDc`/`canCreate`) —
+confirmed all were already fully removed with no dangling references elsewhere; `goCreate` was
+the only one missed.
+
+### 2026-07-28 (later same day) — Console errors investigated: real but non-fatal, one clean fix
+User shared a console screenshot showing two Supabase auth warnings ("Session as retrieved from
+URL expires in -97349s" / "was issued over 120s ago, URL could be stale") and a 403 on
+`/auth/v1/user`, alongside "refresh lands back on Design Inputs."
+
+**Root cause of the console warnings, confirmed**: the Supabase client is created with all
+defaults (`createClient(url, key)`, no options), which includes `detectSessionInUrl: true` — it
+tries to parse an auth token straight out of the URL on every load. Nothing in the code ever
+clears that token from the URL after it's used once. So a tab whose URL still carries an old
+`#access_token=...` fragment (from whenever a magic-link login first landed there) re-parses
+that SAME now-expired token on every subsequent refresh, correctly fails validation (`-97349s`
+past expiry \u2248 27 hours), and logs the exact warnings + 403 shown. The app keeps working
+anyway because Supabase separately persists a valid session to `localStorage` by default, which
+the client falls back to — so this was noisy, not fatal, but worth fixing since it's real
+console noise a QA reviewer would reasonably flag. **Fixed**: after the initial `getSession()`
+resolves, strip the `access_token` fragment from the URL via `history.replaceState` — purely
+cosmetic, doesn't change auth behaviour, just stops re-parsing an already-consumed token on
+every future reload of that same tab.
+
+**On "refresh lands back on Design Inputs" — clarified as a separate, different thing from the
+fix a few rounds ago, not a regression of it.** That earlier fix specifically addressed
+`onAuthStateChange` firing on a background token refresh WITHOUT a page reload (e.g., switching
+browser tabs and back) — `isFirstLoad = !this.state.authProfile` correctly distinguishes that
+case from a genuine first load, since React state survives a tab-switch. A literal hard refresh
+(F5/Cmd+R) is different: it always resets ALL JS state from scratch, so `isFirstLoad` is
+correctly `true` again and `view` resets to the role's default tab — this is standard SPA
+behaviour, not a bug, since this app has no URL-based routing or persisted-view mechanism to
+restore the exact prior screen across a full page reload. Flagged to the user as a distinct,
+additive feature (persisting `view` to `sessionStorage` and restoring it on load) rather than
+building it unprompted, since it's meaningfully more work than a bug fix and wasn't clearly
+asked for yet.
