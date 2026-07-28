@@ -1763,8 +1763,12 @@ function View(B, self) {
 <div style={css(`display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:12px; padding-top:10px; border-top:1px solid #F4F5F8;`)}>
 <span style={css(`display:inline-flex; align-items:center; gap:6px; padding:5px 10px; border-radius:999px; font-size:10.5px; font-weight:600; background:${c.flagBg}; color:${c.flagFg};`)}><span style={css(`width:7px; height:7px; border-radius:50%; background:${c.flagDot};`)} />{c.flagLabel}</span>
 <div style={css(`display:flex; gap:8px;`)}>
+{(!c.pushed) ? (<>
 <button onClick={c.onPush} aria-label={"Push this run to Ops Alignment"} style={css(`display:inline-flex; align-items:center; justify-content:center; gap:7px; height:34px; padding:0 13px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer; white-space:nowrap;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; justify-content:center; gap:7px; height:34px; padding:0 13px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer; white-space:nowrap;`, `background:#00337D;`)}>Push to alignment<svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M5 12h14M13 6l6 6-6 6"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button>
 <button onClick={c.onFinaliseDirect} aria-label={"Finalise this run directly without Ops alignment"} style={css(`display:inline-flex; align-items:center; justify-content:center; height:34px; padding:0 13px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer; white-space:nowrap;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#C77B00; color:#C77B00;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; justify-content:center; height:34px; padding:0 13px; border:1px solid #C3C9D4; background:#fff; color:#5A5E66; font-family:inherit; font-size:12px; font-weight:600; border-radius:7px; cursor:pointer; white-space:nowrap;`, `border-color:#C77B00; color:#C77B00;`)}>Finalise directly</button>
+</>) : (<>
+<span style={css(`display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; border-radius:7px; background:#E7F0F8; color:#1E6FB8; font-size:12px; font-weight:600; white-space:nowrap;`)}><svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M20 6L9 17l-5-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Pushed to Alignment</span>
+</>)}
 </div>
 </div>
 </div>
@@ -3582,9 +3586,6 @@ function View(B, self) {
 {/* ===== NETWORK MAP ===== */}
 {(isMap) ? (<>
 <div style={css(`display:flex; flex-direction:column; height:100%;`)}>
-{(mapEmpty) ? (<>
-<div style={css(`margin:14px 26px 0; padding:10px 14px; background:#FBF1DF; border:1px solid #F0DBA8; border-radius:8px; font-size:12.5px; color:#9A5E00;`)}>{mapEmptyMessage}</div>
-</>) : null}
 {/* top bar: plan type + data source */}
 <div style={css(`display:flex; align-items:center; gap:14px; padding:12px 26px; background:#fff; border-bottom:1px solid #E6EBF2; flex-shrink:0; flex-wrap:wrap;`)}>
 <div style={css(`display:flex; gap:8px;`)}>
@@ -3599,7 +3600,8 @@ function View(B, self) {
 </div>
 </div>
 <div style={css(`flex:1; display:flex; min-height:0;`)}>
-{/* LEFT: SC picker */}
+{/* LEFT: SC picker -- Ingested Data only; Generated Plans has no list at all */}
+{(mapIngested) ? (<>
 <aside style={css(`width:240px; flex-shrink:0; border-right:1px solid #E6EBF2; background:#fff; display:flex; flex-direction:column;`)}>
 <div style={css(`padding:13px 14px 9px; font-size:12px; font-weight:700; color:#14171F;`)}>LMSC origin</div>
 <div style={css(`padding:0 12px 10px; display:flex; gap:5px; flex-wrap:wrap;`)}>
@@ -3609,147 +3611,65 @@ function View(B, self) {
 {(mapScList || []).map((s, __i123) => (<React.Fragment key={__i123}>
 <button onClick={s.onClick} style={css(`display:flex; align-items:center; gap:8px; width:100%; text-align:left; padding:9px 11px; margin-bottom:2px; border:1px solid ${s.bd}; border-radius:8px; background:${s.bg}; cursor:pointer; font-family:inherit;`)}><span style={css(`font-size:12px; font-weight:700; color:#003F98;`)}>{s.code}</span><span style={css(`font-size:11.5px; color:#5A5E66; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{s.name}</span><span style={css(`font-size:10px; color:#5A5E66;`)}>{s.zone}</span></button>
 </React.Fragment>))}
+{(!hasScList) ? (<><div style={css(`padding:20px 10px; text-align:center; font-size:12px; color:#8E96A3;`)}>No ingested plans match this filter.</div></>) : null}
 </div>
 </aside>
+</>) : null}
 {/* MAIN */}
-<main style={css(`flex:1; overflow-y:auto; min-width:0; background:#F4F5F8;`)}>
-{/* PER-SC VIEWS */}
-{(isMapPerSC) ? (<>
+<main style={css(`flex:1; overflow-y:auto; min-width:0; background:#F4F5F8; display:flex; flex-direction:column;`)}>
 {(mapGen) ? (<>
-<div style={css(`padding:18px 24px;`)}>
-{/* plan selector */}
-<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; padding:14px 16px; margin-bottom:16px;`)}>
-<div style={css(`display:flex; align-items:center; gap:9px; margin-bottom:9px;`)}>
-<span style={css(`font-size:11px; font-weight:700; color:#8E96A3; letter-spacing:0.05em;`)}>SELECT PLAN</span>
-{(hasPlanSel) ? (<><button onClick={clearMapPlan} style={css(`height:22px; padding:0 9px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:11px; font-weight:600; border-radius:5px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#F4F5F8;`)} onMouseLeave={(e) => hoverOff(e, `height:22px; padding:0 9px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:11px; font-weight:600; border-radius:5px; cursor:pointer;`, `background:#F4F5F8;`)}>✕ Clear selection</button></>) : null}
-</div>
-<div style={css(`display:flex; gap:8px; overflow-x:auto; padding-bottom:4px;`)}>
-{(mapPlanCards || []).map((pl, __i124) => (<React.Fragment key={__i124}>
-<button onClick={pl.onClick} style={css(`flex-shrink:0; width:190px; text-align:left; padding:10px 12px; border:1.5px solid ${pl.bd}; background:${pl.bg}; border-radius:8px; cursor:pointer; font-family:inherit;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#003F98;`)} onMouseLeave={(e) => hoverOff(e, `flex-shrink:0; width:190px; text-align:left; padding:10px 12px; border:1.5px solid ${pl.bd}; background:${pl.bg}; border-radius:8px; cursor:pointer; font-family:inherit;`, `border-color:#003F98;`)}>
-<div style={css(`font-size:13px; font-weight:700; color:#003F98; margin-bottom:3px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{pl.runId}</div>
-<div style={css(`font-size:11px; color:#5A5E66; margin-bottom:7px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;`)}>{pl.code} · {pl.city} · {pl.routes} routes</div>
-<span style={css(`display:inline-block; padding:1px 7px; border-radius:999px; font-size:9.5px; font-weight:700; background:${pl.sBg}; color:${pl.sFg}; white-space:nowrap;`)}>{pl.status}</span>
-</button>
-</React.Fragment>))}
+<div style={css(`flex:1; display:flex; align-items:center; justify-content:center; padding:40px;`)}>
+<div style={css(`text-align:center; max-width:440px;`)}>
+<div style={css(`width:58px; height:58px; border-radius:15px; background:#fff; border:1px solid #E6EBF2; display:flex; align-items:center; justify-content:center; margin:0 auto;`)}><svg width={"27"} height={"27"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#5A5E66"} strokeWidth={"1.6"}><path d={"M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
+<div style={css(`font-size:16px; font-weight:700; color:#14171F; margin-top:15px;`)}>No generated plans</div>
+<div style={css(`font-size:12.5px; color:#5A5E66; margin-top:7px; line-height:1.55;`)}>{mapEmptyMessage}</div>
 </div>
 </div>
+</>) : null}
+{(mapIngested && noScSelected) ? (<>
+<div style={css(`flex:1; display:flex; align-items:center; justify-content:center; padding:40px;`)}>
+<div style={css(`text-align:center; max-width:380px;`)}>
+<div style={css(`font-size:15px; font-weight:700; color:#14171F;`)}>Select an SC</div>
+<div style={css(`font-size:12.5px; color:#5A5E66; margin-top:7px; line-height:1.55;`)}>Pick a Sort Centre from the list on the left to view its ingested plan on the map.</div>
+</div>
+</div>
+</>) : null}
+{(mapIngested && hasCurSC) ? (<>
 {/* filter bar */}
-<div style={css(`display:flex; align-items:center; gap:11px; flex-wrap:wrap; margin-bottom:14px;`)}>
-<div style={css(`display:flex; align-items:center; gap:7px;`)}><span style={css(`font-size:11.5px; color:#5A5E66;`)}>Route</span><select value={mapRoute} onChange={onMapRoute} style={css(`height:34px; padding:0 9px; border:1px solid #E6EBF2; border-radius:8px; font-family:inherit; font-size:12px; color:#14171F; background:#fff; cursor:pointer;`)}>{(routeOptions || []).map((o, __i125) => (<React.Fragment key={__i125}><option value={o}>{o}</option></React.Fragment>))}</select></div>
-<div style={css(`display:flex; align-items:center; gap:7px;`)}><span style={css(`font-size:11.5px; color:#5A5E66;`)}>Vehicle</span><select value={mapVeh} onChange={onMapVeh} style={css(`height:34px; padding:0 9px; border:1px solid #E6EBF2; border-radius:8px; font-family:inherit; font-size:12px; color:#14171F; background:#fff; cursor:pointer;`)}>{(vehOptions || []).map((o, __i126) => (<React.Fragment key={__i126}><option value={o}>{o}</option></React.Fragment>))}</select></div>
-<div style={css(`display:flex; align-items:center; gap:7px; height:34px; padding:0 11px; border:1px solid #E6EBF2; border-radius:8px; background:#fff;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#5A5E66"} strokeWidth={"1.8"}><path d={"M11 4a7 7 0 105 12 7 7 0 00-5-12zM21 21l-4.5-4.5"} strokeLinecap={"round"} /></svg><input value={mapSearch} onInput={onMapSearch} placeholder={"Search LMDC…"} style={css(`border:none; outline:none; font-family:inherit; font-size:12px; color:#14171F; background:transparent; width:120px;`)} /></div>
+<div style={css(`display:flex; align-items:center; gap:11px; flex-wrap:wrap; padding:14px 24px 0;`)}>
+<div style={css(`position:relative;`)}>
+<button onClick={toggleMapRouteDropdown} style={css(`display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 13px; border:1px solid #E6EBF2; border-radius:8px; background:#fff; color:#14171F; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;`)}>Routes: {mapRouteLabel}<span style={css(`font-size:10px; color:#8E96A3;`)}>▾</span></button>
+{(mapRouteDropdownOpen) ? (<>
+<div style={css(`position:absolute; top:38px; left:0; z-index:30; background:#fff; border:1px solid #E6EBF2; border-radius:8px; box-shadow:0 10px 28px rgba(11,20,48,0.16); min-width:200px; max-height:320px; overflow-y:auto; padding:6px;`)}>
+<label style={css(`display:flex; align-items:center; gap:8px; padding:7px 9px; cursor:pointer; font-size:12.5px; font-weight:700; color:#14171F; border-radius:6px;`)}><input type={"checkbox"} checked={allRoutesChecked} onChange={onSelectAllMapRoutes} />All routes</label>
+<div style={css(`border-top:1px solid #EEF1F6; margin:4px 2px;`)} />
+{(mapRouteOptions || []).map((r, __i140) => (<React.Fragment key={__i140}><label style={css(`display:flex; align-items:center; gap:8px; padding:7px 9px; cursor:pointer; font-size:12.5px; color:#14171F; border-radius:6px;`)}><input type={"checkbox"} checked={r.checked} onChange={() => onToggleMapRoute(r.code)} />{r.code}</label></React.Fragment>))}
+<div style={css(`border-top:1px solid #EEF1F6; margin:4px 2px;`)} />
+<button onClick={closeMapRouteDropdown} style={css(`width:100%; height:30px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12px; font-weight:600; border-radius:6px; cursor:pointer; margin-top:2px;`)}>Done</button>
+</div>
+</>) : null}
+</div>
+<div style={css(`position:relative;`)}>
+<button onClick={toggleMapVehDropdown} style={css(`display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 13px; border:1px solid #E6EBF2; border-radius:8px; background:#fff; color:#14171F; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;`)}>Vehicle: {mapVehLabel}<span style={css(`font-size:10px; color:#8E96A3;`)}>▾</span></button>
+{(mapVehDropdownOpen) ? (<>
+<div style={css(`position:absolute; top:38px; left:0; z-index:30; background:#fff; border:1px solid #E6EBF2; border-radius:8px; box-shadow:0 10px 28px rgba(11,20,48,0.16); min-width:160px; max-height:280px; overflow-y:auto; padding:6px;`)}>
+{(mapVehOptions || []).map((o, __i141) => (<React.Fragment key={__i141}><div onClick={onSelectMapVeh(o)} style={css(`padding:7px 9px; cursor:pointer; font-size:12.5px; font-weight:${mapVehLabel === o ? '700' : '400'}; color:${mapVehLabel === o ? '#003F98' : '#14171F'}; background:${mapVehLabel === o ? '#EAEEFB' : 'transparent'}; border-radius:6px;`)}>{o}</div></React.Fragment>))}
+</div>
+</>) : null}
+</div>
+<div style={css(`display:flex; align-items:center; gap:7px; height:34px; padding:0 11px; border:1px solid #E6EBF2; border-radius:8px; background:#fff;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#5A5E66"} strokeWidth={"1.8"}><path d={"M11 4a7 7 0 105 12 7 7 0 00-5-12zM21 21l-4.5-4.5"} strokeLinecap={"round"} /></svg><input value={mapSearch} onInput={onMapSearch} placeholder={"Search LMDC…"} style={css(`border:none; outline:none; font-family:inherit; font-size:12px; color:#14171F; background:transparent; width:130px;`)} /></div>
 <div style={css(`flex:1;`)} />
-<span style={css(`font-size:12px; color:#5A5E66;`)}>Showing <strong style={css(`color:#14171F;`)}>{rowsShown}</strong> of {routeTotal} routes · <strong style={css(`color:#003F98;`)}>{activeFilters}</strong> filters</span>
-{(hasActiveFilters) ? (<><button onClick={clearMapFilters} style={css(`height:34px; padding:0 12px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#C3C9D4;`)} onMouseLeave={(e) => hoverOff(e, `height:34px; padding:0 12px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12px; font-weight:600; border-radius:8px; cursor:pointer;`, `border-color:#C3C9D4;`)}>Clear all</button></>) : null}
+<span style={css(`font-size:12px; color:#5A5E66;`)}>Showing <strong style={css(`color:#14171F;`)}>{routesShown}</strong> of {routesTotal} routes</span>
+{(hasActiveFilters) ? (<><button onClick={clearMapFilters} style={css(`height:34px; padding:0 12px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12px; font-weight:600; border-radius:8px; cursor:pointer;`)}>Clear all</button></>) : null}
 </div>
 {/* map */}
-<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:13px; overflow:hidden;`)}>
-<div style={css(`display:flex; align-items:center; justify-content:space-between; padding:13px 18px; border-bottom:1px solid #EEF1F6;`)}>
-<div style={css(`font-size:13px; font-weight:700; color:#14171F;`)}>{mapSC} · {mapSCname} <span style={css(`font-weight:500; color:#5A5E66;`)}>— {mapSCzone} zone · RLH routes</span></div>
-<div style={css(`display:flex; align-items:center; gap:14px; font-size:11px; color:#5A5E66;`)}><span style={css(`display:inline-flex; align-items:center; gap:6px;`)}><span style={css(`width:11px; height:11px; background:#0B1430; display:inline-block;`)} />LMSC origin</span><span style={css(`display:inline-flex; align-items:center; gap:6px;`)}><span style={css(`width:10px; height:10px; border-radius:50%; background:#5A5E66; display:inline-block;`)} />LMDC delivery</span></div>
-</div>
-<div style={css(`position:relative; background:#F0F2EC;`)}>
-<svg viewBox={`0 0 ${mapW} ${mapH}`} style={css(`width:100%; height:auto; display:block;`)}>
-<defs>
-<pattern id={"mgrid"} width={"60"} height={"60"} patternUnits={"userSpaceOnUse"}><path d={"M60 0H0V60"} fill={"none"} stroke={"#CACECA"} strokeWidth={"0.35"} /></pattern>
-<filter id={"arcglow"} x={"-30%"} y={"-30%"} width={"160%"} height={"160%"}><fegaussianblur in={"SourceGraphic"} stdDeviation={"4"} result={"blur"} /></filter>
-</defs>
-{/* Map canvas: muted landmass + faint water + subtle road traces (Google-Maps feel, pure SVG) */}
-<rect x={"0"} y={"0"} width={mapW} height={mapH} fill={"#F0F2EC"} />
-<path d={"M0,318 Q88,294 178,310 Q268,328 338,353 Q398,382 354,470 L0,470 Z"} fill={"#E4ECF0"} opacity={"0.6"} />
-<rect x={"0"} y={"0"} width={mapW} height={mapH} fill={"url(#mgrid)"} opacity={"0.5"} />
-<path d={"M0,160 Q148,144 270,165 Q398,188 526,170 Q644,154 760,168"} fill={"none"} stroke={"#C8CCC2"} strokeWidth={"1.1"} strokeLinecap={"round"} />
-<path d={"M0,290 Q110,274 210,288 Q330,306 448,292 Q596,276 760,288"} fill={"none"} stroke={"#C8CCC2"} strokeWidth={"1.1"} strokeLinecap={"round"} />
-<path d={"M162,0 Q174,96 170,196 Q164,296 166,470"} fill={"none"} stroke={"#C8CCC2"} strokeWidth={"1.0"} strokeLinecap={"round"} />
-<path d={"M404,0 Q415,90 411,186 Q405,296 407,470"} fill={"none"} stroke={"#C8CCC2"} strokeWidth={"1.0"} strokeLinecap={"round"} />
-<path d={"M604,0 Q612,96 609,202 Q605,320 608,470"} fill={"none"} stroke={"#C8CCC2"} strokeWidth={"0.8"} strokeLinecap={"round"} />
-{/* white casing separates crossing spokes (metro-map style) */}
-{(arcs || []).map((a, __i127) => (<React.Fragment key={__i127}><path d={a.d} fill={"none"} stroke={"#fff"} strokeWidth={"3.2"} strokeLinecap={"round"} strokeLinejoin={"round"} /></React.Fragment>))}
-{/* crisp coloured spoke (thin) */}
-{(arcs || []).map((a, __i128) => (<React.Fragment key={__i128}><path d={a.d} fill={"none"} stroke={a.color} strokeWidth={"1.4"} strokeOpacity={"0.95"} strokeLinecap={"round"} strokeLinejoin={"round"} /></React.Fragment>))}
-{/* arrowheads at DC delivery end of each route */}
-{(arrowHeads || []).map((ah, __i129) => (<React.Fragment key={__i129}><path d={ah.d} fill={ah.color} opacity={"0.9"} /></React.Fragment>))}
-{/* DC node soft halos (subtle glow behind delivery markers so they read on the map) */}
-{(dcMarkers || []).map((m, __i130) => (<React.Fragment key={__i130}><circle cx={m.x} cy={m.y} r={"10"} fill={m.color} fillOpacity={"0.13"} opacity={m.op} /></React.Fragment>))}
-{/* DC delivery circles (ring style: outer fill + white inner) — clickable for node info card */}
-{(dcMarkers || []).map((m, __i131) => (<React.Fragment key={__i131}><circle cx={m.x} cy={m.y} r={"5"} fill={m.color} fillOpacity={m.op} stroke={"#fff"} strokeWidth={"2"} style={css(`cursor:pointer;`)} onClick={m.onClick} /></React.Fragment>))}
-{(dcMarkers || []).map((m, __i132) => (<React.Fragment key={__i132}><circle cx={m.x} cy={m.y} r={"2"} fill={"#fff"} fillOpacity={m.op} style={css(`pointer-events:none;`)} /></React.Fragment>))}
-{/* LMSC origin square (dark navy with white inner square marker) */}
-<rect x={scX} y={scY} width={"22"} height={"22"} transform={"translate(-11,-11)"} rx={"3"} fill={"#0B1430"} stroke={"#fff"} strokeWidth={"2.5"} />
-<rect x={scX} y={scY} width={"10"} height={"10"} transform={"translate(-5,-5)"} rx={"1.5"} fill={"#fff"} opacity={"0.9"} />
-</svg>
-{/* node-name overlay (HTML positioned by % over the SVG — bound SVG text doesn't lay out in this engine) */}
-<div style={css(`position:absolute; inset:0; pointer-events:none;`)}>
-{(dcLabels || []).map((l, __i133) => (<React.Fragment key={__i133}><div style={css(`position:absolute; left:${l.xPct}%; top:${l.yPct}%; transform:translate(-50%, 8px); text-align:center; white-space:nowrap;`)}><div style={css(`font-family:'Mier B02',system-ui,sans-serif; font-size:11px; font-weight:700; color:#14171F; text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 1px 2px #fff;`)}>{l.name}</div><div style={css(`font-family:'Mier B02',system-ui,sans-serif; font-size:9.5px; font-weight:500; color:#8E96A3; text-shadow:0 0 3px #fff, 0 0 3px #fff;`)}>{l.code}</div></div></React.Fragment>))}
-{(arcLabels || []).map((a, __i134) => (<React.Fragment key={__i134}><div style={css(`position:absolute; left:${a.midXPct}%; top:${a.midYPct}%; transform:translate(-50%,-50%); white-space:nowrap; font-family:'Mier B02',system-ui,sans-serif; font-size:11px; font-weight:700; color:${a.color}; text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 0 2px #fff;`)}>{a.label}</div></React.Fragment>))}
-</div>
-{/* Part B.3 — node info card (click a DC marker to show) */}
-{(showNodeCard) ? (<>
-<div style={css(`position:absolute; left:${nodeCard.xPct}%; top:${nodeCard.yPct}%; transform:translate(-50%, -110%); pointer-events:auto; z-index:10;`)}>
-<div style={css(`background:#14171F; color:#fff; border-radius:8px; padding:9px 12px; font-family:'Mier B02',system-ui,sans-serif; white-space:nowrap; box-shadow:0 6px 20px rgba(0,0,0,0.35); min-width:160px;`)}>
-<div style={css(`display:flex; align-items:flex-start; justify-content:space-between; gap:8px;`)}>
-<div style={css(`font-size:12.5px; font-weight:700; color:#fff; line-height:1.3;`)}>{nodeCard.name}</div>
-<button onClick={clearHovDc} style={css(`background:transparent; border:none; color:#8E96A3; cursor:pointer; padding:0; line-height:1; font-size:14px; flex-shrink:0; margin-top:1px;`)} onMouseEnter={(e) => hoverOn(e, `color:#fff;`)} onMouseLeave={(e) => hoverOff(e, `background:transparent; border:none; color:#8E96A3; cursor:pointer; padding:0; line-height:1; font-size:14px; flex-shrink:0; margin-top:1px;`, `color:#fff;`)}>×</button>
-</div>
-<div style={css(`font-size:10.5px; color:#8E96A3; margin-top:3px;`)}>{nodeCard.code}</div>
-<div style={css(`display:flex; align-items:center; gap:6px; margin-top:6px;`)}>
-<span style={css(`padding:1px 7px; border-radius:999px; font-size:9.5px; font-weight:700; background:#2F4FC6; color:#fff;`)}>{nodeCard.type}</span>
-<span style={css(`font-size:10.5px; color:#C3C9D4;`)}>{nodeCard.zone} zone</span>
-</div>
-<div style={css(`font-size:10.5px; color:#6E82C4; margin-top:4px; font-weight:600;`)}>{nodeCard.routeId}</div>
-</div>
-<div style={css(`width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:6px solid #14171F; margin:0 auto;`)} />
-</div>
-</>) : null}
-{(mapNoResults) ? (<>
-<div style={css(`position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:11px; background:rgba(244,245,248,0.72); backdrop-filter:blur(1px);`)}>
-<svg width={"30"} height={"30"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#5A5E66"} strokeWidth={"1.6"}><path d={"M11 4a7 7 0 105 12 7 7 0 00-5-12zM21 21l-4.5-4.5"} strokeLinecap={"round"} /></svg>
-<div style={css(`font-size:13px; font-weight:600; color:#14171F;`)}>No routes match these filters</div>
-<button onClick={clearMapFilters} style={css(`height:32px; padding:0 14px; border:1px solid #003F98; background:#fff; color:#003F98; font-family:inherit; font-size:12px; font-weight:600; border-radius:8px; cursor:pointer;`)}>Clear filters</button>
-</div>
-</>) : null}
-</div>
-<div style={css(`display:flex; flex-wrap:wrap; gap:8px; padding:13px 18px; border-top:1px solid #EEF1F6;`)}>
-{(legend || []).map((l, __i135) => (<React.Fragment key={__i135}><span style={css(`display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:999px; background:#F7F8FB; font-size:11px; font-weight:600; color:#5A5E66;`)}><span style={css(`width:9px; height:9px; border-radius:2px; background:${l.color};`)} />{l.id}</span></React.Fragment>))}
+<div style={css(`margin:14px 24px; background:#fff; border:1px solid #E6EBF2; border-radius:13px; overflow:hidden; flex:1; display:flex; flex-direction:column; min-height:420px;`)}>
+<div style={css(`padding:13px 18px; border-bottom:1px solid #EEF1F6; font-size:13px; font-weight:700; color:#14171F;`)}>{mapSC} · {mapSCname} <span style={css(`font-weight:500; color:#5A5E66;`)}>— {mapSCzone} zone</span></div>
+<div style={css(`flex:1; min-height:0; position:relative;`)} ref={mapMountRef} />
+<div style={css(`display:flex; flex-wrap:wrap; gap:8px; padding:12px 18px; border-top:1px solid #EEF1F6; max-height:78px; overflow-y:auto;`)}>
+{(mapLegend || []).map((l, __i142) => (<React.Fragment key={__i142}><span style={css(`display:inline-flex; align-items:center; gap:6px; padding:3px 9px; border-radius:999px; background:#F7F8FB; font-size:11px; font-weight:600; color:#5A5E66;`)}><span style={css(`width:9px; height:9px; border-radius:2px; background:${l.color};`)} />{l.routeCode} · {l.veh} · {l.tps} TPs</span></React.Fragment>))}
 </div>
 </div>
-{/* row table */}
-<div style={css(`background:#fff; border:1px solid #E6EBF2; border-radius:8px; overflow:hidden; margin-top:16px;`)}>
-<div style={css(`display:grid; grid-template-columns:1.1fr 0.6fr 0.7fr 1fr; background:#E6EBF2;`)}>
-<div style={css(`padding:10px 14px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em;`)}>ROUTE</div>
-<div style={css(`padding:10px 14px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em; text-align:center;`)}>TP</div>
-<div style={css(`padding:10px 14px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em; text-align:center;`)}>DCs</div>
-<div style={css(`padding:10px 14px; font-size:10.5px; font-weight:700; color:#5A5E66; letter-spacing:0.04em; text-align:right;`)}>RT DISTANCE</div>
-</div>
-{(mapRows || []).map((r, __i136) => (<React.Fragment key={__i136}>
-<div style={css(`display:grid; grid-template-columns:1.1fr 0.6fr 0.7fr 1fr; align-items:center; border-top:1px solid #EEF1F6;`)}>
-<div style={css(`padding:11px 14px; display:flex; align-items:center; gap:8px;`)}><span style={css(`width:9px; height:9px; border-radius:2px; background:${r.color}; flex-shrink:0;`)} /><span style={css(`font-size:12.5px; font-weight:700; color:#003F98;`)}>{r.id}</span></div>
-<div style={css(`padding:11px 14px; font-size:12.5px; color:#14171F; text-align:center;`)}>{r.tp}</div>
-<div style={css(`padding:11px 14px; font-size:12.5px; color:#14171F; text-align:center;`)}>{r.dcs}</div>
-<div style={css(`padding:11px 14px; font-size:12.5px; color:#14171F; text-align:right;`)}>{r.rtDist}</div>
-</div>
-</React.Fragment>))}
-{(mapNoResults) ? (<>
-<div style={css(`padding:26px 14px; text-align:center; font-size:12.5px; color:#5A5E66; border-top:1px solid #EEF1F6;`)}>No routes match the current filters.</div>
-</>) : null}
-</div>
-</div>
-</>) : null}
-{(mapIngested) ? (<>
-<div style={css(`height:100%; display:flex; align-items:center; justify-content:center; padding:40px;`)}>
-<div style={css(`text-align:center; max-width:420px;`)}>
-<div style={css(`width:58px; height:58px; border-radius:15px; background:#fff; border:1px solid #E6EBF2; display:flex; align-items:center; justify-content:center; margin:0 auto;`)}><svg width={"27"} height={"27"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#5A5E66"} strokeWidth={"1.6"}><path d={"M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
-<div style={css(`font-size:16px; font-weight:700; color:#14171F; margin-top:15px;`)}>No ingested data for this cycle</div>
-{(canCreate) ? (<>
-<div style={css(`font-size:12.5px; color:#5A5E66; margin-top:7px; line-height:1.55;`)}>No uploaded plan for this cycle. Switch to <strong>Generated plans</strong>, or create a design in Design Creation.</div>
-<button onClick={goCreate} style={css(`margin-top:16px; height:38px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#00337D;`)} onMouseLeave={(e) => hoverOff(e, `margin-top:16px; height:38px; padding:0 18px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:13px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#00337D;`)}>Go to Design Creation</button>
-</>) : null}
-{(canCreate) ? (<>
-<div style={css(`font-size:12.5px; color:#5A5E66; margin-top:7px; line-height:1.55;`)}>No uploaded plan for this cycle. Switch to <strong>Generated plans</strong> to view the planner's routes for this SC.</div>
-</>) : null}
-</div>
-</div>
-</>) : null}
 </>) : null}
 </main>
 </div>
@@ -4024,7 +3944,7 @@ class NDCApp extends React.Component {
       editAvailKey: null, editAvailDraft: null,
       editVehRowKey: null, editVehRowDraft: null,
       pocOpenRow: null, volTypeFilter: 'All', volSearch: '', nodeChangeBy: 'Shashvat Jain', nodeChangeDate: '10 Jul · 11:24',
-      mapSC: null, mapDataSource: 'generated', mapRoute: 'All', mapVeh: 'All', mapSearch: '', mapZone: 'All', hovDcIdx: null,
+      mapSC: null, mapDataSource: 'generated', mapSelRoutes: null, mapVeh: 'All', mapSearch: '', mapZone: 'All', hovDcIdx: null,
       reviewRoutesOpen: false, reviewDetailRunId: null, reviewDetailView: 'route',
       pgAutodml: 1, pgScMaster: 1, pgRoutes: 1, pgAvail: 1,
       data: this.buildSeed(),
@@ -6739,7 +6659,11 @@ class NDCApp extends React.Component {
       // same FK constraint. Flagged as a separate, pre-existing gap: a Finalise-Direct plan isn't
       // persisted to Supabase at all currently, not something fixed in this pass.
     }
-    if (ingested) this.deleteIngestedRlhPlanDraft(code);
+    // 2026-07-28 — NOT deleting the ingested draft here anymore: it's the permanent ingestion
+    // log (Design Inputs -> RLH Route Plan) AND the source for Design Review's plan card for this
+    // SC, neither of which should disappear just because the plan was pushed. Push status is
+    // tracked separately via pushedSCs; the ingested record itself is upsert-by-SC-code and only
+    // ever replaced by a fresh re-ingestion for the same SC, never cleared by pushing.
     const runTxt = ingested ? ingested.fileBaseName : (run ? (run.runId || run.id) : code);
     const hwOrIngestedTxt = ingested ? 'Ingested plan' : hwTxt;
     if (finaliseDirect) this.showToast('Finalised ' + runTxt + ' directly \u2014 skipped Ops alignment, ready for RFQ handoff', '#128A3E');
@@ -8870,165 +8794,143 @@ class NDCApp extends React.Component {
       propArcs, propDcMarkers: toDcMarkers(propArcs) };
   }
 
+  // ===== Network Map (2026-07-28 rebuild) ===============================================
+  // Two tabs: "Generated Plans" (always blank -- no DS-optimiser exists in this build, d.runs
+  // is permanently empty) and "Ingested Data" (real SC-wise list of every SC with an ingested
+  // plan, no metrics -- just code/name/zone, per user's explicit "I only want to view the map
+  // views" instruction; selecting one renders the real Leaflet map INLINE on this same page, not
+  // a new tab -- unlike Design Review/Ops Alignment's "Open on map", which deliberately does open
+  // a new tab). File ingestion UI is intentionally not built here, per instruction.
   mapVals() {
     const st = this.state, d = st.data;
     const isMap = st.view === 'map';
-    // 2026-07-14 — SKELETON BUILD: this whole view is built around "the current SC" (arcs, DC
-    // markers, legend all derive from it) and was never designed to run with zero SCs. Rather than
-    // partially null-guard a dozen downstream computations, short-circuit here with a safe empty
-    // stub once at least one real SC has been ingested, this early return stops firing and the view
-    // works exactly as before.
-    if (!d.scs.length) {
-      return { isMap, mapScList: [], mapSC: null, mapSCname: '', mapSCzone: '',
-        mapZoneChips: [], mapGen: true, mapIngested: false, mapSrcGenBg: '#003F98', mapSrcGenFg: '#fff', mapSrcIngBg: '#fff', mapSrcIngFg: '#5A5E66',
-        setMapGen: () => this.setState({ mapDataSource: 'generated' }), setMapIng: () => this.setState({ mapDataSource: 'ingested' }),
-        mapW: 600, mapH: 400, scX: 300, scY: 200, arcs: [], arcLabels: [], dcMarkers: [], dcLabels: [], legend: [], mapRows: [], rowsShown: 0, routeTotal: 0, mapNoResults: true, mapHasResults: false,
-        routeOptions: [], vehOptions: [], mapRoute: 'All', mapVeh: 'All', mapSearch: '',
-        onMapRoute: () => {}, onMapVeh: () => {}, onMapSearch: () => {},
-        activeFilters: 0, hasActiveFilters: false, clearMapFilters: () => {}, goCreate: () => this.go('creation'),
-        mapPlanCards: [], hasPlanSel: false, clearMapPlan: () => {},
-        canCreate: st.persona === 'planner', isMapPerSC: true, mapEmpty: true,
-        mapEmptyMessage: 'No Sort Centres ingested yet — add one under Design Inputs → Sort Centre Master, or ingest via the data pipeline, to use the map.',
-        arrowHeads: [], showNodeCard: false, nodeCard: {}, clearHovDc: () => this.setState({ hovDcIdx: null }) };
-    }
-    // toned-down (desaturated) route palette — softer than the vivid original per design feedback
-    const PALETTE = ['#6E82C4', '#6BA083', '#C6A06A', '#C88585', '#7EA3C9', '#9C8AC4', '#C892AC', '#72A39C', '#C99E74', '#96A6D6', '#9BA1AE', '#8FB185'];
-    const NAMEPOOL = ['North Hub', 'East Depot', 'South Yard', 'West Point', 'Central DC', 'Ring Road', 'Uptown', 'Riverside', 'Old Town', 'Midfield', 'Highland', 'Lakeside', 'Gateway', 'Junction', 'Parkside', 'Hilltop', 'Greenfield', 'Southgate', 'Northgate', 'Eastgate', 'Westgate', 'Cross Dock', 'Transit Pt', 'Outer Ring'];
+    const gen = (st.mapDataSource || 'generated') === 'generated';
     const zf = st.mapZone || 'All';
-    const mapPlanId = st.mapPlanId || null;
-    const selPlan = mapPlanId ? d.plans.find(p => p.id === mapPlanId) : null;
-    const curCode = selPlan ? selPlan.scCode : ((st.mapSC && d.scs.find(s => s.code === st.mapSC)) ? st.mapSC : d.scs[0].code);
-    const scList = d.scs.filter(s => zf === 'All' || s.zone === zf).map(s => ({ code: s.code, name: s.name, zone: s.zone, active: s.code === curCode, bg: (s.code === curCode) ? '#EAEEFB' : '#fff', bd: (s.code === curCode) ? '#003F98' : 'transparent', onClick: () => this.setState({ mapSC: s.code, mapPlanId: null }) }));
-    const sc = d.scs.find(s => s.code === curCode);
-    let seed = curCode.split('').reduce((a, c) => a + c.charCodeAt(0), 0) * 7 + 13;
-    const R = () => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; };
-    const W = 760, H = 470, cx = W / 2, cy = H / 2, scale = 80;
-    const proj = (lat, lng) => ({ x: +(cx + (lng - sc.lng) * scale).toFixed(1), y: +(cy - (lat - sc.lat) * scale).toFixed(1) });
-    const scPt = proj(sc.lat, sc.lng);
 
-    // F1 — derive the route SET from the selected SC's REAL data so Map, Design Review and
-    // Ops-Lead Node Details agree for the same SC. Prefer the live plan rows; fall back to the
-    // chosen-HW run's routes when no plan exists yet. Only the arc *geometry* is synthesised
-    // (DCs carry no lat/lng), every load-bearing figure — route id, vehicle, TP, DC count,
-    // RT distance — comes straight from the source rows.
-    const srcPlan = selPlan || d.plans.find(p => p.scCode === curCode);
-    // Prefer the run the planner opened the map from (mapRunId) so a HW-0/HW-1 run card draws ITS
-    // geometry, not the HW-0.5 default. Fall back to the balanced run, then any run for this SC.
-    const srcRun = (st.mapRunId && d.runs.find(r => r.id === st.mapRunId && r.scCode === curCode))
-      || d.runs.find(r => r.scCode === curCode && r.hw === 0.5)
-      || d.runs.find(r => r.scCode === curCode);
-    // When the planner opened the map from a specific run card, that run's geometry wins over the
-    // generic plan rows so each HW run draws distinctly; otherwise prefer live plan rows.
-    const runChosen = !!(st.mapRunId && srcRun && srcRun.id === st.mapRunId);
-    let srcRows;
-    if (srcPlan && !runChosen) {
-      srcRows = srcPlan.rows.map(r => ({ id: r.routeCode, veh: r.veh, tpN: r.dcs.length, rtDist: r.rtDist }));
-    } else if (srcRun) {
-      srcRows = Array.from({ length: srcRun.routes }, (_, i) => {
-        const tpN = Math.max(2, Math.round(srcRun.avgTP));
-        return { id: sc.cityCode + '-R' + String(i + 1).padStart(2, '0'), veh: (srcRun.vehByType && (srcRun.vehByType.find(v => v.n > 0) || {}).name) || 'Bolero / 8ft', tpN, rtDist: Math.round(srcRun.distance / srcRun.routes) };
-      });
-    } else if (srcPlan) {
-      srcRows = srcPlan.rows.map(r => ({ id: r.routeCode, veh: r.veh, tpN: r.dcs.length, rtDist: r.rtDist }));
-    } else { srcRows = []; }
+    // Only SCs with a real ingested plan appear in the Ingested Data list. Generated Plans has no
+    // picker at all -- this build has no DS-optimiser output to show.
+    const ingestedCodes = Object.keys(st.ingestedRlhPlans || {});
+    const ingestedScs = ingestedCodes.map(code => d.scs.find(s => s.code === code)).filter(Boolean);
+    const scListSource = gen ? [] : ingestedScs;
+    const zoneFiltered = scListSource.filter(s => zf === 'All' || s.zone === zf);
+    const curCode = gen ? null : ((st.mapSC && zoneFiltered.some(s => s.code === st.mapSC)) ? st.mapSC : (zoneFiltered[0] && zoneFiltered[0].code));
+    const curSC = curCode ? d.scs.find(s => s.code === curCode) : null;
 
-    const routes = srcRows.map((sr, r) => {
-      const color = PALETTE[r % PALETTE.length];
-      const tpN = Math.max(1, sr.tpN);
-      const N = Math.max(1, srcRows.length);
-      // Organic spoke — seeded bearing jitter + per-route reach variation kill the symmetric clock-even spider.
-      // Nodes scatter like a real city delivery network radiating unevenly along roads. Deterministic per SC via R().
-      const baseTheta = -Math.PI / 2 + (r + 0.5) / N * 6.283185;
-      const theta = baseTheta + (R() - 0.5) * 0.70;
-      const reachFactor = 0.62 + R() * 0.38;
-      const maxRx = (cx - 74) * reachFactor, maxRy = (cy - 56) * reachFactor, perp = theta + 1.5708;
-      const dcs = [];
-      for (let k = 0; k < tpN; k++) {
-        const tBase = 0.2 + (tpN === 1 ? 0.5 : k / (tpN - 1)) * 0.72;
-        const t = Math.max(0.18, Math.min(0.95, tBase + (R() - 0.5) * 0.10));
-        const wob = (R() - 0.5) * 30;
-        const x = +(cx + Math.cos(theta) * maxRx * t + Math.cos(perp) * wob).toFixed(1);
-        const y = +(cy + Math.sin(theta) * maxRy * t + Math.sin(perp) * wob).toFixed(1);
-        dcs.push({ code: 'LMDC-' + sc.cityCode + '-' + String(r * 6 + k + 1).padStart(3, '0'), name: NAMEPOOL[(r * 3 + k) % NAMEPOOL.length], x: x, y: y });
+    const mapScList = zoneFiltered.map(s => ({
+      code: s.code, name: s.name, zone: s.zone,
+      bg: s.code === curCode ? '#EAEEFB' : '#fff', bd: s.code === curCode ? '#003F98' : 'transparent',
+      onClick: () => this.setState({ mapSC: s.code, mapSelRoutes: null, mapVeh: 'All', mapSearch: '' }),
+    }));
+
+    const mapZoneChips = ['All', 'North', 'South', 'East', 'West'].map(z => ({
+      label: z, bg: z === zf ? '#003F98' : '#fff', fg: z === zf ? '#fff' : '#5A5E66', bd: z === zf ? '#003F98' : '#E6EBF2',
+      onClick: () => this.setState({ mapZone: z }),
+    }));
+
+    // Real route/DC data for the selected SC -- same pipeline the standalone map screen uses
+    // (computeIngestedRunMetrics -> buildMapRoutes), just rendered inline instead of a new tab.
+    const PALETTE = ['#6E82C4', '#6BA083', '#C6A06A', '#C88585', '#7EA3C9', '#9C8AC4', '#C892AC', '#72A39C', '#C99E74', '#96A6D6', '#9BA1AE', '#8FB185'];
+    let routeAll = [], vehOptions = ['All'], routeOptions = [];
+    if (curSC) {
+      const ingested = (st.ingestedRlhPlans || {})[curCode];
+      if (ingested) {
+        const computed = this.computeIngestedRunMetrics(ingested);
+        const raw = this.buildMapRoutes(computed.rows, false);
+        routeAll = raw.map((r, i) => ({ routeCode: r.routeCode, veh: r.veh, color: PALETTE[i % PALETTE.length], dcs: r.dcs.slice().sort((a, b) => (a.tpOrder || 0) - (b.tpOrder || 0)) }));
+        vehOptions = ['All'].concat(Array.from(new Set(routeAll.map(r => r.veh))).filter(Boolean));
+        routeOptions = routeAll.map(r => r.routeCode);
       }
-      const pts = [scPt].concat(dcs);
-      let arcD;
-      if (pts.length < 3) {
-        arcD = 'M' + pts[0].x + ',' + pts[0].y + ' L' + pts[1].x + ',' + pts[1].y;
-      } else {
-        arcD = 'M' + pts[0].x + ',' + pts[0].y;
-        for (let i = 0; i < pts.length - 1; i++) {
-          const p0 = pts[Math.max(0, i-1)], p1 = pts[i], p2 = pts[i+1], p3 = pts[Math.min(pts.length-1, i+2)], t = 0.38;
-          arcD += ' C' + (p1.x + (p2.x - p0.x) * t).toFixed(1) + ',' + (p1.y + (p2.y - p0.y) * t).toFixed(1) + ' ' + (p2.x - (p3.x - p1.x) * t).toFixed(1) + ',' + (p2.y - (p3.y - p1.y) * t).toFixed(1) + ' ' + p2.x + ',' + p2.y;
-        }
-      }
-      const midDc = dcs[Math.floor(dcs.length / 2)] || dcs[0] || scPt;
-      const vehN = Math.max(1, Math.ceil(tpN / 2));
-      return { id: sr.id, color, veh: sr.veh, tpN, dcs, d: arcD, midX: midDc.x, midY: midDc.y, vehN, rtDist: sr.rtDist };
-    });
-    const fRoute = st.mapRoute || 'All', fVeh = st.mapVeh || 'All', dcq = (st.mapSearch || '').toLowerCase();
-    const searchActive = dcq.length > 0;
-    let vis = routes.filter(rt => (fRoute === 'All' || rt.id === fRoute) && (fVeh === 'All' || rt.veh === fVeh));
-    if (searchActive) vis = vis.filter(rt => rt.dcs.some(dc => dc.code.toLowerCase().indexOf(dcq) >= 0));
-    const arcs = vis.map(rt => ({ d: rt.d, color: rt.color, midX: rt.midX, midY: rt.midY, midXPct: +(rt.midX / W * 100).toFixed(2), midYPct: +(rt.midY / H * 100).toFixed(2), label: vis.length <= 6 ? (rt.veh.split('/')[0].trim() + ' \xD7' + rt.vehN) : '' }));
-    const arcLabels = arcs.filter(a => a.label);
-    const dcMarkers = []; let _dcIdx = 0; vis.forEach(rt => rt.dcs.forEach(dc => { const _i = _dcIdx++; dcMarkers.push({ x: dc.x, y: dc.y, color: rt.color, op: (!searchActive || dc.code.toLowerCase().indexOf(dcq) >= 0) ? '1' : '0.2', dcode: dc.code, dname: dc.name, dzone: sc.zone, drouteId: rt.id, onClick: () => this.setState({ hovDcIdx: st.hovDcIdx === _i ? null : _i }) }); }));
-    // node labels — name + code at each route's endpoint DC (like the reference); endpoints only, to stay legible
-    const dcLabels = vis.map((rt, ri) => { const last = rt.dcs[rt.dcs.length - 1]; return last ? { xPct: +(last.x / W * 100).toFixed(2), yPct: +(last.y / H * 100).toFixed(2), name: NAMEPOOL[ri % NAMEPOOL.length], code: last.code } : null; }).filter(Boolean);
-    const legend = vis.map(rt => ({ id: rt.id, color: rt.color }));
-    // B7 — per-route vehicle count (digest L24 "vehicle counts, e.g. 19ft ×5"). One arc = one vehicle assignment;
-    // a route with more touchpoints needs more vehicle trips, so derive count from the route's own TP count.
-    const rows = vis.map(rt => { const vehN = Math.max(1, Math.ceil(rt.tpN / 2)); return { id: rt.id, color: rt.color, veh: rt.veh, vehN, tp: rt.tpN, dcs: rt.dcs.length, rtDist: rt.rtDist + ' km' }; });
-
-    // Part B.1 — arrowheads at the DC (delivery) end of each arc
-    const arrowHeads = vis.map(rt => {
-      const dcs = rt.dcs;
-      if (!dcs.length) return null;
-      const tip = dcs[dcs.length - 1];
-      const prev = dcs.length > 1 ? dcs[dcs.length - 2] : scPt;
-      const dx = tip.x - prev.x, dy = tip.y - prev.y;
-      const len = Math.sqrt(dx * dx + dy * dy) || 1;
-      const ux = dx / len, uy = dy / len, px = -uy, py = ux;
-      const arrowLen = 9, arrowHW = 5;
-      const bx = tip.x + ux * 6, by = tip.y + uy * 6;
-      const tx = bx + ux * arrowLen, ty = by + uy * arrowLen;
-      const lx = bx + px * arrowHW, ly = by + py * arrowHW;
-      const rx = bx - px * arrowHW, ry = by - py * arrowHW;
-      return { d: 'M' + tx.toFixed(1) + ',' + ty.toFixed(1) + ' L' + lx.toFixed(1) + ',' + ly.toFixed(1) + ' L' + rx.toFixed(1) + ',' + ry.toFixed(1) + ' Z', color: rt.color };
-    }).filter(Boolean);
-
-    // Part B.3 — node info card on DC click
-    const showNodeCard = st.hovDcIdx != null && st.hovDcIdx >= 0 && st.hovDcIdx < dcMarkers.length;
-    let nodeCard = { name: '', code: '', type: '', zone: '', routeId: '', xPct: 50, yPct: 50 };
-    if (showNodeCard) {
-      const m = dcMarkers[st.hovDcIdx];
-      if (m) nodeCard = { name: m.dname, code: m.dcode, type: 'LMDC', zone: m.dzone, routeId: m.drouteId, xPct: +(m.x / W * 100).toFixed(2), yPct: +(m.y / H * 100).toFixed(2) };
     }
-    const clearHovDc = () => this.setState({ hovDcIdx: null });
 
-    const routeOptions = ['All'].concat(routes.map(r => r.id));
-    const vehSet = {}; routes.forEach(r => vehSet[r.veh] = 1); const vehOptions = ['All'].concat(Object.keys(vehSet));
-    let af = 0; if (fRoute !== 'All') af++; if (fVeh !== 'All') af++; if (searchActive) af++; if (zf !== 'All') af++;
-    const PS_CLR = { 'Pushed': ['#E7F4EC', '#128A3E'], 'In Alignment': ['#FBF1DF', '#C77B00'], 'Acknowledged': ['#EAEEFB', '#2F4FC6'], 'Finalised': ['#E7F4EC', '#128A3E'] };
-    const mapPlanCards = d.plans.map(p => { const act = p.id === mapPlanId; const sc2 = d.scs.find(s => s.code === p.scCode); const cl = PS_CLR[p.status] || ['#F4F5F8', '#5A5E66']; return { id: p.id, runId: 'RUN-' + p.scCode + '-01', code: p.scCode, city: sc2 ? sc2.name : p.scName, routes: p.rows.length, status: p.status || 'Pushed', sBg: cl[0], sFg: cl[1], active: act, bg: act ? '#EAEEFB' : '#fff', bd: act ? '#003F98' : '#E6EBF2', onClick: () => this.setState({ mapPlanId: p.id, mapSC: p.scCode, mapRunId: null, mapRoute: 'All', mapVeh: 'All' }) }; });
-    const hasPlanSel = !!mapPlanId;
-    const clearMapPlan = () => this.setState({ mapPlanId: null });
-    const gen = st.mapDataSource === 'generated';
+    const selRoutes = st.mapSelRoutes;
+    const fVeh = st.mapVeh || 'All';
+    const dcq = (st.mapSearch || '').toLowerCase().trim();
+    const searchActive = dcq.length > 0;
+    const isRouteSelected = (code) => !selRoutes || !selRoutes.length || selRoutes.indexOf(code) >= 0;
+    const matchesSearch = (rt) => rt.dcs.some(dc => dc.code.toLowerCase().indexOf(dcq) >= 0 || dc.name.toLowerCase().indexOf(dcq) >= 0);
+    const vis = routeAll.filter(rt => isRouteSelected(rt.routeCode) && (fVeh === 'All' || rt.veh === fVeh));
 
-    return { isMap, mapScList: scList, mapSC: curCode, mapSCname: sc.name, mapSCzone: sc.zone,
-      mapZoneChips: ['All', 'North', 'South', 'East', 'West'].map(z => ({ label: z, active: z === zf, bg: z === zf ? '#003F98' : '#fff', fg: z === zf ? '#fff' : '#5A5E66', bd: z === zf ? '#003F98' : '#E6EBF2', onClick: () => this.setState({ mapZone: z }) })),
-      mapGen: gen, mapIngested: !gen, mapSrcGenBg: gen ? '#003F98' : '#fff', mapSrcGenFg: gen ? '#fff' : '#5A5E66', mapSrcIngBg: !gen ? '#003F98' : '#fff', mapSrcIngFg: !gen ? '#fff' : '#5A5E66', setMapGen: () => this.setState({ mapDataSource: 'generated' }), setMapIng: () => this.setState({ mapDataSource: 'ingested' }),
-      mapW: W, mapH: H, scX: scPt.x, scY: scPt.y, arcs, arcLabels, dcMarkers, dcLabels, legend, mapRows: rows, rowsShown: rows.length, routeTotal: routes.length, mapNoResults: rows.length === 0, mapHasResults: rows.length > 0,
-      routeOptions, vehOptions, mapRoute: fRoute, mapVeh: fVeh, mapSearch: st.mapSearch || '',
-      onMapRoute: (e) => this.setState({ mapRoute: e.target.value }), onMapVeh: (e) => this.setState({ mapVeh: e.target.value }), onMapSearch: (e) => this.setState({ mapSearch: e.target.value }),
-      activeFilters: af, hasActiveFilters: af > 0, clearMapFilters: () => this.setState({ mapRoute: 'All', mapVeh: 'All', mapSearch: '', mapZone: 'All' }), goCreate: () => this.go('creation'),
-      mapPlanCards, hasPlanSel, clearMapPlan,
-      // C8b — only the Planner can reach Design Creation. The Ops Lead gets a neutral message, not a dead "create" CTA.
-      canCreate: st.persona === 'planner',
-      isMapPerSC: true,
-      // Part B — arrowheads + node info card
-      arrowHeads, showNodeCard, nodeCard, clearHovDc };
+    const toggleRoute = (code) => {
+      const cur = selRoutes && selRoutes.length ? selRoutes.slice() : routeOptions.slice();
+      const i = cur.indexOf(code);
+      if (i >= 0) cur.splice(i, 1); else cur.push(code);
+      this.setState({ mapSelRoutes: cur.length === routeOptions.length ? null : cur });
+    };
+    const selectAllRoutes = () => this.setState({ mapSelRoutes: null });
+    const hasActiveFilters = (selRoutes && selRoutes.length > 0) || fVeh !== 'All' || searchActive;
+    const clearMapFilters = () => this.setState({ mapSelRoutes: null, mapVeh: 'All', mapSearch: '' });
+
+    // Leaflet mount/redraw for the INLINE map (separate Leaflet instance from the standalone
+    // screen's -- tracked on `this` under a different key so the two never collide if both are
+    // ever open at once, e.g. this tab plus a Design Review "Open on map" tab).
+    const mountMap = (el) => {
+      if (!el || !curSC) return;
+      NDC_ensureLeaflet(() => {
+        const L = window.L;
+        if (!this._netMapInstance || this._netMapEl !== el) {
+          this._netMapInstance = L.map(el, { zoomControl: true });
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '\u00a9 OpenStreetMap contributors' }).addTo(this._netMapInstance);
+          this._netMapEl = el;
+          this._netMapLayers = [];
+        }
+        (this._netMapLayers || []).forEach(l => { try { this._netMapInstance.removeLayer(l); } catch (e) {} });
+        this._netMapLayers = [];
+        const bounds = [];
+        const scLat = curSC.lat, scLng = curSC.lng;
+        vis.forEach(rt => {
+          const dim = searchActive && !matchesSearch(rt);
+          const latlngs = [[scLat, scLng]].concat(rt.dcs.map(dc => [dc.lat, dc.lng])).concat([[scLat, scLng]]);
+          latlngs.forEach(p => bounds.push(p));
+          const line = L.polyline(latlngs, { color: rt.color, weight: dim ? 2 : 3.5, opacity: dim ? 0.25 : 0.9 }).addTo(this._netMapInstance);
+          this._netMapLayers.push(line);
+          rt.dcs.forEach(dc => {
+            const dcDim = searchActive && dc.code.toLowerCase().indexOf(dcq) < 0 && dc.name.toLowerCase().indexOf(dcq) < 0;
+            const marker = L.circleMarker([dc.lat, dc.lng], { radius: dcDim ? 4 : 6, color: '#fff', weight: 1.5, fillColor: rt.color, fillOpacity: dcDim ? 0.3 : 0.95 }).addTo(this._netMapInstance);
+            marker.bindPopup('<b>' + dc.code + '</b><br>' + dc.name + '<br>Route ' + rt.routeCode + ' \u00b7 TP ' + dc.tpOrder);
+            this._netMapLayers.push(marker);
+          });
+        });
+        if (scLat != null && scLng != null) {
+          const scIcon = L.divIcon({ className: '', html: '<div style="width:16px;height:16px;border-radius:50%;background:#0B1430;border:2px solid #fff;box-shadow:0 0 0 2px #0B1430;"></div>', iconSize: [16, 16], iconAnchor: [8, 8] });
+          const scMarker = L.marker([scLat, scLng], { icon: scIcon }).addTo(this._netMapInstance);
+          scMarker.bindPopup('<b>' + curSC.code + '</b> (Sort Centre)');
+          this._netMapLayers.push(scMarker);
+        }
+        if (bounds.length) { try { this._netMapInstance.fitBounds(bounds, { padding: [30, 30] }); } catch (e) {} }
+        else if (scLat != null) { this._netMapInstance.setView([scLat, scLng], 11); }
+      });
+    };
+
+    return {
+      isMap, mapGen: gen, mapIngested: !gen,
+      mapSrcGenBg: gen ? '#003F98' : '#fff', mapSrcGenFg: gen ? '#fff' : '#5A5E66',
+      mapSrcIngBg: !gen ? '#003F98' : '#fff', mapSrcIngFg: !gen ? '#fff' : '#5A5E66',
+      setMapGen: () => this.setState({ mapDataSource: 'generated' }),
+      setMapIng: () => this.setState({ mapDataSource: 'ingested' }),
+      mapZoneChips, mapScList, hasScList: mapScList.length > 0,
+      mapSC: curCode || '', mapSCname: curSC ? curSC.name : '', mapSCzone: curSC ? curSC.zone : '',
+      hasCurSC: !!curSC,
+      mapMountRef: mountMap,
+      mapRouteLabel: (!selRoutes || !selRoutes.length) ? 'All' : (selRoutes.length === 1 ? selRoutes[0] : selRoutes.length + ' selected'),
+      mapRouteDropdownOpen: !!st.mapRouteDropdownOpen,
+      toggleMapRouteDropdown: () => this.setState({ mapRouteDropdownOpen: !st.mapRouteDropdownOpen, mapVehDropdownOpen: false }),
+      mapRouteOptions: routeOptions.map(code => ({ code, checked: isRouteSelected(code) })),
+      allRoutesChecked: !selRoutes || !selRoutes.length,
+      onToggleMapRoute: toggleRoute, onSelectAllMapRoutes: selectAllRoutes,
+      closeMapRouteDropdown: () => this.setState({ mapRouteDropdownOpen: false }),
+      mapVehLabel: fVeh, mapVehOptions: vehOptions, mapVehDropdownOpen: !!st.mapVehDropdownOpen,
+      toggleMapVehDropdown: () => this.setState({ mapVehDropdownOpen: !st.mapVehDropdownOpen, mapRouteDropdownOpen: false }),
+      onSelectMapVeh: (o) => () => this.setState({ mapVeh: o, mapVehDropdownOpen: false }),
+      mapSearch: st.mapSearch || '', onMapSearch: (e) => this.setState({ mapSearch: e.target.value }),
+      hasActiveFilters, clearMapFilters,
+      routesShown: vis.length, routesTotal: routeAll.length,
+      mapLegend: vis.map(rt => ({ routeCode: rt.routeCode, color: rt.color, veh: (rt.veh || '').split(/[/\u00b7]/)[0].trim(), tps: rt.dcs.length })),
+      mapEmpty: gen,
+      mapEmptyMessage: 'This module doesn\'t contain any generated plans \u2014 no DS optimiser exists in this build. Switch to Ingested Data to view real ingested plans.',
+      noScSelected: !gen && !curSC,
+    };
   }
+
 
   // Finalise view — the terminal lifecycle stage. Finalised (and acknowledged/frozen) plans live HERE, not as a
   // tab inside Ops Alignment (which now holds only the active Pending/Feedback-Received work). Read-only, RFQ handoff.
@@ -9165,16 +9067,13 @@ class NDCApp extends React.Component {
     const curCode = (st.reviewSC && completedSCs.find(s => s.code === st.reviewSC)) ? st.reviewSC : (completedSCs[0] && completedSCs[0].code);
     const curSC = d.scs.find(s => s.code === curCode);
 
-    // §9 R4 handlers — map icon opens that run's map (wires to the existing Map; uses the plan
-    // if one exists, else just the SC); detail icon opens the full-screen plan-detail state for that run.
-    // Open the run's route map as an in-context POPUP (does NOT navigate away to the Network Map page — that broke the review flow).
-    // Sets mapSC/mapRunId so mapVals computes this run's per-SC geometry; the modal binds the same arcs/dcMarkers the map page uses.
+    // §9 R4 handler — detail icon opens the full-screen plan-detail state for that run.
     const openRunDetail = (run) => this.setState({ reviewDetailRunId: run.id });
 
     // Left rail = one entry per SC; dot = worst flag across ALL the SC's runs; the cps slot carries the run count.
     const reviewList = listSCs.map(s => {
       const rs = completedRunsFor(s.code);
-      const pushed = !!st.pushedSCs[s.code];
+      const pushed = !!st.pushedSCs[s.code] || (d.plans || []).some(p => p.scCode === s.code);
       const allFlags = rs.reduce((a, r) => a.concat(r.flags || []), []);
       const hasErr = allFlags.some(f => f.sev === 'danger'), hasWarn = allFlags.some(f => f.sev === 'warning');
       const sevDot = hasErr ? '#D14B4B' : hasWarn ? '#C77B00' : '#128A3E';
@@ -9196,7 +9095,7 @@ class NDCApp extends React.Component {
       const flagLabel = flErr ? (flErr + flWarn) + ' validation flag' + ((flErr + flWarn) === 1 ? '' : 's') : flWarn ? flWarn + ' warning' + (flWarn === 1 ? '' : 's') : 'No flags';
       const flagBg = flErr ? '#FBEAEA' : flWarn ? '#FBF1DF' : '#E7F4EC';
       const flagFg = flErr ? '#D14B4B' : flWarn ? '#C77B00' : '#128A3E';
-      const pushed = !!st.pushedSCs[r.scCode];
+      const pushed = !!st.pushedSCs[r.scCode] || (d.plans || []).some(p => p.scCode === r.scCode);
       // RDR — Route Disruption Rate: % of routes changed vs the historic plan; only meaningful when HW>0 (uses a historic plan).
       const rdrOn = r.hw > 0;
       const rdrPct = rdrOn ? (r.hw >= 1 ? 6 + ((r.runNo || 1) * 7) % 10 : 16 + ((r.runNo || 1) * 11) % 16) : 0;
@@ -9415,7 +9314,7 @@ class NDCApp extends React.Component {
       curCode, curName: curSC ? curSC.name : '', curZone: curSC ? curSC.zone : '', curDcCount: curSC ? curSC.dcCount : 0,
       planCards, runCountLabel: scRuns.length + ' run' + (scRuns.length === 1 ? '' : 's') + ' generated this cycle', hasPlanCards: planCards.length > 0,
       reviewDetail,
-      reviewPushed: !!st.pushedSCs[curCode],
+      reviewPushed: !!st.pushedSCs[curCode] || (d.plans || []).some(p => p.scCode === curCode),
       pushOpen: st.pushOpen, pushSCname: pushSC ? (pushSC.code + ' \u00b7 ' + pushSC.name) : '', reviewersList, pushAddOptions, pushAddSelect: st.pushAddSelect || '',
       onPushAddSelect: (e) => this.addPushReviewerById(e.target.value),
       doPush: () => this.doPush(), closePush: () => this.closePush(),
@@ -9977,22 +9876,40 @@ class NDCApp extends React.Component {
           e('button', { onClick: () => this.setState({ standaloneMapMode: 'proposed' }), style: { height: '30px', padding: '0 14px', border: 'none', borderRadius: '6px', background: mode === 'proposed' ? '#003F98' : 'transparent', color: mode === 'proposed' ? '#fff' : '#5A5E66', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, cursor: 'pointer' } }, 'Proposed (Simulate)')
         ) : null
       ),
-      // route filter (multi-select chips)
-      e('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', padding: '10px 24px 0', background: '#fff', flexShrink: 0 } },
-        e('span', { style: { fontSize: '11px', fontWeight: 700, color: '#8E96A3', letterSpacing: '0.04em', marginRight: '4px' } }, 'ROUTES'),
-        e('button', { onClick: selectAllRoutes, style: { height: '26px', padding: '0 11px', border: '1px solid ' + (!selRoutes || !selRoutes.length ? '#003F98' : '#E6EBF2'), background: (!selRoutes || !selRoutes.length) ? '#003F98' : '#fff', color: (!selRoutes || !selRoutes.length) ? '#fff' : '#5A5E66', fontFamily: 'inherit', fontSize: '11.5px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' } }, 'All'),
-        routeOptions.map((code, i) => e('button', { key: i, onClick: () => toggleRoute(code), style: { height: '26px', padding: '0 11px', border: '1px solid ' + (isRouteSelected(code) && selRoutes ? '#003F98' : '#E6EBF2'), background: (isRouteSelected(code) && selRoutes) ? '#EAEEFB' : '#fff', color: (isRouteSelected(code) && selRoutes) ? '#003F98' : '#5A5E66', fontFamily: 'inherit', fontSize: '11.5px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' } }, code))
-      ),
-      // vehicle filter + search + counts
-      e('div', { style: { display: 'flex', alignItems: 'center', gap: '11px', flexWrap: 'wrap', padding: '10px 24px 12px', background: '#fff', borderBottom: '1px solid #E6EBF2', flexShrink: 0 } },
-        e('span', { style: { fontSize: '11px', fontWeight: 700, color: '#8E96A3', letterSpacing: '0.04em' } }, 'VEHICLE'),
-        vehOptions.map((o, i) => e('button', { key: i, onClick: () => this.setState({ standaloneMapVeh: o }), style: { height: '26px', padding: '0 11px', border: '1px solid ' + (fVeh === o ? '#003F98' : '#E6EBF2'), background: fVeh === o ? '#003F98' : '#fff', color: fVeh === o ? '#fff' : '#5A5E66', fontFamily: 'inherit', fontSize: '11.5px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' } }, o)),
-        e('div', { style: { display: 'flex', alignItems: 'center', gap: '7px', height: '30px', padding: '0 11px', border: '1px solid #E6EBF2', borderRadius: '8px', background: '#fff' } },
+      // route + vehicle filter dropdowns (was unscalable chip rows -- 24+ routes wrapped across
+      // multiple lines) + search + counts, all in one row
+      e('div', { style: { display: 'flex', alignItems: 'center', gap: '11px', flexWrap: 'wrap', padding: '12px 24px', background: '#fff', borderBottom: '1px solid #E6EBF2', flexShrink: 0 } },
+        // Routes dropdown (multi-select via checkboxes)
+        e('div', { style: { position: 'relative' } },
+          e('button', { onClick: () => this.setState({ standaloneMapRouteDropdownOpen: !st.standaloneMapRouteDropdownOpen, standaloneMapVehDropdownOpen: false }), style: { display: 'inline-flex', alignItems: 'center', gap: '7px', height: '32px', padding: '0 12px', border: '1px solid #E6EBF2', borderRadius: '8px', background: '#fff', color: '#14171F', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, cursor: 'pointer' } },
+            'Routes: ' + ((!selRoutes || !selRoutes.length) ? 'All' : (selRoutes.length === 1 ? selRoutes[0] : selRoutes.length + ' selected')),
+            e('span', { style: { fontSize: '10px', color: '#8E96A3' } }, '\u25BE')
+          ),
+          st.standaloneMapRouteDropdownOpen ? e('div', { style: { position: 'absolute', top: '36px', left: 0, zIndex: 30, background: '#fff', border: '1px solid #E6EBF2', borderRadius: '8px', boxShadow: '0 10px 28px rgba(11,20,48,0.16)', minWidth: '200px', maxHeight: '320px', overflowY: 'auto', padding: '6px' } },
+            e('label', { style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 9px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700, color: '#14171F', borderRadius: '6px' } },
+              e('input', { type: 'checkbox', checked: !selRoutes || !selRoutes.length, onChange: selectAllRoutes }), 'All routes'),
+            e('div', { style: { borderTop: '1px solid #EEF1F6', margin: '4px 2px' } }),
+            routeOptions.map((code, i) => e('label', { key: i, style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 9px', cursor: 'pointer', fontSize: '12.5px', color: '#14171F', borderRadius: '6px' } },
+              e('input', { type: 'checkbox', checked: isRouteSelected(code), onChange: () => toggleRoute(code) }), code)),
+            e('div', { style: { borderTop: '1px solid #EEF1F6', margin: '4px 2px' } }),
+            e('button', { onClick: () => this.setState({ standaloneMapRouteDropdownOpen: false }), style: { width: '100%', height: '30px', border: 'none', background: '#003F98', color: '#fff', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, borderRadius: '6px', cursor: 'pointer', marginTop: '2px' } }, 'Done')
+          ) : null
+        ),
+        // Vehicle dropdown (single-select)
+        e('div', { style: { position: 'relative' } },
+          e('button', { onClick: () => this.setState({ standaloneMapVehDropdownOpen: !st.standaloneMapVehDropdownOpen, standaloneMapRouteDropdownOpen: false }), style: { display: 'inline-flex', alignItems: 'center', gap: '7px', height: '32px', padding: '0 12px', border: '1px solid #E6EBF2', borderRadius: '8px', background: '#fff', color: '#14171F', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, cursor: 'pointer' } },
+            'Vehicle: ' + fVeh, e('span', { style: { fontSize: '10px', color: '#8E96A3' } }, '\u25BE')
+          ),
+          st.standaloneMapVehDropdownOpen ? e('div', { style: { position: 'absolute', top: '36px', left: 0, zIndex: 30, background: '#fff', border: '1px solid #E6EBF2', borderRadius: '8px', boxShadow: '0 10px 28px rgba(11,20,48,0.16)', minWidth: '160px', maxHeight: '280px', overflowY: 'auto', padding: '6px' } },
+            vehOptions.map((o, i) => e('div', { key: i, onClick: () => this.setState({ standaloneMapVeh: o, standaloneMapVehDropdownOpen: false }), style: { padding: '7px 9px', cursor: 'pointer', fontSize: '12.5px', fontWeight: fVeh === o ? 700 : 400, color: fVeh === o ? '#003F98' : '#14171F', background: fVeh === o ? '#EAEEFB' : 'transparent', borderRadius: '6px' } }, o))
+          ) : null
+        ),
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: '7px', height: '32px', padding: '0 11px', border: '1px solid #E6EBF2', borderRadius: '8px', background: '#fff' } },
           e('input', { value: st.standaloneMapSearch || '', onInput: (ev) => this.setState({ standaloneMapSearch: ev.target.value }), placeholder: 'Search LMDC code or name…', style: { border: 'none', outline: 'none', fontFamily: 'inherit', fontSize: '12px', color: '#14171F', background: 'transparent', width: '170px' } })
         ),
         e('div', { style: { flex: 1 } }),
         e('span', { style: { fontSize: '12px', color: '#5A5E66' } }, 'Showing ', e('strong', { style: { color: '#14171F' } }, vis.length), ' of ', routeAll.length, ' routes'),
-        hasActiveFilters ? e('button', { onClick: clearFilters, style: { height: '30px', padding: '0 12px', border: '1px solid #E6EBF2', background: '#fff', color: '#5A5E66', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' } }, 'Clear all') : null
+        hasActiveFilters ? e('button', { onClick: clearFilters, style: { height: '32px', padding: '0 12px', border: '1px solid #E6EBF2', background: '#fff', color: '#5A5E66', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' } }, 'Clear all') : null
       ),
       // real map canvas
       e('div', { style: { flex: 1, minHeight: 0, position: 'relative' }, ref: mountMap }),
