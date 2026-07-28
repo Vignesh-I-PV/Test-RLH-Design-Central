@@ -3640,7 +3640,7 @@ function View(B, self) {
 <div style={css(`position:relative;`)}>
 <button onClick={toggleMapRouteDropdown} style={css(`display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 13px; border:1px solid #E6EBF2; border-radius:8px; background:#fff; color:#14171F; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;`)}>Routes: {mapRouteLabel}<span style={css(`font-size:10px; color:#8E96A3;`)}>▾</span></button>
 {(mapRouteDropdownOpen) ? (<>
-<div style={css(`position:absolute; top:38px; left:0; z-index:30; background:#fff; border:1px solid #E6EBF2; border-radius:8px; box-shadow:0 10px 28px rgba(11,20,48,0.16); min-width:200px; max-height:320px; overflow-y:auto; padding:6px;`)}>
+<div style={css(`position:absolute; top:38px; left:0; z-index:2000; background:#fff; border:1px solid #E6EBF2; border-radius:8px; box-shadow:0 10px 28px rgba(11,20,48,0.16); min-width:200px; max-height:320px; overflow-y:auto; padding:6px;`)}>
 <label style={css(`display:flex; align-items:center; gap:8px; padding:7px 9px; cursor:pointer; font-size:12.5px; font-weight:700; color:#14171F; border-radius:6px;`)}><input type={"checkbox"} checked={allRoutesChecked} onChange={onSelectAllMapRoutes} />All routes</label>
 <div style={css(`border-top:1px solid #EEF1F6; margin:4px 2px;`)} />
 {(mapRouteOptions || []).map((r, __i140) => (<React.Fragment key={__i140}><label style={css(`display:flex; align-items:center; gap:8px; padding:7px 9px; cursor:pointer; font-size:12.5px; color:#14171F; border-radius:6px;`)}><input type={"checkbox"} checked={r.checked} onChange={() => onToggleMapRoute(r.code)} />{r.code}</label></React.Fragment>))}
@@ -3652,7 +3652,7 @@ function View(B, self) {
 <div style={css(`position:relative;`)}>
 <button onClick={toggleMapVehDropdown} style={css(`display:inline-flex; align-items:center; gap:7px; height:34px; padding:0 13px; border:1px solid #E6EBF2; border-radius:8px; background:#fff; color:#14171F; font-family:inherit; font-size:12px; font-weight:600; cursor:pointer;`)}>Vehicle: {mapVehLabel}<span style={css(`font-size:10px; color:#8E96A3;`)}>▾</span></button>
 {(mapVehDropdownOpen) ? (<>
-<div style={css(`position:absolute; top:38px; left:0; z-index:30; background:#fff; border:1px solid #E6EBF2; border-radius:8px; box-shadow:0 10px 28px rgba(11,20,48,0.16); min-width:160px; max-height:280px; overflow-y:auto; padding:6px;`)}>
+<div style={css(`position:absolute; top:38px; left:0; z-index:2000; background:#fff; border:1px solid #E6EBF2; border-radius:8px; box-shadow:0 10px 28px rgba(11,20,48,0.16); min-width:160px; max-height:280px; overflow-y:auto; padding:6px;`)}>
 {(mapVehOptions || []).map((o, __i141) => (<React.Fragment key={__i141}><div onClick={onSelectMapVeh(o)} style={css(`padding:7px 9px; cursor:pointer; font-size:12.5px; font-weight:${mapVehLabel === o ? '700' : '400'}; color:${mapVehLabel === o ? '#003F98' : '#14171F'}; background:${mapVehLabel === o ? '#EAEEFB' : 'transparent'}; border-radius:6px;`)}>{o}</div></React.Fragment>))}
 </div>
 </>) : null}
@@ -4915,6 +4915,16 @@ class NDCApp extends React.Component {
       const session = data && data.session;
       this.setState({ authChecked: true, authUser: session ? session.user : null });
       if (session) this.loadAuthProfile(session.user.id);
+      // Clear any access-token fragment from the URL once Supabase has consumed it. Without this,
+      // the SAME token fragment stays in the address bar forever -- every subsequent refresh
+      // re-parses that same now-stale token (detectSessionInUrl's default behaviour), producing a
+      // confusing "expires in -97349s" warning and a 403 on /auth/v1/user, even though the app
+      // still works fine via the separately-persisted, valid session in localStorage. Purely
+      // cosmetic/noise-reduction -- doesn't change auth behaviour, just stops re-parsing a token
+      // that's already been used.
+      if (window.location.hash && window.location.hash.indexOf('access_token') >= 0) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
     });
     this._authSub = supabase.auth.onAuthStateChange((_event, session) => {
       this.setState({ authUser: session ? session.user : null, authProfile: session ? this.state.authProfile : null });
@@ -9742,6 +9752,13 @@ class NDCApp extends React.Component {
       onOpsActingChange: (e) => this.switchOpsPersona(e.target.value, st.opsPlanId),
       setPlanner: () => this.setPersona('planner'), setOps: () => this.setPersona('ops'),
       comingSoonSearch: () => this.showToast('Search is coming — use the filters and zone chips to narrow your view for now.', '#1E6FB8'), openCycle: () => this.comingSoon('Cycle switcher'),
+      // Global nav helper -- used by both Design Review's empty state and Network Map. Moved here
+      // (2026-07-28) after the Network Map rebuild accidentally dropped it from mapVals(), which
+      // crashed Design Review's unrelated "no runs yet" empty state the moment it needed to render
+      // (any SC-less state) -- both screens' JSX pull from the same merged vals object, so a shared
+      // identifier like this must live somewhere screen-independent, not inside one screen's own
+      // *Vals() function.
+      goCreate: () => this.go('creation'),
       goCommand: () => this.go('inputs'), dismissCoach: () => this.setState({ showCoach: false }),
       showCoach: st.showCoach,
       hero: { days: daysToFreeze, healthLabel: health.label, healthBg: health.bg, healthFg: health.fg, healthDot: health.dot,
@@ -9885,7 +9902,7 @@ class NDCApp extends React.Component {
             'Routes: ' + ((!selRoutes || !selRoutes.length) ? 'All' : (selRoutes.length === 1 ? selRoutes[0] : selRoutes.length + ' selected')),
             e('span', { style: { fontSize: '10px', color: '#8E96A3' } }, '\u25BE')
           ),
-          st.standaloneMapRouteDropdownOpen ? e('div', { style: { position: 'absolute', top: '36px', left: 0, zIndex: 30, background: '#fff', border: '1px solid #E6EBF2', borderRadius: '8px', boxShadow: '0 10px 28px rgba(11,20,48,0.16)', minWidth: '200px', maxHeight: '320px', overflowY: 'auto', padding: '6px' } },
+          st.standaloneMapRouteDropdownOpen ? e('div', { style: { position: 'absolute', top: '36px', left: 0, zIndex: 2000, background: '#fff', border: '1px solid #E6EBF2', borderRadius: '8px', boxShadow: '0 10px 28px rgba(11,20,48,0.16)', minWidth: '200px', maxHeight: '320px', overflowY: 'auto', padding: '6px' } },
             e('label', { style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 9px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700, color: '#14171F', borderRadius: '6px' } },
               e('input', { type: 'checkbox', checked: !selRoutes || !selRoutes.length, onChange: selectAllRoutes }), 'All routes'),
             e('div', { style: { borderTop: '1px solid #EEF1F6', margin: '4px 2px' } }),
@@ -9900,7 +9917,7 @@ class NDCApp extends React.Component {
           e('button', { onClick: () => this.setState({ standaloneMapVehDropdownOpen: !st.standaloneMapVehDropdownOpen, standaloneMapRouteDropdownOpen: false }), style: { display: 'inline-flex', alignItems: 'center', gap: '7px', height: '32px', padding: '0 12px', border: '1px solid #E6EBF2', borderRadius: '8px', background: '#fff', color: '#14171F', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, cursor: 'pointer' } },
             'Vehicle: ' + fVeh, e('span', { style: { fontSize: '10px', color: '#8E96A3' } }, '\u25BE')
           ),
-          st.standaloneMapVehDropdownOpen ? e('div', { style: { position: 'absolute', top: '36px', left: 0, zIndex: 30, background: '#fff', border: '1px solid #E6EBF2', borderRadius: '8px', boxShadow: '0 10px 28px rgba(11,20,48,0.16)', minWidth: '160px', maxHeight: '280px', overflowY: 'auto', padding: '6px' } },
+          st.standaloneMapVehDropdownOpen ? e('div', { style: { position: 'absolute', top: '36px', left: 0, zIndex: 2000, background: '#fff', border: '1px solid #E6EBF2', borderRadius: '8px', boxShadow: '0 10px 28px rgba(11,20,48,0.16)', minWidth: '160px', maxHeight: '280px', overflowY: 'auto', padding: '6px' } },
             vehOptions.map((o, i) => e('div', { key: i, onClick: () => this.setState({ standaloneMapVeh: o, standaloneMapVehDropdownOpen: false }), style: { padding: '7px 9px', cursor: 'pointer', fontSize: '12.5px', fontWeight: fVeh === o ? 700 : 400, color: fVeh === o ? '#003F98' : '#14171F', background: fVeh === o ? '#EAEEFB' : 'transparent', borderRadius: '6px' } }, o))
           ) : null
         ),
