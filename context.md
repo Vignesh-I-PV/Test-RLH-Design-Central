@@ -948,3 +948,76 @@ and verified by reading/tracing only, no live browser testing was possible this 
 Chrome extension tool wasn't connected) — worth a real click-through pass, especially the
 Leaflet ref-remount behaviour on repeated filter clicks, which is a known rough edge of mixing
 an imperative library into this app's otherwise-declarative render pattern.
+
+### 2026-07-28 — Three bugs found from live testing of the deployed map view
+1. **Route/vehicle filters as chip rows didn't scale** — a real plan with 24 routes wrapped the
+   chip row across 2+ lines (confirmed via screenshot). Converted both to proper dropdowns:
+   Routes is a multi-select checkbox dropdown (matches "single, multi, and all" from the original
+   spec) with a "Done" button to close; Vehicle stays single-select but as a clickable dropdown
+   list instead of a chip row. Both close/reopen via the same toggle state, mutually exclusive
+   (opening one closes the other).
+
+2. **Real flow gap: pushing a plan made it disappear from both the Design Inputs ingestion log
+   AND Design Review** — root cause: `doPush()` called `deleteIngestedRlhPlanDraft(code)` after
+   a successful push, deleting the `rlh_ingested_plans` row entirely. That row is the ONLY source
+   for both Design Review's plan card (via `ingestedRunFor`/`ingestedRlhPlans[code]`) and the
+   Design Inputs ingestion log (`ingestedPlans`, reconstructed from the same table on load) — so
+   deleting it broke both at once, not two separate bugs. Fixed by no longer deleting anything on
+   push: the ingested record is the permanent per-SC ingestion log (upsert-by-SC-code, only ever
+   replaced by re-ingesting that SC, never cleared by pushing); push status is tracked
+   separately. `deleteIngestedRlhPlanDraft()` itself is now unused — left in place rather than
+   removed, in case a future "explicitly delete this ingested plan" action wants it.
+
+   **Related durability bug found while fixing this**: Design Review's Push/Finalise buttons now
+   correctly become a static "Pushed to Alignment" tag once pushed (replacing the old always-
+   clickable buttons) — but the underlying `pushed` flag (`st.pushedSCs`) was PURE local session
+   state, never persisted or reconstructed on reload (same bug class as the Acknowledge-
+   visibility fix from a few rounds ago). After a refresh, an already-pushed plan would have
+   reverted to showing a clickable "Push to alignment" button again. Fixed all 3 places that
+   compute this (`reviewList`, `planCards`, `reviewDetail`) to also check `d.plans.some(p =>
+   p.scCode === code)` — real, persisted, reconstructed-on-load data — not just the ephemeral
+   local flag.
+
+### 2026-07-28 (later same day) — Network Map rebuilt (route plan views only)
+User asked to read the original prototype repo (`V2.0-RLH-Design-Central`) to understand this
+tab's structure before building. Could not fetch that repo's actual source this session —
+GitHub's robots.txt blocks automated fetching of raw file content on every path tried (blob
+viewer, `/raw/`, `raw.githubusercontent.com`), and the browser tool timed out. Rather than guess
+blind, used this fork's own existing `mapVals()`/Network Map scaffold instead — it's the same
+codebase lineage and already had a `mapDataSource` ('generated'/'ingested') toggle partially
+built, just wired backwards from what was needed (see below) and rendering fabricated SVG
+geometry, not a real map. Flagged this limitation to the user rather than silently proceeding
+as if the repo had been read.
+
+**Found the existing toggle was backwards**: `mapGen` ("Generated Plans") was rendering the
+real (fabricated-geometry) map content, while `mapIngested` ("Ingested Data") was a permanent
+stub ("No ingested data for this cycle"). Since this build has no DS-optimiser (`d.runs` is
+always empty), the correct assignment is the reverse — confirmed by explicit user instruction
+this pass. Swapped: **Generated Plans is now always the blank state**; **Ingested Data now
+shows the real content**.
+
+**Full rewrite of `mapVals()` and the `isMap` JSX block** (both replaced entirely rather than
+patched, given how much of the old structure — `mapPlanCards`, the SVG arc/DC-marker system,
+the route-summary table, `isMapPerSC` — no longer applied):
+- Ingested Data's SC list is now sourced only from SCs with a real entry in
+  `ingestedRlhPlans` (not all of `d.scs`) — matches "show the plans ingested via Design
+  Ingestion," not every SC in the master.
+- **No metrics on the list** — per explicit instruction, just SC code/name/zone, no
+  Nodes/Volume/Coverage summary the way Design Review's cards show.
+- Selecting an SC renders the real Leaflet map **inline, on the same page** — a second,
+  independent Leaflet instance (`this._netMapInstance`, separate from the standalone screen's
+  `this._leafletMap`) so the two can't collide if both happen to be open at once (e.g. this tab
+  plus a Design Review "Open on map" tab). Reuses the same real-coordinate pipeline
+  (`computeIngestedRunMetrics` -> `buildMapRoutes`) as the standalone map — same real SC-from-
+  SC-Master / DC-from-ingested-file coordinates, not a second synthetic system.
+- Same dropdown filters as the just-fixed standalone screen (multi-select route checkboxes,
+  single-select vehicle dropdown, DC search) — copied the same UI approach in JSX form (the
+  standalone screen uses plain `React.createElement`; this one uses this app's normal JSX/
+  `with(B)` template style, since it's part of the regular app shell, not a separate page load).
+- File ingestion UI intentionally not built here, per instruction — Design Inputs stays the
+  only ingestion entry point.
+
+**Not done**: nothing else deferred for this pass — the four explicit build points (blank
+Generated tab, SC-wise Ingested Data list, inline map on selection, skip file ingestion) are
+all in. Untested live, same caveat as the standalone map build — no browser access this
+session.
