@@ -3466,43 +3466,6 @@ function View(B, self) {
 </div>
 </div>
 </>) : null}
-{/* RUN-MAP POPUP (opened from Design Review — shows THIS run's routes in place, no navigation) */}
-{(runMapOpen) ? (<>
-<div style={css(`position:fixed; inset:0; z-index:90; background:rgba(11,20,48,0.5); display:flex; align-items:center; justify-content:center; padding:32px;`)}>
-<div style={css(`width:900px; max-width:100%; max-height:90vh; background:#fff; border-radius:15px; box-shadow:0 24px 64px rgba(11,20,48,0.42); overflow:hidden; display:flex; flex-direction:column;`)}>
-<div style={css(`display:flex; align-items:center; gap:12px; padding:15px 20px; border-bottom:1px solid #E6EBF2; flex-shrink:0;`)}>
-<div style={css(`width:34px; height:34px; border-radius:8px; background:#EAEEFB; display:flex; align-items:center; justify-content:center; flex-shrink:0;`)}><svg width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} stroke={"#003F98"} strokeWidth={"1.8"}><path d={"M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></div>
-<div style={css(`flex:1; min-width:0;`)}><div style={css(`font-size:15px; font-weight:700; color:#14171F;`)}>{mapSC} · {mapSCname} <span style={css(`font-weight:500; color:#5A5E66;`)}>— route map</span></div><div style={css(`font-size:11.5px; color:#8E96A3;`)}>{mapSCzone} zone · {rowsShown} of {routeTotal} routes · LMSC origin → LMDC deliveries</div></div>
-<button onClick={runMapClose} aria-label={"Close map"} style={css(`border:none; background:transparent; cursor:pointer; padding:6px; color:#5A5E66; display:flex; flex-shrink:0;`)} onMouseEnter={(e) => hoverOn(e, `color:#14171F;`)} onMouseLeave={(e) => hoverOff(e, `border:none; background:transparent; cursor:pointer; padding:6px; color:#5A5E66; display:flex; flex-shrink:0;`, `color:#14171F;`)}><svg width={"18"} height={"18"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M6 6l12 12M18 6L6 18"} strokeLinecap={"round"} /></svg></button>
-</div>
-<div style={css(`flex:1; overflow:auto; min-height:0;`)}>
-<div style={css(`position:relative; background:linear-gradient(155deg, #EEF3FB 0%, #E5EDF8 45%, #EBF0F9 100%);`)}>
-<svg viewBox={`0 0 ${mapW} ${mapH}`} style={css(`width:100%; height:auto; display:block;`)}>
-<defs><pattern id={"rmgrid"} width={"48"} height={"48"} patternUnits={"userSpaceOnUse"}><path d={"M48 0H0V48"} fill={"none"} stroke={"#D4DCE8"} strokeWidth={"0.55"} /></pattern></defs>
-<rect x={"0"} y={"0"} width={mapW} height={mapH} fill={"url(#rmgrid)"} />
-{(arcs || []).map((a, __i114) => (<React.Fragment key={__i114}><path d={a.d} fill={"none"} stroke={"#fff"} strokeWidth={"3.2"} strokeLinecap={"round"} strokeLinejoin={"round"} /></React.Fragment>))}
-{(arcs || []).map((a, __i115) => (<React.Fragment key={__i115}><path d={a.d} fill={"none"} stroke={a.color} strokeWidth={"1.4"} strokeOpacity={"0.95"} strokeLinecap={"round"} strokeLinejoin={"round"} /></React.Fragment>))}
-{(arrowHeads || []).map((ah, __i116) => (<React.Fragment key={__i116}><path d={ah.d} fill={ah.color} opacity={"0.9"} /></React.Fragment>))}
-{(dcMarkers || []).map((m, __i117) => (<React.Fragment key={__i117}><circle cx={m.x} cy={m.y} r={"5"} fill={m.color} fillOpacity={m.op} stroke={"#fff"} strokeWidth={"2"} /></React.Fragment>))}
-{(dcMarkers || []).map((m, __i118) => (<React.Fragment key={__i118}><circle cx={m.x} cy={m.y} r={"2"} fill={"#fff"} fillOpacity={m.op} /></React.Fragment>))}
-<rect x={scX} y={scY} width={"22"} height={"22"} transform={"translate(-11,-11)"} rx={"3"} fill={"#0B1430"} stroke={"#fff"} strokeWidth={"2.5"} />
-<rect x={scX} y={scY} width={"10"} height={"10"} transform={"translate(-5,-5)"} rx={"1.5"} fill={"#fff"} opacity={"0.9"} />
-</svg>
-<div style={css(`position:absolute; inset:0; pointer-events:none;`)}>
-{(dcLabels || []).map((l, __i119) => (<React.Fragment key={__i119}><div style={css(`position:absolute; left:${l.xPct}%; top:${l.yPct}%; transform:translate(-50%, 8px); text-align:center; white-space:nowrap;`)}><div style={css(`font-family:'Mier B02',system-ui,sans-serif; font-size:11px; font-weight:700; color:#14171F; text-shadow:0 0 3px #fff, 0 0 3px #fff, 0 1px 2px #fff;`)}>{l.name}</div><div style={css(`font-family:'Mier B02',system-ui,sans-serif; font-size:9.5px; font-weight:500; color:#8E96A3; text-shadow:0 0 3px #fff, 0 0 3px #fff;`)}>{l.code}</div></div></React.Fragment>))}
-</div>
-</div>
-</div>
-<div style={css(`display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:13px 20px; border-top:1px solid #E6EBF2; flex-shrink:0;`)}>
-<span style={css(`display:inline-flex; align-items:center; gap:6px; font-size:11px; color:#5A5E66;`)}><span style={css(`width:11px; height:11px; background:#0B1430; display:inline-block; border-radius:2px;`)} />LMSC origin</span>
-<span style={css(`display:inline-flex; align-items:center; gap:6px; font-size:11px; color:#5A5E66;`)}><span style={css(`width:10px; height:10px; border-radius:50%; background:#5A5E66; display:inline-block;`)} />LMDC delivery</span>
-<div style={css(`flex:1;`)} />
-<button onClick={openFullMap} style={css(`display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#003F98; color:#003F98;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `border-color:#003F98; color:#003F98;`)}>Open full Network Map<svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2"}><path d={"M5 12h14M13 6l6 6-6 6"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg></button>
-<button onClick={runMapClose} style={css(`height:34px; padding:0 16px; border:none; background:#003F98; color:#fff; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)}>Done</button>
-</div>
-</div>
-</div>
-</>) : null}
 {/* ===== FINALISE (terminal stage — finalised plans live here, ready for RFQ handoff) ===== */}
 {(isFinalise) ? (<>
 <div style={css(`display:flex; flex-direction:column; height:100%;`)}>
@@ -3857,6 +3820,24 @@ const NDC_RUN_MINUTES = 30; // ~30 min per solve (used for the batch ETA estimat
 // Null-safe CPS/cost formatter -- needed everywhere a route or plan's cost/CPS is displayed with
 // a currency prefix, now that removing the cost-per-km fallback (2026-07-27) means these can
 // genuinely be null (no rate configured for that vehicle type) rather than always a number.
+// NDC_ensureLeaflet(cb) -- dynamically loads Leaflet (JS+CSS) from the unpkg CDN on first use and
+// calls back once ready; calls back immediately if already loaded. No API key needed (renders
+// OpenStreetMap tiles, which are free for this scale of internal-tool usage per OSM's fair-use
+// policy -- flagged to the user as the one real external dependency this introduces).
+let _ndcLeafletLoading = false, _ndcLeafletCallbacks = [];
+function NDC_ensureLeaflet(cb) {
+  if (window.L) { cb(); return; }
+  _ndcLeafletCallbacks.push(cb);
+  if (_ndcLeafletLoading) return;
+  _ndcLeafletLoading = true;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet'; link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+  document.head.appendChild(link);
+  const script = document.createElement('script');
+  script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  script.onload = () => { _ndcLeafletCallbacks.forEach(f => f()); _ndcLeafletCallbacks = []; };
+  document.head.appendChild(script);
+}
 const NDC_fmtCps = (v) => (v == null ? '—' : '\u20b9' + Number(v).toFixed(2));
 // Real cost-per-km rate card (confirmed with user 2026-07-27), keyed by the exact Vehicle Master
 // type names (VEH_TYPE_OPTIONS) -- replaces the old 3-entry table of legacy fabricated vehicle
@@ -3949,17 +3930,17 @@ function NDC_isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v
 class NDCApp extends React.Component {
   constructor(props) {
     super(props);
-    // 2026-07-10 — "open map in a new tab" support: onMapView handlers open THIS SAME page in a
-    // new browser tab with ?standaloneMap=<scCode>&mapMode=<label>. Since buildSeed() is fully
-    // deterministic (seeded off fixed data, not Math.random), a fresh tab loading this same script
-    // reconstructs the IDENTICAL plans/routes independently — no cross-tab state channel needed.
-    // Caveat: it reconstructs the SEEDED data, not any of the original tab's in-progress/unsaved
-    // edits (Ops feedback not yet submitted, decisions not yet made) — those live only in that
-    // tab's React state. The map tab is a read-only, independent view of the plan as currently
-    // committed, not a live mirror of the reviewing tab.
+    // 2026-07-27 — "open map in a new tab" support: openPlanMap() opens THIS SAME page in a new
+    // browser tab with ?planMap=<localStorage key>. The payload (stashed by openPlanMap right
+    // before opening) carries the real, resolved route/DC geometry -- both "original" (as
+    // committed/ingested) and, where Simulate applies, "proposed" -- so this tab doesn't need its
+    // own Supabase fetch or any access to the opener's in-progress decision state to render either.
     const _qp = new URLSearchParams(window.location.search);
-    this.standaloneMapSc = _qp.get('standaloneMap');
-    this.standaloneMapMode = _qp.get('mapMode') || '';
+    const _planMapKey = _qp.get('planMap');
+    this.standaloneMapPayload = null;
+    if (_planMapKey) {
+      try { this.standaloneMapPayload = JSON.parse(localStorage.getItem(_planMapKey) || 'null'); } catch (e) { this.standaloneMapPayload = null; }
+    }
     this.state = {
       // Real auth (2026-07-16) — replaces the "Acting as"/View-as toggles. authChecked flips true
       // once the initial supabase.auth.getSession() resolves; authUser/authProfile are null until
@@ -4043,7 +4024,7 @@ class NDCApp extends React.Component {
       editAvailKey: null, editAvailDraft: null,
       editVehRowKey: null, editVehRowDraft: null,
       pocOpenRow: null, volTypeFilter: 'All', volSearch: '', nodeChangeBy: 'Shashvat Jain', nodeChangeDate: '10 Jul · 11:24',
-      mapSC: null, mapDataSource: 'generated', mapRoute: 'All', mapVeh: 'All', mapSearch: '', mapZone: 'All', runMapOpen: false, hovDcIdx: null,
+      mapSC: null, mapDataSource: 'generated', mapRoute: 'All', mapVeh: 'All', mapSearch: '', mapZone: 'All', hovDcIdx: null,
       reviewRoutesOpen: false, reviewDetailRunId: null, reviewDetailView: 'route',
       pgAutodml: 1, pgScMaster: 1, pgRoutes: 1, pgAvail: 1,
       data: this.buildSeed(),
@@ -6936,6 +6917,47 @@ class NDCApp extends React.Component {
     });
   }
 
+  // ===== Real map view (2026-07-27) ======================================================
+  // buildMapRoutes(rows, useDcRecords) -- normalizes route+DC data into one consistent shape for
+  // the map, from either source: a committed/ingested row's own `.dcs` (via genDcRows -- covers
+  // both a freshly-ingested plan pre-push, and a pushed/finalised plan's committed rows, since
+  // genDcRows already handles both), or computeHypotheticalPlan's `.dcRecords` (needed for a
+  // Simulate preview, since that's the only place a feedback-proposed coordinate/route/TP change
+  // is actually resolved -- genDcRows only ever reflects what's already committed, never a
+  // pending edit). Field names differ slightly between the two sources (tpOrder vs tp) --
+  // normalized here so the map renderer only ever deals with one shape.
+  buildMapRoutes(rows, useDcRecords) {
+    return (rows || []).map(r => {
+      const rawDcs = useDcRecords ? (r.dcRecords || []) : this.genDcRows(r);
+      return {
+        routeCode: r.routeCode, veh: r.veh || r.vehName || '',
+        dcs: rawDcs.map(dc => ({ code: dc.code, name: dc.name || dc.code, lat: Number(dc.lat), lng: Number(dc.lng), tpOrder: dc.tpOrder != null ? dc.tpOrder : dc.tp })),
+      };
+    });
+  }
+
+  // openPlanMap(scCode, scName, zone, currentRows, proposedEffectiveFb, contextLabel) --
+  // builds the "original" (as-committed/as-ingested) route package always, and a "proposed"
+  // package only when proposedEffectiveFb is given (Simulate-capable contexts). Both get stashed
+  // in localStorage (shared across same-origin tabs, unlike sessionStorage) since the standalone
+  // tab is a genuinely separate page load with no access to the opener's in-progress, unsaved
+  // decision state (opsRowFb/alignDecisions/etc. are pure local React state, never persisted
+  // until actual submission) -- passing a resolved snapshot sidesteps that entirely rather than
+  // trying to reconstruct live UI state in a different execution context.
+  openPlanMap(scCode, scName, zone, scLat, scLng, currentRows, proposedEffectiveFb, contextLabel) {
+    const original = this.buildMapRoutes(currentRows, false);
+    let proposed = null;
+    if (proposedEffectiveFb) {
+      const hyp = this.computeHypotheticalPlan({ rows: currentRows }, proposedEffectiveFb);
+      proposed = this.buildMapRoutes(hyp.routes, true);
+    }
+    const payload = { scCode, scName, zone, scLat, scLng, original, proposed, contextLabel };
+    const key = 'ndc_map_' + Date.now() + '_' + Math.floor(Math.random() * 1e6);
+    try { localStorage.setItem(key, JSON.stringify(payload)); } catch (e) { console.error('Could not stash map payload', e); }
+    const url = window.location.pathname + '?planMap=' + encodeURIComponent(key);
+    window.open(url, '_blank');
+  }
+
   // ===== Ops Feedback recompute engine (2026-07-09) =====================================
   // computeHypotheticalPlan() is the single source of truth behind Validate, Simulate, and
   // Finalise for a plan under Ops feedback. It NEVER mutates plan.rows itself -- it takes the
@@ -7220,6 +7242,39 @@ class NDCApp extends React.Component {
         const kept = {};
         ['lat', 'lng', 'tp', 'distance', 'routeCode'].forEach((f) => { if (src[f] != null && perField[f] === 'Accept') kept[f] = src[f]; });
         // splitVehicle rides along with an accepted routeCode (a split route with no vehicle makes no sense)
+        if (kept.routeCode && src.splitVehicle) kept.splitVehicle = src.splitVehicle;
+        if (Object.keys(kept).length) dcCells[code] = kept;
+      });
+      if (Object.keys(cells).length || Object.keys(dcCells).length) out[idx] = { cells, dcCells, remark: fb.remark, by: fb.by };
+    });
+    return out;
+  }
+
+  // effectiveFbForSimulate(plan) -- preview resolution shared by the metrics-tile Simulate AND the
+  // new real-map Simulate (confirmed 2026-07-27: map and metrics must stay in sync, showing the
+  // same hypothetical plan). Keeps a proposed field UNLESS the planner has explicitly REJECTED it
+  // -- an undecided field is treated as accepted for preview purposes. Deliberately different from
+  // effectiveFbForFinalise() above, which is used ONLY at the real, permanent Finalise commit and
+  // keeps a field only if explicitly ACCEPTED (undecided = dropped) -- that stricter rule is
+  // unchanged for the actual commit; only the preview is more lenient.
+  effectiveFbForSimulate(plan) {
+    const st = this.state;
+    const proposed = this.effectiveFbFor(plan);
+    const out = {};
+    Object.keys(proposed).forEach((idxStr) => {
+      const idx = Number(idxStr);
+      const fb = proposed[idx];
+      const fieldKey = plan.id + ':' + idx;
+      const fieldDec = (st.alignFieldDec && st.alignFieldDec[fieldKey]) || {};
+      const rowDec = (st.alignDecisions[plan.id] && st.alignDecisions[plan.id][idx]) || null;
+      const dcDec = (st.alignDcDecisions[plan.id] && st.alignDcDecisions[plan.id][idx]) || {};
+      const cells = {};
+      if (fb.cells) Object.keys(fb.cells).forEach((k) => { const dec = fieldDec[k] || rowDec; if (dec !== 'Reject') cells[k] = fb.cells[k]; });
+      const dcCells = {};
+      if (fb.dcCells) Object.keys(fb.dcCells).forEach((code) => {
+        const src = fb.dcCells[code]; const perField = dcDec[code] || {};
+        const kept = {};
+        ['lat', 'lng', 'tp', 'distance', 'routeCode'].forEach((f) => { if (src[f] != null && perField[f] !== 'Reject') kept[f] = src[f]; });
         if (kept.routeCode && src.splitVehicle) kept.splitVehicle = src.splitVehicle;
         if (Object.keys(kept).length) dcCells[code] = kept;
       });
@@ -7530,7 +7585,7 @@ class NDCApp extends React.Component {
       const hasAnyDecision = rows.some(r => r.changeDecidedCount > 0);
       // Validate the CURRENT decision state (accepted-only once any decision exists, else the raw
       // proposal) — this is the single source both the Finalise gate and the Simulate gate below read.
-      const planStateFb = hasAnyDecision ? this.effectiveFbForFinalise(plan) : this.effectiveFbFor(plan);
+      const planStateFb = this.effectiveFbForSimulate(plan);
       const planStateHyp = this.computeHypotheticalPlan(plan, planStateFb);
       const validatedClean = !planStateHyp.hasErrors;
       // Master–detail: pick the open route (default first flagged), build the left list + selected route's detail.
@@ -7658,7 +7713,7 @@ class NDCApp extends React.Component {
         // run-cards -> full-detail flow.
         detailOpen: !!st.alignDetailOpen, showCard: !st.alignDetailOpen,
         openDetail: () => this.setState({ alignDetailOpen: true }), backToCards: () => this.setState({ alignDetailOpen: false }),
-        onMapView: () => this.openStandaloneMap(plan.scCode, 'Ops Alignment · Planner'),
+        onMapView: () => { const mapSc = d.scs.find(s => s.code === plan.scCode); const proposedFb = (ps === 'Acknowledged') ? this.effectiveFbForSimulate(plan) : null; this.openPlanMap(plan.scCode, mapSc ? mapSc.name : plan.scName, mapSc ? mapSc.zone : plan.zone, mapSc ? mapSc.lat : null, mapSc ? mapSc.lng : null, plan.rows, proposedFb, 'Ops Alignment · Planner' + (ps === 'Finalised' ? ' · Finalised' : '')); },
         onDownloadCsv: () => { const head = 'Route,Vehicle,Touch Points,Round-Trip Dist (km),Breakdown TAT (h),Out Cutoff,Volume,Utilisation,CPS\n'; const body = plan.rows.map(r => [r.routeCode, r.veh, r.tp, r.rtDist, r.breakdownTat, r.outCutoff, r.volume, Math.round(r.util * 100) + '%', r.cps.toFixed(2)].join(',')).join('\n'); this.downloadText(plan.scCode + '-plan.csv', head + body); this.showToast('CSV downloaded \u00b7 ' + plan.rows.length + ' routes', '#128A3E'); },
         // Finalised-card warnings -- same thresholds/wording as Design Review's validation flags, since
         // this is the same underlying plan just further along the lifecycle (no separate flag data model here).
@@ -7736,7 +7791,7 @@ class NDCApp extends React.Component {
           const planHyp = planStateHyp;
           const canPlanSim = ps === 'Acknowledged' && ncFlaggedPlan.length > 0 && (!hasAnyDecision || validatedClean);
           const canPlanValidate = ps === 'Acknowledged' && ncFlaggedPlan.length > 0;
-          const simStateLabel = !hasAnyDecision ? 'Previewing all proposed changes' : (validatedClean ? 'Previewing accepted changes' : 'Decisions pending validation');
+          const simStateLabel = !hasAnyDecision ? 'Previewing all proposed changes' : (validatedClean ? 'Previewing accepted changes (undecided treated as accepted)' : 'Decisions pending validation');
           if (!canPlanSim) return { canPlanSim: false, canPlanValidate, validatedClean, simStateLabel, planSimBtnBg: '#EAEEFB', planSimBtnFg: '#2F4FC6', planSimBtnLabel: 'Simulate impact', planSimOpen: false, planSimRows: [], planSimSubtitle: '', onPlanSim: () => {}, onPlanSimMap: () => {}, planSimMapBg: '#fff', planSimMapFg: '#2F4FC6', planSimMapLabel: 'Compare on map', planSimMapOpen: false, planSimMapRouteLabel: '', planSmMW: 280, planSmMH: 174, planSmScX: 140, planSmScY: 87, planSmOrigArcs: [], planSmPropArcs: [], planSmOrigDcM: [], planSmPropDcM: [], planSmCapText: '' };
           const m = plan.metrics;
           const nFlagged = ncFlaggedPlan.length;
@@ -8414,7 +8469,7 @@ class NDCApp extends React.Component {
         metrics: [{ label: 'Routes', value: plan.metrics.routes }, { label: 'Vehicles', value: plan.metrics.vehicles }, { label: 'CPS', value: NDC_fmtCps(plan.metrics.cps) }, { label: 'Coverage', value: pct(plan.metrics.coverage) }, { label: 'Distance', value: plan.metrics.distance.toLocaleString('en-IN') + ' km' }, { label: 'Avg TAT', value: plan.metrics.avgTat != null ? (plan.metrics.avgTat + 'h') : '—' }],
         mixArr, routeViewRows: oRouteViewRows, dcViewRows: oDcViewRows, dcGroupHeaders: oDcGroupHeaders, secDetails: sec === 'details', secRoute: sec === 'route',
         sections: SECS.map(s => ({ label: s[1], active: sec === s[0], color: sec === s[0] ? '#003F98' : '#5A5E66', weight: sec === s[0] ? '700' : '600', onClick: () => this.setState({ opsSection: s[0] }) })),
-        onAcceptAll: () => { if (pendN > 0) this.setState({ alignAllOpen: true, alignAllPlanId: plan.id }); }, acceptAllDisabled: pendN === 0, onReset: () => this.resetOps(plan.id), onMapView: () => this.openStandaloneMap(plan.scCode, 'Ops Alignment · Ops Lead'),
+        onAcceptAll: () => { if (pendN > 0) this.setState({ alignAllOpen: true, alignAllPlanId: plan.id }); }, acceptAllDisabled: pendN === 0, onReset: () => this.resetOps(plan.id), onMapView: () => { const mapSc = d.scs.find(s => s.code === plan.scCode); const opsLocked = planStatus === 'Acknowledged' || planStatus === 'Finalised'; const proposedFb = opsLocked ? null : this.effectiveFbFor(plan); this.openPlanMap(plan.scCode, mapSc ? mapSc.name : plan.scName, mapSc ? mapSc.zone : plan.zone, mapSc ? mapSc.lat : null, mapSc ? mapSc.lng : null, plan.rows, proposedFb, 'Ops Alignment · Ops Lead' + (opsLocked ? ' · ' + planStatus : '')); },
         onOpsValidate: () => {
           this.setState({ opsValidateOpen: true });
           const n = opsHypTop.errors.length + opsHypTop.warnings.length;
@@ -8764,16 +8819,6 @@ class NDCApp extends React.Component {
   // in a smaller viewBox. Returns two map objects: origMap (original plan) and propMap (proposed,
   // with one route highlighted to indicate the Ops-flagged change). HTML captions/legend are
   // rendered by the caller as positioned HTML over the SVG (not SVG <text> — known engine limit).
-  // openStandaloneMap(scCode, mode) — Part of "Map view" no longer navigating away from whatever
-  // tab/detail is currently open (2026-07-10): opens THIS SAME page in a brand-new browser tab with
-  // ?standaloneMap=<scCode>, which the constructor/render() detect and use to show only the
-  // full-screen map (renderStandaloneMap) instead of the normal app shell. Lets someone keep Details
-  // or Route View open in the original tab while looking at the map in parallel.
-  openStandaloneMap(scCode, mode) {
-    const url = window.location.pathname + '?standaloneMap=' + encodeURIComponent(scCode) + (mode ? '&mapMode=' + encodeURIComponent(mode) : '');
-    window.open(url, '_blank');
-  }
-
   buildMiniMap(sc, srcRows, highlightIdx, changeCaption) {
     if (!sc || !srcRows || srcRows.length === 0) return null;
     const PALETTE = ['#6E82C4','#6BA083','#C6A06A','#C88585','#7EA3C9','#9C8AC4','#C892AC','#72A39C','#C99E74','#96A6D6','#9BA1AE','#8FB185'];
@@ -9124,7 +9169,6 @@ class NDCApp extends React.Component {
     // if one exists, else just the SC); detail icon opens the full-screen plan-detail state for that run.
     // Open the run's route map as an in-context POPUP (does NOT navigate away to the Network Map page — that broke the review flow).
     // Sets mapSC/mapRunId so mapVals computes this run's per-SC geometry; the modal binds the same arcs/dcMarkers the map page uses.
-    const openRunMap = (run) => { const pl = d.plans.find(p => p.scCode === run.scCode); this.setState({ runMapOpen: true, mapSC: run.scCode, mapRunId: run.id, mapPlanId: pl ? pl.id : null, mapRoute: 'All', mapVeh: 'All', mapSearch: '' }); };
     const openRunDetail = (run) => this.setState({ reviewDetailRunId: run.id });
 
     // Left rail = one entry per SC; dot = worst flag across ALL the SC's runs; the cps slot carries the run count.
@@ -9200,7 +9244,8 @@ class NDCApp extends React.Component {
         cpsRefOn, cpsDeltaLabel, cpsDeltaColor, cpsDeltaTooltip,
         flagDot, flagLabel, flagBg, flagFg,
         onDownloadCsv: () => { const rows = [['Run ID', r.runId], ['Sort Centre', r.scCode], ['Historical Weight', r.hw], ['Coverage', pct(r.coverage)], ['CPS', r.cps.toFixed(2)], ['Utilisation', pct(r.util)], ['Routes', r.routes], ['Vehicles', r.vehicles], ['Distance (km)', r.distance], ['Total cost', r.cost]]; this.downloadText(r.runId + '-summary.csv', 'Metric,Value\n' + rows.map(x => x.join(',')).join('\n')); this.showToast('Plan summary downloaded · ' + r.runId, '#128A3E'); },
-        onMap: () => openRunMap(r), onDetail: () => openRunDetail(r), hasMap: !r.isIngested, hasDetail: true, onPush: () => this.openPush(r.scCode, r.id), onFinaliseDirect: () => this.openFinDirect(r.scCode, r.id) };
+        onMap: () => this.openPlanMap(r.scCode, curSC ? curSC.name : r.scCode, curSC ? curSC.zone : '', curSC ? curSC.lat : null, curSC ? curSC.lng : null, r.ingestedComputedRows || [], null, 'Design Review · as ingested'),
+        onDetail: () => openRunDetail(r), hasMap: true, hasDetail: true, onPush: () => this.openPush(r.scCode, r.id), onFinaliseDirect: () => this.openFinDirect(r.scCode, r.id) };
     });
 
     // §9 R4 — full-screen plan detail opened by the detail icon. Backed by reviewDetailRunId; shows
@@ -9331,7 +9376,7 @@ class NDCApp extends React.Component {
         onDcView: () => this.setState({ reviewDetailView: 'dc' }),
         dcRows, hasDcRows: dcRows.length > 0,
         onDownloadCsv: () => { const head = 'Route Code,Count of Nodes,Total Volume,Total Distance (km),Vehicle Type,Utilisation,Capacity\n'; const body = dRouteRows.map(r => [r.segment, r.tps, r.vol, r.dist, r.veh, r.util, r.cap].join(',')).join('\n'); this.downloadText(detailRun.runId + '-routes.csv', head + body); this.showToast('Route breakdown downloaded · ' + dRouteRows.length + ' routes', '#128A3E'); },
-        onMap: () => openRunMap(detailRun), close: () => this.setState({ reviewDetailRunId: null }),
+        onMap: () => this.openPlanMap(detailRun.scCode, dSC ? dSC.name : detailRun.scCode, dSC ? dSC.zone : '', dSC ? dSC.lat : null, dSC ? dSC.lng : null, detailRun.ingestedComputedRows || [], null, 'Design Review · as ingested'), close: () => this.setState({ reviewDetailRunId: null }),
         sections: [['details', 'Plan Details'], ['route', 'Route View']].map(t => ({ label: t[1], active: rdt === t[0], color: rdt === t[0] ? '#003F98' : '#5A5E66', weight: rdt === t[0] ? '700' : '600', onClick: () => this.setState({ reviewDetailTab: t[0] }) })),
         secDetails: rdt === 'details', secRoute: rdt === 'route' };
     }
@@ -9774,8 +9819,6 @@ class NDCApp extends React.Component {
       ...this.finaliseVals(),
       ...this.summaryVals(),
       // Run-map popup (opened from Design Review cards / "Open on map") — reuses mapVals' per-SC geometry, no navigation.
-      runMapOpen: !!st.runMapOpen, runMapClose: () => this.setState({ runMapOpen: false }),
-      openFullMap: () => this.setState({ runMapOpen: false, view: 'map' }),
       ...this.inputsVals(),
       // inputs action handlers not produced by inputsVals (kept here so they survive):
       ...this.addScVals(),
@@ -9831,108 +9874,133 @@ class NDCApp extends React.Component {
   }
 
   render() {
-    if (this.standaloneMapSc) return this.renderStandaloneMap();
+    if (this.standaloneMapPayload) return this.renderStandaloneMap();
     if (!this.state.authUser) return this.renderLogin();
     return View(this.renderVals(), this);
   }
 
-  // renderStandaloneMap() — full-screen, independent map view opened in a NEW browser tab (see
-  // onMapView handlers), so Details/Route View stays open side-by-side in the original tab instead
-  // of being navigated away from. Same visual base as the main Network Map (buildMiniMap's arc
-  // geometry + this app's colour palette), scaled up to fill the screen via SVG viewBox rather than
-  // re-deriving Network Map's own filter/search machinery from scratch.
+  // renderStandaloneMap() — full-screen, independent map view opened in a NEW browser tab
+  // (openPlanMap), rendering real Leaflet+OpenStreetMap tiles from the passed payload (original
+  // route/DC package, and a proposed one where Simulate applies) rather than synthetic geometry.
   renderStandaloneMap() {
     const e = React.createElement;
-    const st = this.state, d = st.data;
-    const sc = d.scs.find(s => s.code === this.standaloneMapSc);
-    const plan = d.plans.find(p => p.scCode === this.standaloneMapSc);
-    if (!sc || !plan) {
-      return e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Inter, sans-serif', color: '#5A5E66' } }, 'No plan found for ' + this.standaloneMapSc);
+    const st = this.state;
+    const payload = this.standaloneMapPayload;
+    if (!payload) {
+      return e('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Inter, sans-serif', color: '#5A5E66' } }, 'Map data not found — this link may have expired. Close this tab and reopen the map from where you left off.');
     }
     const PALETTE = ['#6E82C4', '#6BA083', '#C6A06A', '#C88585', '#7EA3C9', '#9C8AC4', '#C892AC', '#72A39C', '#C99E74', '#96A6D6', '#9BA1AE', '#8FB185'];
-    const W = 760, H = 470, cx = W / 2, cy = H / 2, scale = 900;
-    const proj = (lat, lng) => ({ x: +(cx + (lng - sc.lng) * scale).toFixed(1), y: +(cy - (lat - sc.lat) * scale).toFixed(1) });
-    const scPt = proj(sc.lat, sc.lng);
+    const mode = (st.standaloneMapMode === 'proposed' && payload.proposed) ? 'proposed' : 'original';
+    const activeRoutes = (mode === 'proposed' ? payload.proposed : payload.original) || [];
+    const changedRouteCodes = (() => {
+      if (!payload.proposed) return new Set();
+      const origByCode = {}; payload.original.forEach(r => { origByCode[r.routeCode] = JSON.stringify(r.dcs.map(d => [d.code, d.lat, d.lng, d.tpOrder])); });
+      const changed = new Set();
+      payload.proposed.forEach(r => { const sig = JSON.stringify(r.dcs.map(d => [d.code, d.lat, d.lng, d.tpOrder])); if (origByCode[r.routeCode] !== sig) changed.add(r.routeCode); });
+      return changed;
+    })();
 
-    // 2026-07-10 — the ONE change from the earlier version: node positions come from genDcRows(),
-    // the exact same source Design Review / Ops Lead / Planner's Details tab reads, instead of a
-    // second, separate synthetic scatter (what both buildMiniMap() and the main Network Map's own
-    // mapVals() do internally). A DC in this map is now the same DC, in the same place, as the one
-    // in whichever Details table sent you here.
-    const routes = plan.rows.map((r, ri) => {
-      const color = PALETTE[ri % PALETTE.length];
-      const dcs = this.genDcRows(r).map(dc => Object.assign({}, dc, proj(Number(dc.lat), Number(dc.lng))));
-      const pts = [scPt].concat(dcs).concat([scPt]); // round trip: SC -> DCs in TP order -> back to SC
-      let arcD = 'M' + pts[0].x + ',' + pts[0].y;
-      for (let i = 0; i < pts.length - 1; i++) {
-        const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)], t = 0.3;
-        arcD += ' C' + (p1.x + (p2.x - p0.x) * t).toFixed(1) + ',' + (p1.y + (p2.y - p0.y) * t).toFixed(1) + ' ' + (p2.x - (p3.x - p1.x) * t).toFixed(1) + ',' + (p2.y - (p3.y - p1.y) * t).toFixed(1) + ' ' + p2.x + ',' + p2.y;
-      }
-      return { id: r.routeCode, veh: r.veh, color, dcs, d: arcD, tpN: dcs.length, rtDist: r.rtDist };
-    });
-
-    const fRoute = st.standaloneMapRoute || 'All', fVeh = st.standaloneMapVeh || 'All', dcq = (st.standaloneMapSearch || '').toLowerCase();
+    const selRoutes = st.standaloneMapRoutes; // null/undefined = All; else array of selected route codes
+    const fVeh = st.standaloneMapVeh || 'All';
+    const dcq = (st.standaloneMapSearch || '').toLowerCase().trim();
     const searchActive = dcq.length > 0;
-    let vis = routes.filter(rt => (fRoute === 'All' || rt.id === fRoute) && (fVeh === 'All' || rt.veh === fVeh));
-    if (searchActive) vis = vis.filter(rt => rt.dcs.some(dc => dc.code.toLowerCase().indexOf(dcq) >= 0 || dc.name.toLowerCase().indexOf(dcq) >= 0));
 
-    const routeOptions = ['All'].concat(routes.map(r => r.id));
-    const vehOptions = ['All'].concat(Array.from(new Set(routes.map(r => r.veh))));
-    const hasActiveFilters = fRoute !== 'All' || fVeh !== 'All' || searchActive;
-    const clearFilters = () => this.setState({ standaloneMapRoute: 'All', standaloneMapVeh: 'All', standaloneMapSearch: '' });
+    const routeAll = activeRoutes.map((r, i) => ({ routeCode: r.routeCode, veh: r.veh, color: PALETTE[i % PALETTE.length], dcs: r.dcs.slice().sort((a, b) => (a.tpOrder || 0) - (b.tpOrder || 0)) }));
+    const vehOptions = ['All'].concat(Array.from(new Set(routeAll.map(r => r.veh))).filter(Boolean));
+    const routeOptions = routeAll.map(r => r.routeCode);
+    const isRouteSelected = (code) => !selRoutes || selRoutes.length === 0 || selRoutes.indexOf(code) >= 0;
+    let vis = routeAll.filter(rt => isRouteSelected(rt.routeCode) && (fVeh === 'All' || rt.veh === fVeh));
+    const matchesSearch = (rt) => rt.dcs.some(dc => dc.code.toLowerCase().indexOf(dcq) >= 0 || dc.name.toLowerCase().indexOf(dcq) >= 0);
 
-    const dcMarkers = [];
-    vis.forEach(rt => rt.dcs.forEach(dc => dcMarkers.push({ x: dc.x, y: dc.y, color: rt.color, code: dc.code, name: dc.name, dimmed: searchActive && dcq && dc.code.toLowerCase().indexOf(dcq) < 0 && dc.name.toLowerCase().indexOf(dcq) < 0 })));
+    const toggleRoute = (code) => {
+      const cur = selRoutes && selRoutes.length ? selRoutes.slice() : routeOptions.slice();
+      const i = cur.indexOf(code);
+      if (i >= 0) cur.splice(i, 1); else cur.push(code);
+      this.setState({ standaloneMapRoutes: cur.length === routeOptions.length ? null : cur });
+    };
+    const selectAllRoutes = () => this.setState({ standaloneMapRoutes: null });
+    const hasActiveFilters = (selRoutes && selRoutes.length > 0) || fVeh !== 'All' || searchActive;
+    const clearFilters = () => this.setState({ standaloneMapRoutes: null, standaloneMapVeh: 'All', standaloneMapSearch: '' });
+
+    // Leaflet mount/redraw — ref fires on every render; cheap to clear+redraw given typical route counts.
+    const mountMap = (el) => {
+      if (!el) return;
+      NDC_ensureLeaflet(() => {
+        const L = window.L;
+        if (!this._leafletMap || this._leafletMapEl !== el) {
+          this._leafletMap = L.map(el, { zoomControl: true, attributionControl: true });
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '© OpenStreetMap contributors' }).addTo(this._leafletMap);
+          this._leafletMapEl = el;
+          this._leafletLayers = [];
+        }
+        (this._leafletLayers || []).forEach(l => { try { this._leafletMap.removeLayer(l); } catch (err) {} });
+        this._leafletLayers = [];
+        const bounds = [];
+        // SC origin from SC Master (real coordinates) -- payload carries it directly.
+        const scLat = payload.scLat, scLng = payload.scLng;
+        vis.forEach((rt) => {
+          const dim = searchActive && !matchesSearch(rt);
+          const isChanged = mode === 'proposed' && changedRouteCodes.has(rt.routeCode);
+          const latlngs = [[scLat, scLng]].concat(rt.dcs.map(dc => [dc.lat, dc.lng])).concat([[scLat, scLng]]);
+          latlngs.forEach(p => bounds.push(p));
+          const line = L.polyline(latlngs, { color: rt.color, weight: dim ? 2 : (isChanged ? 5 : 3.5), opacity: dim ? 0.25 : 0.9, dashArray: isChanged ? '8 5' : null }).addTo(this._leafletMap);
+          this._leafletLayers.push(line);
+          rt.dcs.forEach(dc => {
+            const dcDim = searchActive && dc.code.toLowerCase().indexOf(dcq) < 0 && dc.name.toLowerCase().indexOf(dcq) < 0;
+            const marker = L.circleMarker([dc.lat, dc.lng], { radius: dcDim ? 4 : 6, color: '#fff', weight: 1.5, fillColor: rt.color, fillOpacity: dcDim ? 0.3 : 0.95 }).addTo(this._leafletMap);
+            marker.bindPopup('<b>' + dc.code + '</b><br>' + dc.name + '<br>Route ' + rt.routeCode + ' · TP ' + dc.tpOrder);
+            this._leafletLayers.push(marker);
+          });
+        });
+        if (scLat != null && scLng != null) {
+          const scIcon = L.divIcon({ className: '', html: '<div style="width:16px;height:16px;border-radius:50%;background:#0B1430;border:2px solid #fff;box-shadow:0 0 0 2px #0B1430;"></div>', iconSize: [16, 16], iconAnchor: [8, 8] });
+          const scMarker = L.marker([scLat, scLng], { icon: scIcon }).addTo(this._leafletMap);
+          scMarker.bindPopup('<b>' + payload.scCode + '</b> (Sort Centre)');
+          this._leafletLayers.push(scMarker);
+        }
+        if (bounds.length) { try { this._leafletMap.fitBounds(bounds, { padding: [40, 40] }); } catch (err) {} }
+        else if (scLat != null) { this._leafletMap.setView([scLat, scLng], 11); }
+      });
+    };
 
     return e('div', { style: { display: 'flex', flexDirection: 'column', height: '100vh', fontFamily: "'Inter', sans-serif", background: '#F4F5F8' } },
       // header
       e('div', { style: { display: 'flex', alignItems: 'center', gap: '12px', padding: '13px 24px', background: '#fff', borderBottom: '1px solid #E6EBF2', flexShrink: 0 } },
         e('div', { style: { width: '32px', height: '32px', borderRadius: '8px', background: '#003F98', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '13px', flexShrink: 0 } }, 'N'),
         e('div', null,
-          e('div', { style: { fontSize: '14px', fontWeight: 700, color: '#14171F' } }, sc.code + ' · ' + sc.name),
-          e('div', { style: { fontSize: '11px', color: '#8E96A3' } }, 'Independent map view' + (this.standaloneMapMode ? ' · ' + this.standaloneMapMode : '') + ' — a read-only snapshot, not a live mirror of unsaved edits in the tab you opened this from.')
-        ),
-        e('div', { style: { flex: 1 } })
-      ),
-      // filter bar (same controls as Network Map: route, vehicle, search, clear)
-      e('div', { style: { display: 'flex', alignItems: 'center', gap: '11px', flexWrap: 'wrap', padding: '12px 24px', background: '#fff', borderBottom: '1px solid #E6EBF2', flexShrink: 0 } },
-        e('div', { style: { display: 'flex', alignItems: 'center', gap: '7px' } },
-          e('span', { style: { fontSize: '11.5px', color: '#5A5E66' } }, 'Route'),
-          e('select', { value: fRoute, onChange: (ev) => this.setState({ standaloneMapRoute: ev.target.value }), style: { height: '32px', padding: '0 9px', border: '1px solid #E6EBF2', borderRadius: '8px', fontFamily: 'inherit', fontSize: '12px', color: '#14171F', background: '#fff', cursor: 'pointer' } },
-            routeOptions.map((o, i) => e('option', { key: i, value: o }, o)))
-        ),
-        e('div', { style: { display: 'flex', alignItems: 'center', gap: '7px' } },
-          e('span', { style: { fontSize: '11.5px', color: '#5A5E66' } }, 'Vehicle'),
-          e('select', { value: fVeh, onChange: (ev) => this.setState({ standaloneMapVeh: ev.target.value }), style: { height: '32px', padding: '0 9px', border: '1px solid #E6EBF2', borderRadius: '8px', fontFamily: 'inherit', fontSize: '12px', color: '#14171F', background: '#fff', cursor: 'pointer' } },
-            vehOptions.map((o, i) => e('option', { key: i, value: o }, o)))
-        ),
-        e('div', { style: { display: 'flex', alignItems: 'center', gap: '7px', height: '32px', padding: '0 11px', border: '1px solid #E6EBF2', borderRadius: '8px', background: '#fff' } },
-          e('input', { value: st.standaloneMapSearch || '', onInput: (ev) => this.setState({ standaloneMapSearch: ev.target.value }), placeholder: 'Search LMDC…', style: { border: 'none', outline: 'none', fontFamily: 'inherit', fontSize: '12px', color: '#14171F', background: 'transparent', width: '130px' } })
+          e('div', { style: { fontSize: '14px', fontWeight: 700, color: '#14171F' } }, payload.scCode + ' · ' + payload.scName + (payload.zone ? ' · ' + payload.zone + ' zone' : '')),
+          e('div', { style: { fontSize: '11px', color: '#8E96A3' } }, (payload.contextLabel || 'Map view') + ' — real coordinates: SC from SC Master, LMDCs from the ingested plan.')
         ),
         e('div', { style: { flex: 1 } }),
-        e('span', { style: { fontSize: '12px', color: '#5A5E66' } }, 'Showing ', e('strong', { style: { color: '#14171F' } }, vis.length), ' of ', routes.length, ' routes'),
-        hasActiveFilters ? e('button', { onClick: clearFilters, style: { height: '32px', padding: '0 12px', border: '1px solid #E6EBF2', background: '#fff', color: '#5A5E66', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' } }, 'Clear all') : null
+        payload.proposed ? e('div', { style: { display: 'flex', gap: '3px', background: '#F2F5FA', borderRadius: '8px', padding: '3px' } },
+          e('button', { onClick: () => this.setState({ standaloneMapMode: 'original' }), style: { height: '30px', padding: '0 14px', border: 'none', borderRadius: '6px', background: mode === 'original' ? '#003F98' : 'transparent', color: mode === 'original' ? '#fff' : '#5A5E66', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, cursor: 'pointer' } }, 'Original'),
+          e('button', { onClick: () => this.setState({ standaloneMapMode: 'proposed' }), style: { height: '30px', padding: '0 14px', border: 'none', borderRadius: '6px', background: mode === 'proposed' ? '#003F98' : 'transparent', color: mode === 'proposed' ? '#fff' : '#5A5E66', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, cursor: 'pointer' } }, 'Proposed (Simulate)')
+        ) : null
       ),
-      // map canvas
-      e('div', { style: { flex: 1, minHeight: 0, position: 'relative', background: '#F0F2EC', overflow: 'hidden' } },
-        e('svg', { viewBox: '0 0 ' + W + ' ' + H, style: { width: '100%', height: '100%' } },
-          e('rect', { x: 0, y: 0, width: W, height: H, fill: '#F0F2EC' }),
-          vis.map((rt, i) => e('path', { key: 'case' + i, d: rt.d, fill: 'none', stroke: '#fff', strokeWidth: 3.2, strokeLinecap: 'round', strokeLinejoin: 'round' })),
-          vis.map((rt, i) => e('path', { key: 'arc' + i, d: rt.d, fill: 'none', stroke: rt.color, strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', opacity: 0.92 })),
-          dcMarkers.map((m, i) => e('circle', { key: 'dc' + i, cx: m.x, cy: m.y, r: 3.4, fill: m.color, opacity: m.dimmed ? 0.25 : 1, stroke: '#fff', strokeWidth: 1 })),
-          e('circle', { cx: scPt.x, cy: scPt.y, r: 7, fill: '#0B1430' }),
-          e('circle', { cx: scPt.x, cy: scPt.y, r: 11, fill: 'none', stroke: '#0B1430', strokeWidth: 1, opacity: 0.35 })
+      // route filter (multi-select chips)
+      e('div', { style: { display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', padding: '10px 24px 0', background: '#fff', flexShrink: 0 } },
+        e('span', { style: { fontSize: '11px', fontWeight: 700, color: '#8E96A3', letterSpacing: '0.04em', marginRight: '4px' } }, 'ROUTES'),
+        e('button', { onClick: selectAllRoutes, style: { height: '26px', padding: '0 11px', border: '1px solid ' + (!selRoutes || !selRoutes.length ? '#003F98' : '#E6EBF2'), background: (!selRoutes || !selRoutes.length) ? '#003F98' : '#fff', color: (!selRoutes || !selRoutes.length) ? '#fff' : '#5A5E66', fontFamily: 'inherit', fontSize: '11.5px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' } }, 'All'),
+        routeOptions.map((code, i) => e('button', { key: i, onClick: () => toggleRoute(code), style: { height: '26px', padding: '0 11px', border: '1px solid ' + (isRouteSelected(code) && selRoutes ? '#003F98' : '#E6EBF2'), background: (isRouteSelected(code) && selRoutes) ? '#EAEEFB' : '#fff', color: (isRouteSelected(code) && selRoutes) ? '#003F98' : '#5A5E66', fontFamily: 'inherit', fontSize: '11.5px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' } }, code))
+      ),
+      // vehicle filter + search + counts
+      e('div', { style: { display: 'flex', alignItems: 'center', gap: '11px', flexWrap: 'wrap', padding: '10px 24px 12px', background: '#fff', borderBottom: '1px solid #E6EBF2', flexShrink: 0 } },
+        e('span', { style: { fontSize: '11px', fontWeight: 700, color: '#8E96A3', letterSpacing: '0.04em' } }, 'VEHICLE'),
+        vehOptions.map((o, i) => e('button', { key: i, onClick: () => this.setState({ standaloneMapVeh: o }), style: { height: '26px', padding: '0 11px', border: '1px solid ' + (fVeh === o ? '#003F98' : '#E6EBF2'), background: fVeh === o ? '#003F98' : '#fff', color: fVeh === o ? '#fff' : '#5A5E66', fontFamily: 'inherit', fontSize: '11.5px', fontWeight: 600, borderRadius: '999px', cursor: 'pointer' } }, o)),
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: '7px', height: '30px', padding: '0 11px', border: '1px solid #E6EBF2', borderRadius: '8px', background: '#fff' } },
+          e('input', { value: st.standaloneMapSearch || '', onInput: (ev) => this.setState({ standaloneMapSearch: ev.target.value }), placeholder: 'Search LMDC code or name…', style: { border: 'none', outline: 'none', fontFamily: 'inherit', fontSize: '12px', color: '#14171F', background: 'transparent', width: '170px' } })
         ),
-        e('div', { style: { position: 'absolute', top: '12px', right: '14px', display: 'flex', alignItems: 'center', gap: '14px', fontSize: '11px', color: '#5A5E66', background: 'rgba(255,255,255,0.9)', padding: '6px 11px', borderRadius: '8px' } },
-          e('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px' } }, e('span', { style: { width: '11px', height: '11px', background: '#0B1430', display: 'inline-block' } }), sc.code + ' origin'),
-          e('span', { style: { display: 'inline-flex', alignItems: 'center', gap: '6px' } }, e('span', { style: { width: '10px', height: '10px', borderRadius: '50%', background: '#5A5E66', display: 'inline-block' } }), 'LMDC delivery')
-        )
+        e('div', { style: { flex: 1 } }),
+        e('span', { style: { fontSize: '12px', color: '#5A5E66' } }, 'Showing ', e('strong', { style: { color: '#14171F' } }, vis.length), ' of ', routeAll.length, ' routes'),
+        hasActiveFilters ? e('button', { onClick: clearFilters, style: { height: '30px', padding: '0 12px', border: '1px solid #E6EBF2', background: '#fff', color: '#5A5E66', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, borderRadius: '8px', cursor: 'pointer' } }, 'Clear all') : null
       ),
+      // real map canvas
+      e('div', { style: { flex: 1, minHeight: 0, position: 'relative' }, ref: mountMap }),
       // legend
       e('div', { style: { display: 'flex', flexWrap: 'wrap', gap: '12px', padding: '11px 24px', background: '#fff', borderTop: '1px solid #E6EBF2', flexShrink: 0, maxHeight: '84px', overflowY: 'auto' } },
         vis.map((rt, i) => e('span', { key: 'leg' + i, style: { display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#5A5E66' } },
           e('span', { style: { width: '9px', height: '9px', borderRadius: '2px', background: rt.color, display: 'inline-block' } }),
-          rt.id + ' · ' + rt.veh.split(/[/·]/)[0].trim() + ' · ' + rt.tpN + ' TPs'
+          rt.routeCode + ' · ' + (rt.veh || '').split(/[/·]/)[0].trim() + ' · ' + rt.dcs.length + ' TPs' + (mode === 'proposed' && changedRouteCodes.has(rt.routeCode) ? ' · changed' : '')
         ))
       )
     );
