@@ -870,3 +870,81 @@ undefined position.
 
 SQL: `16_vehicle_master_allow_ops_lead_read.sql` — policy-only change (drop + recreate the
 select policy), no data touched, run any time after `11_vehicle_master.sql`.
+
+### 2026-07-27 (later same day) — Real map view built: Design Review, Ops Alignment (both roles)
+User chose Leaflet + OpenStreetMap tiles (free, no API key — the one real external dependency
+this introduces, flagged to the user; OSM's tile server has a documented fair-use policy for
+heavier/production-scale traffic, fine for this scale of internal-tool usage) over a plain-SVG
+real-coordinate approach, specifically because "very real" meant an actual basemap with roads/
+terrain visible, not just accurate relative positions on a blank canvas.
+
+**Discovered before building, changed the whole approach**: the app already had a "new tab, no
+navigation" map-opening mechanism (`openStandaloneMap`/`renderStandaloneMap`, driven by
+`?standaloneMap=<scCode>` in the URL) used by Ops Alignment's pre-existing "Map view" button —
+and that button already read REAL DC coordinates via `genDcRows()` (only the *arc curve
+drawing* was synthetic, not the underlying points). Rebuilt on top of this existing mechanism
+rather than inventing a new one — it already satisfied "new screen, not modal, not via Network
+Map." Design Review's own "Open on map" previously used a different, in-context modal
+(`openRunMap`/`runMapOpen`) with fully fabricated RNG geometry; that path is now removed
+entirely (see cleanup below) in favour of the same unified mechanism both screens now share.
+
+**Cross-tab state problem, solved via a stashed payload**: a `window.open()`'d tab is a
+genuinely separate page load with no access to the opener's in-progress, unsaved decision state
+(`opsRowFb`/`alignDecisions`/`alignFieldDec` etc. are pure local React state, never persisted
+until actual submission — confirmed while building the Acknowledge-visibility fix a few rounds
+ago). Passing this state through Supabase isn't an option for a not-yet-submitted draft. Solved
+by resolving the full route/DC geometry (both "original" and, where Simulate applies,
+"proposed") in the ORIGINAL tab at the moment "Open on Map" is clicked, stashing it as JSON in
+`localStorage` (shared across same-origin tabs, unlike sessionStorage) under a fresh key, and
+passing just that key via `?planMap=<key>`. The standalone tab is now a pure renderer of
+whatever payload it's given — no independent Supabase fetch, no risk of drifting from what was
+on-screen when the user clicked.
+
+**Metrics/map must stay in sync (explicit user instruction)** — found a real discrepancy while
+validating: the *existing* Simulate metrics-tile comparison used `effectiveFbForFinalise()`
+once any decision was made, which drops any undecided field entirely (treats it as rejected).
+User confirmed this was wrong — undecided should be treated as accepted for *preview* purposes
+(the stricter accepted-only rule stays correct for the real, permanent Finalise commit, just not
+for previewing it). Added `effectiveFbForSimulate()` (keeps a field unless explicitly REJECTED)
+and pointed the existing metrics-tile Simulate at it too, not just the new map — so a planner
+never sees a map and a set of numbers describing two different hypothetical plans.
+
+**Resolution rules confirmed per context, all reusing existing functions with zero new logic
+beyond the one fix above**:
+- Design Review: current/as-ingested only, no Simulate (sourced from `ingestedComputedRows`,
+  same data the plan-detail view already uses).
+- Ops Alignment · Ops Lead: Simulate available while under review (own live draft pre-
+  submission, or current submitted/latest-overwritten feedback post-submission — both already
+  handled identically by the pre-existing `effectiveFbFor()`, confirmed during discussion since
+  `plan_row_feedback` is upserted one row per route, last write wins); none once
+  Acknowledged/Finalised (locked).
+- Ops Alignment · Planner: Simulate only while Acknowledged (via the new `effectiveFbForSimulate`,
+  undecided = accepted); static, no comparison, once Finalised.
+- A feedback-proposed coordinate change already flows through automatically — `dcRecords` from
+  `computeHypotheticalPlan` already applies any accepted `dcCells.lat`/`.lng` override; no
+  separate logic was needed for this.
+
+**Built**: `NDC_ensureLeaflet()` (dynamic CDN loader, JS+CSS, queues concurrent callers);
+`buildMapRoutes()` (normalizes route/DC data from either `genDcRows` — committed/ingested rows
+— or `computeHypotheticalPlan`'s `dcRecords` — Simulate preview — into one shape, since the two
+sources use different field names for the same thing, e.g. `tpOrder` vs `tp`); `openPlanMap()`
+(resolves original + proposed, stashes the payload, opens the tab); `renderStandaloneMap()`
+fully rewritten — real Leaflet polylines/markers instead of synthetic SVG curves, an Original/
+Proposed toggle (only shown when a proposed package exists), multi-select route chips (replacing
+the old single-select dropdown — user specifically asked for single/multi/all), a vehicle-type
+chip filter, and DC search that dims non-matching markers/routes rather than hiding them. Routes
+that differ between original and proposed get a dashed, thicker line plus a "· changed" tag in
+the legend, so a planner can spot what Simulate actually changed without needing to eyeball
+position differences alone.
+
+**Cleanup**: removed the now-fully-orphaned old in-context map modal (`runMapOpen`/`openRunMap`,
+~40 lines of JSX plus its state/vals bindings) and the old `openStandaloneMap()` function —
+confirmed zero remaining callers to either before removing, now that both Design Review and
+Ops Alignment route through the one new mechanism.
+
+**Not done, explicitly deferred**: the full-page "Network Map" (left nav item) — user's own
+instruction, "we will build this once the above are sorted out." Also not done: this was built
+and verified by reading/tracing only, no live browser testing was possible this session (the
+Chrome extension tool wasn't connected) — worth a real click-through pass, especially the
+Leaflet ref-remount behaviour on repeated filter clicks, which is a known rough edge of mixing
+an imperative library into this app's otherwise-declarative render pattern.
