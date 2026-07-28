@@ -824,3 +824,49 @@ Keys verified to match `VEH_TYPE_OPTIONS` exactly (all 10, same order) — every
 type now resolves to a real rate, so cost/CPS should compute normally rather than showing the
 "no rate configured" warning added when the fallback was removed. All 6 metric-review items
 from the previous pass are now closed.
+
+### 2026-07-27 (later same day) — Three flow bugs validated and fixed
+User asked to validate three specific flows. All three traced to real, root-cause bugs:
+
+**1. Acknowledge & Freeze missing from the Planner's view.** The feature itself was already
+fully built (modal, confirm handler, `acknowledge_plan` RPC) — the bug was in when the button
+becomes visible. `canAck`'s gating condition was `ps === 'In Alignment' && (!!st.opsSubmitted[plan.id]
+|| !!plan.feedbackReceived)`. The second half of that AND is **local-only React state that never
+persists or reconstructs across a different login** — `opsSubmitted` is set only in the Ops
+Lead's own browser session by `submitOpsPlan()`, and `feedbackReceived` is set locally too but
+never written back to Supabase (`submitFeedbackToSupabase()` only writes `plan_row_feedback` and
+`plan_reviewer_status`, never touches the `plans` table). Meanwhile `ps === 'In Alignment'` is
+**already** the correct, cross-session-safe signal — `loadPlansFromSupabase()` derives it
+directly from real `submittedReviewers` (reconstructed from `plan_reviewer_status`). The extra
+condition was both redundant and the actual bug: for the Planner, logged in separately from
+whichever Ops Lead submitted feedback, it was always false, permanently hiding the button.
+Fixed: `canAck` (and the matching `onAck` validation) now rely solely on `ps === 'In Alignment'`.
+
+**2. Route sort order (RT-1, RT-10, RT-11, RT-2...).** Two places sorted route codes with plain
+alphabetical `localeCompare` — `buildIngestedRlhPlans()` (grouping ingested rows into routes)
+and `computeHypotheticalPlan()` (the single source of truth behind Route View, Plan Details,
+and every metric). String comparison looks at characters, not numeric value, so "RT-10" sorts
+before "RT-2". Added a shared `NDC_routeCodeCompare()` natural-sort comparator (splits into
+prefix + trailing number, compares the number numerically when the prefix matches) and applied
+it at both sites.
+
+**3. Split Route vehicle picker showing no options, at all.** Root cause was much broader than
+Split Route specifically: **Vehicle Master was never loaded for `ops_lead` sessions at all.**
+When Vehicle Master was wired to Supabase earlier this session, `loadMastersFromSupabase()` was
+scoped to planner-only ("ops_lead can't reach these screens and RLS blocks them anyway") — but
+that reasoning missed that the Ops Lead's OWN feedback-authoring UI needs read access to real
+Vehicle Master data for both the regular vehicle-type-change flag AND the split-route vehicle
+picker. With `d.VEH` always empty for that role, every vehicle dropdown in the Ops Lead's
+feedback modal had zero options — not a Split-Route-specific bug, a Vehicle-Master-access bug
+that happened to surface there first. Fixed with a narrow, deliberate exception: added
+`loadVehicleMasterForOps()` (Vehicle Master only, not the other 3 masters) called for `ops_lead`
+sessions; SQL policy `vehicle_master_select_planner` replaced with one allowing both roles to
+SELECT (insert/update/delete remain planner-only, and the other three masters are untouched —
+still fully planner-only across every operation).
+Also added, per the same request: Touch Point is now mandatory (hard error, same validation
+pipeline as everything else in this modal) whenever a DC is split into a new route or moved to
+a different existing route — previously nothing enforced this, so a DC could move route with an
+undefined position.
+
+SQL: `16_vehicle_master_allow_ops_lead_read.sql` — policy-only change (drop + recreate the
+select policy), no data touched, run any time after `11_vehicle_master.sql`.
