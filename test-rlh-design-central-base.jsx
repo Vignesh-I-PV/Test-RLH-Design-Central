@@ -8852,7 +8852,7 @@ class NDCApp extends React.Component {
       }
     }
 
-    const selRoutes = st.mapSelRoutes;
+    const selRoutes = st.mapSelRoutes !== undefined ? st.mapSelRoutes : null;
     const fVeh = st.mapVeh || 'All';
     const dcq = (st.mapSearch || '').toLowerCase().trim();
     const searchActive = dcq.length > 0;
@@ -9816,7 +9816,7 @@ class NDCApp extends React.Component {
       return changed;
     })();
 
-    const selRoutes = st.standaloneMapRoutes; // null/undefined = All; else array of selected route codes
+    const selRoutes = st.standaloneMapRoutes !== undefined ? st.standaloneMapRoutes : null; // null = All; [] = none; array = subset
     const fVeh = st.standaloneMapVeh || 'All';
     const dcq = (st.standaloneMapSearch || '').toLowerCase().trim();
     const searchActive = dcq.length > 0;
