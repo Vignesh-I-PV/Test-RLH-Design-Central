@@ -1103,8 +1103,7 @@ function View(B, self) {
 <div style={css(`flex:1;`)} />
 {/* B. CSV download — validation aid (selected SCs + node-vs-volume coverage) */}
 <button onClick={downloadSelectionCsv} title={"Download selected SCs + volume-coverage as CSV"} style={css(`display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#C3C9D4;`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `border-color:#C3C9D4;`)}><svg width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.8"}><path d={"M12 4v12M7 11l5 5 5-5M5 20h14"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Download CSV</button>
-<button onClick={selectAllSCs} style={css(`height:36px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#003F98; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:#EAEEFB;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#003F98; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:#EAEEFB;`)}>Select all shown</button>
-<button onClick={clearAllSCs} style={css(`height:36px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `border-color:#C3C9D4;`)} onMouseLeave={(e) => hoverOff(e, `height:36px; padding:0 13px; border:1px solid #E6EBF2; background:#fff; color:#5A5E66; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `border-color:#C3C9D4;`)}>Clear</button>
+<button onClick={allShownSelected ? clearAllSCs : selectAllSCs} style={css(`display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 13px; border:1px solid ${allShownSelected ? '#B6E0C6' : '#E6EBF2'}; background:${allShownSelected ? '#E7F4EC' : '#fff'}; color:${allShownSelected ? '#0D7A3E' : '#003F98'}; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`)} onMouseEnter={(e) => hoverOn(e, `background:${allShownSelected ? '#D2EDDC' : '#EAEEFB'};`)} onMouseLeave={(e) => hoverOff(e, `display:inline-flex; align-items:center; gap:6px; height:36px; padding:0 13px; border:1px solid ${allShownSelected ? '#B6E0C6' : '#E6EBF2'}; background:${allShownSelected ? '#E7F4EC' : '#fff'}; color:${allShownSelected ? '#0D7A3E' : '#003F98'}; font-family:inherit; font-size:12.5px; font-weight:600; border-radius:8px; cursor:pointer;`, `background:${allShownSelected ? '#D2EDDC' : '#EAEEFB'};`)}>{allShownSelected ? (<><svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M18 6L6 18M6 6l12 12"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Deselect all</>) : (<><svg width={"13"} height={"13"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"2.2"}><path d={"M20 6L9 17l-5-5"} strokeLinecap={"round"} strokeLinejoin={"round"} /></svg>Select all shown</>)}</button>
 </div>
 <div style={css(`display:flex; align-items:center; gap:10px; margin-bottom:12px;`)}>
 <span style={css(`display:inline-flex; align-items:center; gap:7px; padding:5px 12px; border-radius:999px; background:#EAEEFB; color:#003F98; font-size:12px; font-weight:700;`)}>{creationSelCount} LMSCs selected</span>
@@ -6455,6 +6454,7 @@ class NDCApp extends React.Component {
       isWizardView: (st.creationView || 'wizard') === 'wizard', isQueueView: (st.creationView || 'wizard') === 'queue',
       stepper, planGroupName: planGroup.name, planGroupTriggered: planGroup.triggered, planGroupCap: planGroup.cap, planGroupPct: planGroup.pct + '%',
       scGroups, creationSelCount: sel.length, creationShown: filtered.length, creationTotal: d.scs.length, creationSearch: st.creationSearch || '',
+      allShownSelected: filtered.length > 0 && filtered.every(s => sel.includes(s.code)),
       onCreationSearch: (e) => this.setState({ creationSearch: e.target.value }),
       creationZoneChips: ['All', 'North', 'South', 'East', 'West'].map(z => ({ label: z, active: z === zf, bg: z === zf ? '#003F98' : '#fff', fg: z === zf ? '#fff' : '#5A5E66', bd: z === zf ? '#003F98' : '#E6EBF2', onClick: () => this.setState({ creationZone: z }) })),
       // G8 — union with existing selection (never drop SCs picked under a different zone/search filter). Capped.
@@ -8856,18 +8856,18 @@ class NDCApp extends React.Component {
     const fVeh = st.mapVeh || 'All';
     const dcq = (st.mapSearch || '').toLowerCase().trim();
     const searchActive = dcq.length > 0;
-    const isRouteSelected = (code) => !selRoutes || !selRoutes.length || selRoutes.indexOf(code) >= 0;
+    const isRouteSelected = (code) => selRoutes === null || (selRoutes.length > 0 && selRoutes.indexOf(code) >= 0);
     const matchesSearch = (rt) => rt.dcs.some(dc => dc.code.toLowerCase().indexOf(dcq) >= 0 || dc.name.toLowerCase().indexOf(dcq) >= 0);
     const vis = routeAll.filter(rt => isRouteSelected(rt.routeCode) && (fVeh === 'All' || rt.veh === fVeh));
 
     const toggleRoute = (code) => {
-      const cur = selRoutes && selRoutes.length ? selRoutes.slice() : routeOptions.slice();
+      const cur = selRoutes === null ? routeOptions.slice() : selRoutes.slice();
       const i = cur.indexOf(code);
       if (i >= 0) cur.splice(i, 1); else cur.push(code);
       this.setState({ mapSelRoutes: cur.length === routeOptions.length ? null : cur });
     };
-    const selectAllRoutes = () => this.setState({ mapSelRoutes: null });
-    const hasActiveFilters = (selRoutes && selRoutes.length > 0) || fVeh !== 'All' || searchActive;
+    const selectAllRoutes = () => this.setState({ mapSelRoutes: selRoutes === null ? [] : null });
+    const hasActiveFilters = (selRoutes !== null) || fVeh !== 'All' || searchActive;
     const clearMapFilters = () => this.setState({ mapSelRoutes: null, mapVeh: 'All', mapSearch: '' });
 
     // Leaflet mount/redraw for the INLINE map (separate Leaflet instance from the standalone
@@ -8921,11 +8921,11 @@ class NDCApp extends React.Component {
       mapSC: curCode || '', mapSCname: curSC ? curSC.name : '', mapSCzone: curSC ? curSC.zone : '',
       hasCurSC: !!curSC,
       mapMountRef: mountMap,
-      mapRouteLabel: (!selRoutes || !selRoutes.length) ? 'All' : (selRoutes.length === 1 ? selRoutes[0] : selRoutes.length + ' selected'),
+      mapRouteLabel: selRoutes === null ? 'All' : selRoutes.length === 0 ? 'None' : selRoutes.length === 1 ? selRoutes[0] : selRoutes.length + ' selected',
       mapRouteDropdownOpen: !!st.mapRouteDropdownOpen,
       toggleMapRouteDropdown: () => this.setState({ mapRouteDropdownOpen: !st.mapRouteDropdownOpen, mapVehDropdownOpen: false }),
       mapRouteOptions: routeOptions.map(code => ({ code, checked: isRouteSelected(code) })),
-      allRoutesChecked: !selRoutes || !selRoutes.length,
+      allRoutesChecked: selRoutes === null,
       onToggleMapRoute: toggleRoute, onSelectAllMapRoutes: selectAllRoutes,
       closeMapRouteDropdown: () => this.setState({ mapRouteDropdownOpen: false }),
       mapVehLabel: fVeh, mapVehOptions: vehOptions, mapVehDropdownOpen: !!st.mapVehDropdownOpen,
@@ -9824,18 +9824,18 @@ class NDCApp extends React.Component {
     const routeAll = activeRoutes.map((r, i) => ({ routeCode: r.routeCode, veh: r.veh, color: PALETTE[i % PALETTE.length], dcs: r.dcs.slice().sort((a, b) => (a.tpOrder || 0) - (b.tpOrder || 0)) }));
     const vehOptions = ['All'].concat(Array.from(new Set(routeAll.map(r => r.veh))).filter(Boolean));
     const routeOptions = routeAll.map(r => r.routeCode);
-    const isRouteSelected = (code) => !selRoutes || selRoutes.length === 0 || selRoutes.indexOf(code) >= 0;
+    const isRouteSelected = (code) => selRoutes === null || (selRoutes.length > 0 && selRoutes.indexOf(code) >= 0);
     let vis = routeAll.filter(rt => isRouteSelected(rt.routeCode) && (fVeh === 'All' || rt.veh === fVeh));
     const matchesSearch = (rt) => rt.dcs.some(dc => dc.code.toLowerCase().indexOf(dcq) >= 0 || dc.name.toLowerCase().indexOf(dcq) >= 0);
 
     const toggleRoute = (code) => {
-      const cur = selRoutes && selRoutes.length ? selRoutes.slice() : routeOptions.slice();
+      const cur = selRoutes === null ? routeOptions.slice() : selRoutes.slice();
       const i = cur.indexOf(code);
       if (i >= 0) cur.splice(i, 1); else cur.push(code);
       this.setState({ standaloneMapRoutes: cur.length === routeOptions.length ? null : cur });
     };
-    const selectAllRoutes = () => this.setState({ standaloneMapRoutes: null });
-    const hasActiveFilters = (selRoutes && selRoutes.length > 0) || fVeh !== 'All' || searchActive;
+    const selectAllRoutes = () => this.setState({ standaloneMapRoutes: selRoutes === null ? [] : null });
+    const hasActiveFilters = (selRoutes !== null) || fVeh !== 'All' || searchActive;
     const clearFilters = () => this.setState({ standaloneMapRoutes: null, standaloneMapVeh: 'All', standaloneMapSearch: '' });
 
     // Leaflet mount/redraw — ref fires on every render; cheap to clear+redraw given typical route counts.
@@ -9899,12 +9899,12 @@ class NDCApp extends React.Component {
         // Routes dropdown (multi-select via checkboxes)
         e('div', { style: { position: 'relative' } },
           e('button', { onClick: () => this.setState({ standaloneMapRouteDropdownOpen: !st.standaloneMapRouteDropdownOpen, standaloneMapVehDropdownOpen: false }), style: { display: 'inline-flex', alignItems: 'center', gap: '7px', height: '32px', padding: '0 12px', border: '1px solid #E6EBF2', borderRadius: '8px', background: '#fff', color: '#14171F', fontFamily: 'inherit', fontSize: '12px', fontWeight: 600, cursor: 'pointer' } },
-            'Routes: ' + ((!selRoutes || !selRoutes.length) ? 'All' : (selRoutes.length === 1 ? selRoutes[0] : selRoutes.length + ' selected')),
+            'Routes: ' + (selRoutes === null ? 'All' : selRoutes.length === 0 ? 'None' : selRoutes.length === 1 ? selRoutes[0] : selRoutes.length + ' selected'),
             e('span', { style: { fontSize: '10px', color: '#8E96A3' } }, '\u25BE')
           ),
           st.standaloneMapRouteDropdownOpen ? e('div', { style: { position: 'absolute', top: '36px', left: 0, zIndex: 2000, background: '#fff', border: '1px solid #E6EBF2', borderRadius: '8px', boxShadow: '0 10px 28px rgba(11,20,48,0.16)', minWidth: '200px', maxHeight: '320px', overflowY: 'auto', padding: '6px' } },
             e('label', { style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 9px', cursor: 'pointer', fontSize: '12.5px', fontWeight: 700, color: '#14171F', borderRadius: '6px' } },
-              e('input', { type: 'checkbox', checked: !selRoutes || !selRoutes.length, onChange: selectAllRoutes }), 'All routes'),
+              e('input', { type: 'checkbox', checked: selRoutes === null, onChange: selectAllRoutes }), 'All routes'),
             e('div', { style: { borderTop: '1px solid #EEF1F6', margin: '4px 2px' } }),
             routeOptions.map((code, i) => e('label', { key: i, style: { display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 9px', cursor: 'pointer', fontSize: '12.5px', color: '#14171F', borderRadius: '6px' } },
               e('input', { type: 'checkbox', checked: isRouteSelected(code), onChange: () => toggleRoute(code) }), code)),
